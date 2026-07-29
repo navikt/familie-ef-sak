@@ -107,13 +107,13 @@ class RestClientConfig(
     @Bean("infotrygdReplikaRestClient")
     fun infotrygdReplikaRestClient(
         @Value("\${INFOTRYGD_REPLIKA_SCOPE}") scope: String,
-    ): RestClient = hybrid(scope)
+    ): RestClient = entraIDRestClientFactory.lagMaskinTilMaskinRestKlient(scope).medTimeout()
 
     /** infotrygd-replika (GCP) (InfotrygdReplikaGcpClient) */
     @Bean("infotrygdReplikaGcpRestClient")
     fun infotrygdReplikaGcpRestClient(
         @Value("\${INFOTRYGD_REPLIKA_GCP_SCOPE}") scope: String,
-    ): RestClient = hybrid(scope)
+    ): RestClient = entraIDRestClientFactory.lagMaskinTilMaskinRestKlient(scope).medTimeout()
 
     /** familie-klage (KlageClient) */
     @Bean("klageRestClient")
