@@ -61,17 +61,23 @@ class RestClientConfig(
         @Value("\${REPR_API_SCOPE}") scope: String,
     ): RestClient = hybrid(scope)
 
-    /** familie-ef-proxy (EregClient, ArbeidOgInntektClient, SigrunClient) */
+    /**
+     * familie-ef-proxy (EregClient, ArbeidOgInntektClient, SigrunClient)
+     * Kun maskin-til-maskin, appen har ingen OBO/jwt-bearer-registrering i Azure AD.
+     */
     @Bean("efProxyRestClient")
     fun efProxyRestClient(
         @Value("\${FAMILIE_EF_PROXY_SCOPE}") scope: String,
-    ): RestClient = hybrid(scope)
+    ): RestClient = entraIDRestClientFactory.lagMaskinTilMaskinRestKlient(scope).medTimeout()
 
-    /** medlemskap MEDL (MedlClient) */
+    /**
+     * medlemskap MEDL (MedlClient)
+     * Kun maskin-til-maskin, appen har ingen OBO/jwt-bearer-registrering i Azure AD.
+     */
     @Bean("medlRestClient")
     fun medlRestClient(
         @Value("\${MEDL_SCOPE}") scope: String,
-    ): RestClient = hybrid(scope)
+    ): RestClient = entraIDRestClientFactory.lagMaskinTilMaskinRestKlient(scope).medTimeout()
 
     /** skjermede-personer (EgenAnsattClient) */
     @Bean("skjermedePersonerRestClient")
@@ -85,11 +91,14 @@ class RestClientConfig(
         @Value("\${ARBEIDSSOKER_SCOPE}") scope: String,
     ): RestClient = hybrid(scope)
 
-    /** historisk-pensjon (HistoriskPensjonClient) */
+    /**
+     * historisk-pensjon (HistoriskPensjonClient)
+     * Kun maskin-til-maskin, appen har ingen OBO/jwt-bearer-registrering i Azure AD.
+     */
     @Bean("historiskPensjonRestClient")
     fun historiskPensjonRestClient(
         @Value("\${HISTORISK_PENSJON_SCOPE}") scope: String,
-    ): RestClient = hybrid(scope)
+    ): RestClient = entraIDRestClientFactory.lagMaskinTilMaskinRestKlient(scope).medTimeout()
 
     /** inntektskomponenten (AMeldingInntektClient) */
     @Bean("inntektRestClient")
@@ -121,23 +130,32 @@ class RestClientConfig(
         @Value("\${FAMILIE_KLAGE_SCOPE}") scope: String,
     ): RestClient = hybrid(scope)
 
-    /** aareg (ArbeidsforholdClient) */
+    /**
+     * aareg (ArbeidsforholdClient)
+     * Kun maskin-til-maskin, appen har ingen OBO/jwt-bearer-registrering i Azure AD.
+     */
     @Bean("aaregRestClient")
     fun aaregRestClient(
         @Value("\${AAREG_SCOPE}") scope: String,
-    ): RestClient = hybrid(scope)
+    ): RestClient = entraIDRestClientFactory.lagMaskinTilMaskinRestKlient(scope).medTimeout()
 
-    /** familie-ks-sak (KontantstøtteClient) */
+    /**
+     * familie-ks-sak (KontantstøtteClient)
+     * Kun maskin-til-maskin, appen har ingen OBO/jwt-bearer-registrering i Azure AD.
+     */
     @Bean("ksSakRestClient")
     fun ksSakRestClient(
         @Value("\${FAMILIE_KS_SAK_SCOPE}") scope: String,
-    ): RestClient = hybrid(scope)
+    ): RestClient = entraIDRestClientFactory.lagMaskinTilMaskinRestKlient(scope).medTimeout()
 
-    /** AAP api-intern (ArbeidsavklaringspengerClient) */
+    /**
+     * AAP api-intern (ArbeidsavklaringspengerClient)
+     * Kun maskin-til-maskin, appen har ingen OBO/jwt-bearer-registrering i Azure AD.
+     */
     @Bean("aapRestClient")
     fun aapRestClient(
         @Value("\${ARBEIDSAVKLARINGSPENGER_SCOPE}") scope: String,
-    ): RestClient = hybrid(scope)
+    ): RestClient = entraIDRestClientFactory.lagMaskinTilMaskinRestKlient(scope).medTimeout()
 
     /** familie-ef-iverksett (IverksettClient, IverksettProxyTaskForvaltningController) */
     @Bean("iverksettRestClient")
