@@ -11,38 +11,37 @@ import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.Ident
-import no.nav.familie.restklient.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Component
+import org.springframework.web.client.RestClient
 import org.springframework.web.client.RestClientException
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.body
 import java.net.URI
 
 @Component
 class PersonopplysningerIntegrasjonerClient(
-    @Qualifier("azure") restOperations: RestOperations,
+    @Qualifier("integrasjonerRestClient") private val restClient: RestClient,
     private val integrasjonerConfig: IntegrasjonerConfig,
-) : AbstractPingableRestClient(restOperations, "familie.integrasjoner") {
-    override val pingUri: URI = integrasjonerConfig.pingUri
-
+) {
     fun sjekkTilgangTilPerson(personIdent: String): Tilgang =
-        postForEntity<List<Tilgang>>(
-            integrasjonerConfig.tilgangPersonUri,
-            listOf(personIdent),
-            HttpHeaders().also {
-                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
-            },
-        ).single()
+        restClient
+            .post()
+            .uri(integrasjonerConfig.tilgangPersonUri)
+            .header(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
+            .body(listOf(personIdent))
+            .retrieve()
+            .body<List<Tilgang>>()!!
+            .single()
 
     fun sjekkTilgangTilPersonMedRelasjoner(personIdent: String): Tilgang =
-        postForEntity(
-            integrasjonerConfig.tilgangRelasjonerUri,
-            PersonIdent(personIdent),
-            HttpHeaders().also {
-                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
-            },
-        )
+        restClient
+            .post()
+            .uri(integrasjonerConfig.tilgangRelasjonerUri)
+            .header(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
+            .body(PersonIdent(personIdent))
+            .retrieve()
+            .body<Tilgang>()!!
 
     fun hentNavEnhetForPersonMedRelasjoner(ident: String): List<Arbeidsfordelingsenhet> {
         val uri = integrasjonerConfig.arbeidsfordelingMedRelasjonerUri
@@ -50,17 +49,23 @@ class PersonopplysningerIntegrasjonerClient(
     }
 
     fun hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent: String): ADRESSEBESKYTTELSEGRADERING =
-        postForEntity<Ressurs<ADRESSEBESKYTTELSEGRADERING>>(
-            integrasjonerConfig.adressebeskyttelse,
-            PersonIdent(personIdent),
-            HttpHeaders().also {
-                it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
-            },
-        ).getDataOrThrow()
+        restClient
+            .post()
+            .uri(integrasjonerConfig.adressebeskyttelse)
+            .header(HEADER_NAV_TEMA, HEADER_NAV_TEMA_ENF)
+            .body(PersonIdent(personIdent))
+            .retrieve()
+            .body<Ressurs<ADRESSEBESKYTTELSEGRADERING>>()!!
+            .getDataOrThrow()
 
     fun hentBehandlendeEnhetForOppfølging(personident: String): Enhet? {
         val response =
-            postForEntity<Ressurs<List<Enhet>>>(integrasjonerConfig.arbeidsfordelingOppfølgingUri, Ident(personident))
+            restClient
+                .post()
+                .uri(integrasjonerConfig.arbeidsfordelingOppfølgingUri)
+                .body(Ident(personident))
+                .retrieve()
+                .body<Ressurs<List<Enhet>>>()!!
         return response.getDataOrThrow().firstOrNull()
     }
 
@@ -69,14 +74,26 @@ class PersonopplysningerIntegrasjonerClient(
         ident: String,
     ): List<Arbeidsfordelingsenhet> =
         try {
-            val response = postForEntity<Ressurs<List<Arbeidsfordelingsenhet>>>(uri, PersonIdent(ident))
+            val response =
+                restClient
+                    .post()
+                    .uri(uri)
+                    .body(PersonIdent(ident))
+                    .retrieve()
+                    .body<Ressurs<List<Arbeidsfordelingsenhet>>>()!!
             response.data ?: throw Feil("Objektet fra integrasjonstjenesten mot arbeidsfordeling er tomt uri=$uri")
         } catch (e: RestClientException) {
             throw Feil("Kall mot integrasjon feilet ved henting av arbeidsfordelingsenhet uri=$uri", e)
         }
 
     fun hentNavKontor(ident: String): NavKontorEnhet? {
-        val ressurs = postForEntity<Ressurs<NavKontorEnhet>>(integrasjonerConfig.navKontorUri, PersonIdent(ident))
+        val ressurs =
+            restClient
+                .post()
+                .uri(integrasjonerConfig.navKontorUri)
+                .body(PersonIdent(ident))
+                .retrieve()
+                .body<Ressurs<NavKontorEnhet>>()!!
         if (ressurs.status != Ressurs.Status.SUKSESS) {
             error("Henting av nav-kontor feilet status=${ressurs.status} - ${ressurs.melding}")
         }

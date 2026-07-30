@@ -10,12 +10,12 @@ import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
-import no.nav.familie.restklient.client.AbstractPingableRestClient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
@@ -23,11 +23,11 @@ import java.net.URI
 class InfotrygdReplikaClient(
     @Value("\${INFOTRYGD_REPLIKA_API_URL}")
     private val infotrygdReplikaUri: URI,
-    @Qualifier("azure")
-    restOperations: RestOperations,
+    @Qualifier("infotrygdReplikaRestClient")
+    private val restClient: RestClient,
     private val skyggekjøringTaskLagrer: SkyggekjøringTaskLagrer,
     private val featureToggleService: FeatureToggleService,
-) : AbstractPingableRestClient(restOperations, "infotrygd.replika") {
+) {
     private val logger = LoggerFactory.getLogger(javaClass)
     private val perioderUri: URI =
         UriComponentsBuilder
@@ -66,25 +66,48 @@ class InfotrygdReplikaClient(
             .toUri()
 
     fun hentPerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
-        val response = postForEntity<InfotrygdPeriodeResponse>(perioderUri, request)
+        val response =
+            restClient
+                .post()
+                .uri(perioderUri)
+                .body(request)
+                .retrieve()
+                .body<InfotrygdPeriodeResponse>()!!
         skyggekjør(SkyggeInfotrygdOperasjon.HENT_PERIODER, request.personIdenter, request, response)
         return response
     }
 
     fun hentSammenslåttePerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
-        val response = postForEntity<InfotrygdPeriodeResponse>(sammenslåttePerioderUri, request)
+        val response =
+            restClient
+                .post()
+                .uri(sammenslåttePerioderUri)
+                .body(request)
+                .retrieve()
+                .body<InfotrygdPeriodeResponse>()!!
         skyggekjør(SkyggeInfotrygdOperasjon.HENT_SAMMENSLÅTTE_PERIODER, request.personIdenter, request, response)
         return response
     }
 
     fun hentSaker(request: InfotrygdSøkRequest): InfotrygdSakResponse {
-        val response = postForEntity<InfotrygdSakResponse>(finnSakerUri, request)
+        val response =
+            restClient
+                .post()
+                .uri(finnSakerUri)
+                .body(request)
+                .retrieve()
+                .body<InfotrygdSakResponse>()!!
         skyggekjør(SkyggeInfotrygdOperasjon.HENT_SAKER, request.personIdenter, request, response)
         return response
     }
 
     fun hentPersonerForMigrering(antall: Int): Set<String> {
-        val response = getForEntity<Map<String, Any>>(migreringspersonerUri(antall))
+        val response =
+            restClient
+                .get()
+                .uri(migreringspersonerUri(antall))
+                .retrieve()
+                .body<Map<String, Any>>()!!
         @Suppress("UNCHECKED_CAST")
         return (response.getValue("personIdenter") as List<String>).toSet()
     }
@@ -94,18 +117,16 @@ class InfotrygdReplikaClient(
      */
     fun hentInslagHosInfotrygd(request: InfotrygdSøkRequest): InfotrygdFinnesResponse {
         require(request.personIdenter.isNotEmpty()) { "Identer har ingen verdier" }
-        val response = postForEntity<InfotrygdFinnesResponse>(eksistererUri, request)
+        val response =
+            restClient
+                .post()
+                .uri(eksistererUri)
+                .body(request)
+                .retrieve()
+                .body<InfotrygdFinnesResponse>()!!
         skyggekjør(SkyggeInfotrygdOperasjon.HENT_INNSLAG_HOS_INFOTRYGD, request.personIdenter, request, response)
         return response
     }
-
-    override val pingUri: URI
-        get() =
-            UriComponentsBuilder
-                .fromUri(infotrygdReplikaUri)
-                .pathSegment("api/ping")
-                .build()
-                .toUri()
 
     /**
      * Oppretter en asynkron task som gjør det samme kallet mot familie-ef-infotrygd-replika (GCP) og sammenligner

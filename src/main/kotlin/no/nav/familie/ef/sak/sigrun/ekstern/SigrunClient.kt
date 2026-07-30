@@ -1,19 +1,22 @@
 package no.nav.familie.ef.sak.sigrun.ekstern
 
 import no.nav.familie.kontrakter.felles.PersonIdent
-import no.nav.familie.restklient.client.AbstractRestClient
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
 class SigrunClient(
     @Value("\${FAMILIE_EF_PROXY_URL}") private val uri: URI,
-    @Qualifier("azure") restOperations: RestOperations,
-) : AbstractRestClient(restOperations, "sigrun") {
+    @Qualifier("efProxyRestClient") private val restClient: RestClient,
+) {
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+
     fun hentPensjonsgivendeInntekt(
         fødselsnummer: String,
         inntektsår: Int,
@@ -26,7 +29,13 @@ class SigrunClient(
                 .build()
                 .toUri()
 
-        val response = postForEntity<PensjonsgivendeInntektResponse>(uri, PersonIdent(fødselsnummer))
+        val response =
+            restClient
+                .post()
+                .uri(uri)
+                .body(PersonIdent(fødselsnummer))
+                .retrieve()
+                .body<PensjonsgivendeInntektResponse>()!!
         secureLogger.info("Pensjonsgivende inntekt for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
         return response
     }
@@ -43,7 +52,13 @@ class SigrunClient(
                 .build()
                 .toUri()
 
-        val response = postForEntity<SummertSkattegrunnlag>(uri, PersonIdent(fødselsnummer))
+        val response =
+            restClient
+                .post()
+                .uri(uri)
+                .body(PersonIdent(fødselsnummer))
+                .retrieve()
+                .body<SummertSkattegrunnlag>()!!
         secureLogger.info("Summert skattegrunnlag for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
         return response
     }
@@ -60,7 +75,13 @@ class SigrunClient(
                 .build()
                 .toUri()
 
-        val response = postForEntity<List<BeregnetSkatt>>(uri, PersonIdent(fødselsnummer))
+        val response =
+            restClient
+                .post()
+                .uri(uri)
+                .body(PersonIdent(fødselsnummer))
+                .retrieve()
+                .body<List<BeregnetSkatt>>()!!
         secureLogger.info("Beregnet skattegrunnlag for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
         return response
     }

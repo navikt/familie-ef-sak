@@ -21,39 +21,49 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.log.NavHttpHeaders
-import no.nav.familie.restklient.client.AbstractPingableRestClient
-import no.nav.familie.restklient.client.RessursException
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
 class JournalpostClient(
-    @Qualifier("azure") restOperations: RestOperations,
+    @Qualifier("integrasjonerRestClient") private val restClient: RestClient,
     integrasjonerConfig: IntegrasjonerConfig,
     private val featureToggleService: FeatureToggleService,
-) : AbstractPingableRestClient(restOperations, "journalpost") {
-    override val pingUri: URI = integrasjonerConfig.pingUri
+) {
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
     private val journalpostURI: URI = integrasjonerConfig.journalPostUri
     private val dokarkivUri: URI = integrasjonerConfig.dokarkivUri
 
     fun finnJournalposter(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {
         kastApiFeilDersomUtviklerMedVeilederrolle()
-        return postForEntity<Ressurs<List<Journalpost>>>(journalpostURI, journalposterForBrukerRequest).data
+        return restClient
+            .post()
+            .uri(journalpostURI)
+            .body(journalposterForBrukerRequest)
+            .retrieve()
+            .body<Ressurs<List<Journalpost>>>()!!
+            .data
             ?: error("Kunne ikke hente vedlegg for ${journalposterForBrukerRequest.brukerId.id}")
     }
 
     fun finnJournalposterForBrukerOgTema(journalposterForBrukerOgTemaRequest: JournalposterForVedleggRequest): List<Journalpost> {
         kastApiFeilDersomUtviklerMedVeilederrolle()
-        return postForEntity<Ressurs<List<Journalpost>>>(
-            URI.create("$journalpostURI/temaer"),
-            journalposterForBrukerOgTemaRequest,
-        ).data
+        return restClient
+            .post()
+            .uri(URI.create("$journalpostURI/temaer"))
+            .body(journalposterForBrukerOgTemaRequest)
+            .retrieve()
+            .body<Ressurs<List<Journalpost>>>()!!
+            .data
             ?: error("Kunne ikke hente vedlegg for ${journalposterForBrukerOgTemaRequest.brukerId.id}")
     }
 
@@ -61,9 +71,13 @@ class JournalpostClient(
         kastApiFeilDersomUtviklerMedVeilederrolle()
         val ressurs =
             try {
-                getForEntity<Ressurs<Journalpost>>(URI.create("$journalpostURI?journalpostId=$journalpostId"))
-            } catch (e: RessursException) {
-                if (e.message?.contains("Fant ikke journalpost i fagarkivet") == true) {
+                restClient
+                    .get()
+                    .uri(URI.create("$journalpostURI?journalpostId=$journalpostId"))
+                    .retrieve()
+                    .body<Ressurs<Journalpost>>()!!
+            } catch (e: HttpClientErrorException) {
+                if (e.responseBodyAsString.contains("Fant ikke journalpost i fagarkivet")) {
                     throw ApiFeil("Finner ikke journalpost i fagarkivet", BAD_REQUEST)
                 } else {
                     throw e
@@ -87,22 +101,32 @@ class JournalpostClient(
         dokumentVariantformat: DokumentVariantformat,
     ): ByteArray {
         kastApiFeilDersomUtviklerMedVeilederrolle()
-        return getForEntity<Ressurs<ByteArray>>(
-            UriComponentsBuilder
-                .fromUriString(
-                    "$journalpostURI/hentdokument/" +
-                        "$journalpostId/$dokumentInfoId",
-                ).queryParam("variantFormat", dokumentVariantformat)
-                .build()
-                .toUri(),
-        ).getDataOrThrow()
+        return restClient
+            .get()
+            .uri(
+                UriComponentsBuilder
+                    .fromUriString(
+                        "$journalpostURI/hentdokument/" +
+                            "$journalpostId/$dokumentInfoId",
+                    ).queryParam("variantFormat", dokumentVariantformat)
+                    .build()
+                    .toUri(),
+            ).retrieve()
+            .body<Ressurs<ByteArray>>()!!
+            .getDataOrThrow()
     }
 
     fun hentOvergangsstønadSøknad(
         journalpostId: String,
         dokumentInfoId: String,
     ): SøknadOvergangsstønad {
-        val data = getForEntity<Ressurs<ByteArray>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
+        val data =
+            restClient
+                .get()
+                .uri(jsonDokumentUri(journalpostId, dokumentInfoId))
+                .retrieve()
+                .body<Ressurs<ByteArray>>()!!
+                .getDataOrThrow()
         return jsonMapper.readValue(data)
     }
 
@@ -110,7 +134,13 @@ class JournalpostClient(
         journalpostId: String,
         dokumentInfoId: String,
     ): SøknadBarnetilsyn {
-        val data = getForEntity<Ressurs<ByteArray>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
+        val data =
+            restClient
+                .get()
+                .uri(jsonDokumentUri(journalpostId, dokumentInfoId))
+                .retrieve()
+                .body<Ressurs<ByteArray>>()!!
+                .getDataOrThrow()
         return jsonMapper.readValue(data)
     }
 
@@ -118,7 +148,13 @@ class JournalpostClient(
         journalpostId: String,
         dokumentInfoId: String,
     ): SøknadSkolepenger {
-        val data = getForEntity<Ressurs<ByteArray>>(jsonDokumentUri(journalpostId, dokumentInfoId)).getDataOrThrow()
+        val data =
+            restClient
+                .get()
+                .uri(jsonDokumentUri(journalpostId, dokumentInfoId))
+                .retrieve()
+                .body<Ressurs<ByteArray>>()!!
+                .getDataOrThrow()
         return jsonMapper.readValue(data)
     }
 
@@ -138,22 +174,28 @@ class JournalpostClient(
         journalpostId: String,
         saksbehandler: String?,
     ): OppdaterJournalpostResponse =
-        putForEntity<Ressurs<OppdaterJournalpostResponse>>(
-            URI.create("$dokarkivUri/v2/$journalpostId"),
-            oppdaterJournalpostRequest,
-            headerMedSaksbehandler(saksbehandler),
-        ).data
+        restClient
+            .put()
+            .uri(URI.create("$dokarkivUri/v2/$journalpostId"))
+            .headers { it.addAll(headerMedSaksbehandler(saksbehandler)) }
+            .body(oppdaterJournalpostRequest)
+            .retrieve()
+            .body<Ressurs<OppdaterJournalpostResponse>>()!!
+            .data
             ?: error("Kunne ikke oppdatere journalpost med id $journalpostId")
 
     fun arkiverDokument(
         arkiverDokumentRequest: ArkiverDokumentRequest,
         saksbehandler: String?,
     ): ArkiverDokumentResponse =
-        postForEntity<Ressurs<ArkiverDokumentResponse>>(
-            URI.create("$dokarkivUri/v4"),
-            arkiverDokumentRequest,
-            headerMedSaksbehandler(saksbehandler),
-        ).data
+        restClient
+            .post()
+            .uri(URI.create("$dokarkivUri/v4"))
+            .headers { it.addAll(headerMedSaksbehandler(saksbehandler)) }
+            .body(arkiverDokumentRequest)
+            .retrieve()
+            .body<Ressurs<ArkiverDokumentResponse>>()!!
+            .data
             ?: error("Kunne ikke arkivere dokument med fagsakid ${arkiverDokumentRequest.fagsakId}")
 
     fun ferdigstillJournalpost(
@@ -163,13 +205,15 @@ class JournalpostClient(
     ) {
         val ressurs =
             try {
-                putForEntity<Ressurs<OppdaterJournalpostResponse>>(
-                    URI.create("$dokarkivUri/v2/$journalpostId/ferdigstill?journalfoerendeEnhet=$journalførendeEnhet"),
-                    "",
-                    headerMedSaksbehandler(saksbehandler),
-                )
-            } catch (e: RessursException) {
-                brukerfeilHvis(e.ressurs.melding.contains("DokumentInfo.tittel")) {
+                restClient
+                    .put()
+                    .uri(URI.create("$dokarkivUri/v2/$journalpostId/ferdigstill?journalfoerendeEnhet=$journalførendeEnhet"))
+                    .headers { it.addAll(headerMedSaksbehandler(saksbehandler)) }
+                    .body("")
+                    .retrieve()
+                    .body<Ressurs<OppdaterJournalpostResponse>>()!!
+            } catch (e: HttpClientErrorException) {
+                brukerfeilHvis(e.responseBodyAsString.contains("DokumentInfo.tittel")) {
                     "Mangler tittel på et/flere dokument/vedlegg"
                 }
                 throw e
@@ -193,8 +237,11 @@ class JournalpostClient(
         dokumentInfoId: String,
         request: BulkOppdaterLogiskVedleggRequest,
     ): String =
-        putForEntity<Ressurs<String>>(
-            URI.create("$dokarkivUri/dokument/$dokumentInfoId/logiskVedlegg"),
-            request,
-        ).data ?: error("Kunne ikke bulk oppdatere logiske vedlegg på dokument med id=$dokumentInfoId")
+        restClient
+            .put()
+            .uri(URI.create("$dokarkivUri/dokument/$dokumentInfoId/logiskVedlegg"))
+            .body(request)
+            .retrieve()
+            .body<Ressurs<String>>()!!
+            .data ?: error("Kunne ikke bulk oppdatere logiske vedlegg på dokument med id=$dokumentInfoId")
 }

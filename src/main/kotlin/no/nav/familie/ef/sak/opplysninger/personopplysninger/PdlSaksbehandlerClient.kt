@@ -9,11 +9,11 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkResultat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.SøkeKriterier
 import no.nav.familie.kontrakter.felles.Tema
-import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 
 /**
  * Denne klienten sender med azuretokenet til saksbehandler slik att PDL kan sjekke tilgang på dataen som returneres
@@ -21,8 +21,8 @@ import org.springframework.web.client.RestOperations
 @Service
 class PdlSaksbehandlerClient(
     val pdlConfig: PdlConfig,
-    @Qualifier("azureOnBehalfOf") restTemplate: RestOperations,
-) : AbstractRestClient(restTemplate, "pdl.personinfo.saksbehandler") {
+    @Qualifier("pdlSaksbehandlerRestClient") private val restClient: RestClient,
+) {
     fun søkPersonerMedSammeAdresse(søkeKriterier: List<SøkeKriterier>): PersonSøkResultat {
         val pdlPersonSøkRequest =
             PdlPersonSøkRequest(
@@ -34,11 +34,13 @@ class PdlSaksbehandlerClient(
                 query = PdlConfig.søkPersonQuery,
             )
         val pdlResponse: PdlResponse<PersonSøk> =
-            postForEntity(
-                pdlConfig.pdlUri,
-                pdlPersonSøkRequest,
-                httpHeaders(),
-            )
+            restClient
+                .post()
+                .uri(pdlConfig.pdlUri)
+                .headers { it.addAll(httpHeaders()) }
+                .body(pdlPersonSøkRequest)
+                .retrieve()
+                .body<PdlResponse<PersonSøk>>()!!
         return feilsjekkOgReturnerData(null, pdlResponse) { it.sokPerson }
     }
 

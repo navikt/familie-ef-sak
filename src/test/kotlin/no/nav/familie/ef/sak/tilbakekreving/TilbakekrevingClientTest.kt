@@ -12,9 +12,8 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import org.springframework.web.util.UriUtils
 import java.net.URI
 import java.nio.charset.Charset
@@ -44,11 +43,12 @@ internal class TilbakekrevingClientTest {
     }
 
     companion object {
-        private val restOperations: RestOperations =
-            RestTemplateBuilder()
-                .additionalMessageConverters(
-                    JacksonJsonHttpMessageConverter(jsonMapper),
-                ).build()
+        private val restClient: RestClient =
+            RestClient
+                .builder()
+                .messageConverters { converters ->
+                    converters.add(0, JacksonJsonHttpMessageConverter(jsonMapper))
+                }.build()
         lateinit var client: TilbakekrevingClient
         lateinit var wiremockServerItem: WireMockServer
 
@@ -57,7 +57,7 @@ internal class TilbakekrevingClientTest {
         fun initClass() {
             wiremockServerItem = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
             wiremockServerItem.start()
-            client = TilbakekrevingClient(restOperations, URI.create(wiremockServerItem.baseUrl()))
+            client = TilbakekrevingClient(restClient, URI.create(wiremockServerItem.baseUrl()))
         }
 
         @AfterAll

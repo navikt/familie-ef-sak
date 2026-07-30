@@ -16,7 +16,6 @@ import no.nav.familie.kontrakter.felles.journalpost.Bruker
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.journalpost.Journalposttype
 import no.nav.familie.prosessering.internal.TaskService
-import no.nav.familie.restklient.client.RessursException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
@@ -61,12 +60,8 @@ class SaksbehandlingsblankettSteg(
         val journalpostId =
             try {
                 journalpostClient.arkiverDokument(arkiverDokumentRequest, beslutter).journalpostId
-            } catch (e: RessursException) {
-                if (e.cause is HttpClientErrorException.Conflict) {
-                    finnJournalpostIdForBlankett(saksbehandling)
-                } else {
-                    throw e
-                }
+            } catch (e: HttpClientErrorException.Conflict) {
+                finnJournalpostIdForBlankett(saksbehandling)
             }
 
         behandlingService.leggTilBehandlingsjournalpost(

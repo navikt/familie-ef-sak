@@ -11,13 +11,14 @@ import no.nav.familie.kontrakter.ef.iverksett.KonsistensavstemmingDto
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
-import no.nav.familie.restklient.client.AbstractPingableRestClient
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.util.UUID
@@ -26,31 +27,40 @@ import java.util.UUID
 class IverksettClient(
     @Value("\${FAMILIE_EF_IVERKSETT_URL}")
     private val familieEfIverksettUri: String,
-    @Qualifier("azure")
-    private val restOperations: RestOperations,
-) : AbstractPingableRestClient(restOperations, "familie.ef.iverksett") {
-    override val pingUri: URI = URI.create("$familieEfIverksettUri/api/status")
-
-    override fun ping() {
-        operations.optionsForAllow(pingUri)
-    }
+    @Qualifier("iverksettRestClient")
+    private val restClient: RestClient,
+) {
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun simuler(simuleringRequest: SimuleringDto): BeriketSimuleringsresultat {
         val url = URI.create("$familieEfIverksettUri/api/simulering/v2")
 
-        return postForEntity<Ressurs<BeriketSimuleringsresultat>>(
-            url,
-            simuleringRequest,
-            HttpHeaders().medContentTypeJsonUTF8(),
-        ).data!!
+        return restClient
+            .post()
+            .uri(url)
+            .headers { it.addAll(HttpHeaders().medContentTypeJsonUTF8()) }
+            .body(simuleringRequest)
+            .retrieve()
+            .body<Ressurs<BeriketSimuleringsresultat>>()!!
+            .data!!
     }
 
     fun sendBehandlingsstatistikk(request: BehandlingsstatistikkDto) {
-        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/statistikk/behandlingsstatistikk"), request)
+        restClient
+            .post()
+            .uri(URI.create("$familieEfIverksettUri/api/statistikk/behandlingsstatistikk"))
+            .body(request)
+            .retrieve()
+            .body<Any>()
     }
 
     fun publiserVedtakshendelse(behandlingId: UUID) {
-        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/iverksett/vedtakshendelse/$behandlingId"), "")
+        restClient
+            .post()
+            .uri(URI.create("$familieEfIverksettUri/api/iverksett/vedtakshendelse/$behandlingId"))
+            .body("")
+            .retrieve()
+            .body<Any>()
     }
 
     fun iverksett(
@@ -60,17 +70,32 @@ class IverksettClient(
         val url = URI.create("$familieEfIverksettUri/api/iverksett")
         val request = IverksettMedBrevRequest(iverksettDto, fil.bytes)
         secureLogger.info("Sender iverksettDto: $iverksettDto")
-        postForEntity<Any>(url, request)
+        restClient
+            .post()
+            .uri(url)
+            .body(request)
+            .retrieve()
+            .body<Any>()
     }
 
     fun iverksettUtenBrev(iverksettDto: IverksettDto) {
         val url = URI.create("$familieEfIverksettUri/api/iverksett/uten-brev")
-        postForEntity<Any>(url, iverksettDto)
+        restClient
+            .post()
+            .uri(url)
+            .body(iverksettDto)
+            .retrieve()
+            .body<Any>()
     }
 
     fun hentStatus(behandlingId: UUID): IverksettStatus {
         val url = URI.create("$familieEfIverksettUri/api/iverksett/status/$behandlingId")
-        return getForEntity(url, HttpHeaders().medContentTypeJsonUTF8())
+        return restClient
+            .get()
+            .uri(url)
+            .headers { it.addAll(HttpHeaders().medContentTypeJsonUTF8()) }
+            .retrieve()
+            .body<IverksettStatus>()!!
     }
 
     fun sendStartmeldingKonsistensavstemming(
@@ -102,23 +127,39 @@ class IverksettClient(
                 .queryParam("transaksjonId", transaksjonId.toString())
                 .build()
                 .toUri()
-        postForEntity<Any>(url, request)
+        restClient
+            .post()
+            .uri(url)
+            .body(request)
+            .retrieve()
+            .body<Any>()
     }
 
     fun sendFrittståendeBrev(frittståendeBrevDto: FrittståendeBrevDto) {
-        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/brev/frittstaende"), frittståendeBrevDto)
+        restClient
+            .post()
+            .uri(URI.create("$familieEfIverksettUri/api/brev/frittstaende"))
+            .body(frittståendeBrevDto)
+            .retrieve()
+            .body<Any>()
     }
 
     fun håndterUtsendingAvAktivitetspliktBrev(periodiskAktivitetspliktBrevDto: PeriodiskAktivitetspliktBrevDto) {
-        postForEntity<Any>(URI.create("$familieEfIverksettUri/api/brev/frittstaende/innhenting-aktivitetsplikt"), periodiskAktivitetspliktBrevDto)
+        restClient
+            .post()
+            .uri(URI.create("$familieEfIverksettUri/api/brev/frittstaende/innhenting-aktivitetsplikt"))
+            .body(periodiskAktivitetspliktBrevDto)
+            .retrieve()
+            .body<Any>()
     }
 
     fun timeoutTest(sekunder: Long): String {
         val testUri = URI.create("$familieEfIverksettUri/api/konsistensavstemming/timeout-test?sekunder=$sekunder")
-        val headers =
-            HttpHeaders().apply {
-                accept = listOf(MediaType.TEXT_PLAIN)
-            }
-        return getForEntity<String>(testUri, headers)
+        return restClient
+            .get()
+            .uri(testUri)
+            .headers { it.accept = listOf(MediaType.TEXT_PLAIN) }
+            .retrieve()
+            .body<String>()!!
     }
 }

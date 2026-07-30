@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.arbeidssøker
 
-import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
@@ -12,8 +12,8 @@ import java.net.URI
 class ArbeidssøkerClient(
     @Value("\${ARBEIDSSOKER_URL}")
     private val uriGcp: URI,
-    @Qualifier("azure") restOperations: RestOperations,
-) : AbstractRestClient(restOperations, "arbeidssøker") {
+    @Qualifier("arbeidssokerRestClient") private val restClient: RestClient,
+) {
     fun hentPerioder(
         personIdent: String,
     ): List<ArbeidssøkerPeriode> {
@@ -22,7 +22,12 @@ class ArbeidssøkerClient(
                 .fromUri(uriGcp)
                 .pathSegment("api/v1/veileder/arbeidssoekerperioder")
 
-        return postForEntity(uriBuilder.build().toUri(), FnrArbeidssøker(personIdent))
+        return restClient
+            .post()
+            .uri(uriBuilder.build().toUri())
+            .body(FnrArbeidssøker(personIdent))
+            .retrieve()
+            .body<List<ArbeidssøkerPeriode>>()!!
     }
 }
 

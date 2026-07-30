@@ -40,21 +40,21 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.http.HttpStatus
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
 import java.net.URI
 
 internal class JournalpostClientTest {
     companion object {
         private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
-        private val restOperations: RestOperations =
-            RestTemplateBuilder()
-                .additionalMessageConverters(
-                    JacksonJsonHttpMessageConverter(jsonMapper),
-                ).build()
+        private val restClient: RestClient =
+            RestClient
+                .builder()
+                .messageConverters { converters ->
+                    converters.add(0, JacksonJsonHttpMessageConverter(jsonMapper))
+                }.build()
         lateinit var journalpostClient: JournalpostClient
         lateinit var wiremockServerItem: WireMockServer
         lateinit var integrasjonerConfig: IntegrasjonerConfig
@@ -66,7 +66,7 @@ internal class JournalpostClientTest {
             wiremockServerItem.start()
             integrasjonerConfig = IntegrasjonerConfig(URI.create(wiremockServerItem.baseUrl()))
             journalpostClient =
-                JournalpostClient(restOperations, integrasjonerConfig, featureToggleService)
+                JournalpostClient(restClient, integrasjonerConfig, featureToggleService)
         }
 
         @AfterAll

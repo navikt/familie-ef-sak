@@ -17,11 +17,11 @@ import no.nav.familie.ef.sak.tilkjentytelse.tilTilkjentYtelseMedMetaData
 import no.nav.familie.kontrakter.ef.iverksett.SimuleringDto
 import no.nav.familie.kontrakter.felles.simulering.BeriketSimuleringsresultat
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
-import no.nav.familie.restklient.client.RessursException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.client.HttpClientErrorException
 import java.time.LocalDate
 import java.util.UUID
 
@@ -120,7 +120,7 @@ class SimuleringService(
             )
         } catch (e: Exception) {
             val personFinnesIkkeITps = "Personen finnes ikke i TPS"
-            brukerfeilHvis(e is RessursException && e.ressurs.melding == personFinnesIkkeITps) {
+            brukerfeilHvis(e is HttpClientErrorException && e.responseBodyAsString.contains(personFinnesIkkeITps)) {
                 personFinnesIkkeITps
             }
             throw Feil(

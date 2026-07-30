@@ -1,9 +1,7 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
 import io.mockk.every
-import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.slot
 import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
@@ -84,8 +82,6 @@ class PdlClientConfig {
     @Primary
     fun pdlClient(): PdlClient {
         val pdlClient: PdlClient = mockk()
-
-        every { pdlClient.ping() } just runs
 
         every { pdlClient.hentPersonKortBolk(any()) } answers {
             firstArg<List<String>>().associate { it to lagPersonKort(it) }
