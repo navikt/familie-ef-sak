@@ -89,8 +89,6 @@ spec:
         - application: familie-ef-infotrygd-replika
         - application: historisk-pensjon
           namespace: historisk
-        - application: familie-ef-proxy
-          cluster: prod-fss
         - application: paw-arbeidssoekerregisteret-api-oppslag-v2
           namespace: paw
         - application: skjermede-personer-pip
@@ -106,9 +104,11 @@ spec:
         - host: familie-oppdrag.prod-fss-pub.nais.io
         - host: familie-integrasjoner.prod-fss-pub.nais.io
         - host: familie-ef-infotrygd.prod-fss-pub.nais.io
-        - host: familie-ef-proxy.prod-fss-pub.nais.io
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
         - host: ikomp.prod-fss-pub.nais.io
+        - host: ereg-services.prod-fss-pub.nais.io
+        - host: sigrun.prod-fss-pub.nais.io
+        - host: arbeid-og-inntekt.prod-fss-pub.nais.io
   azure:
     application:
       enabled: true
