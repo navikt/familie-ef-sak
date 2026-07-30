@@ -53,7 +53,6 @@
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
         <brukervarsel-builder.version>2.2.0</brukervarsel-builder.version>
         <!--suppress UnresolvedMavenProperty -->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
@@ -66,6 +65,19 @@
                 <version>6.1.2</version> <!-- Denne inkluderer junit-platform 1.13.3 som kreves av cucumber 7.26, kan muligens fjernes når spring bumper til junit versjon 1.13.3 -->
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <!--
+            familie-felles:unleash sin transitive unleash-client-java ble bumpet til 12.2.2, som (uansett streaming-konfig)
+            alltid instansierer en StreamingFeatureFetcherImpl og dermed krever com.launchdarkly:okhttp-eventsource, som
+            drar med seg com.squareup.okhttp3:okhttp:4.12.0. Den kolliderer i test-classpath med okhttp-jvm:5.2.1 som
+            mock-oauth2-server sin mockwebserver drar inn (samme okhttp3.*-pakker, inkompatibel ABI => NoSuchMethodError
+            på okhttp3.internal.concurrent.TaskRunner ved Spring-kontekstoppstart i tester). Låser derfor til siste
+            versjon uten okhttp-eventsource-avhengighet inntil dette er løst oppstrøms.
+            -->
+            <dependency>
+                <groupId>io.getunleash</groupId>
+                <artifactId>unleash-client-java</artifactId>
+                <version>11.1.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
