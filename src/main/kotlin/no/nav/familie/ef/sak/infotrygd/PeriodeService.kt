@@ -235,7 +235,7 @@ private fun AndelTilkjentYtelse.tilInternPeriode(erRegelendring2026: Boolean): I
         stønadTom = this.stønadTom,
         opphørsdato = null,
         datakilde = Datakilde.EF,
-        erRegelendring2026 = erRegelendring2026,
+        erNyttRegelverk2026 = erRegelendring2026,
     )
 
 fun InfotrygdPeriode.tilInternPeriode(): InternPeriode =
