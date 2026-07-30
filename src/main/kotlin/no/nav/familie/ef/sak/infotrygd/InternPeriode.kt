@@ -53,7 +53,7 @@ data class InternPeriode(
     val stønadTom: LocalDate,
     val opphørsdato: LocalDate?,
     val datakilde: Datakilde,
-    val erRegelendring2026: Boolean = false,
+    val erNyttRegelverk2026: Boolean = false,
 ) {
     fun erFullOvergangsstønad(): Boolean = this.inntektsreduksjon == 0 && this.samordningsfradrag == 0
 }
