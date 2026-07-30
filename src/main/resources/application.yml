@@ -30,7 +30,7 @@ spring:
     format:
       date: iso
       date-time: iso
-  autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
+  autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration,efterlatte.prosessering.spring.ProsesseringAutoConfiguration
   data:
     jdbc:
       repositories:
@@ -140,6 +140,10 @@ prosessering:
   delete:
     after:
       weeks: 16
+
+# Pilot: no.nav.efterlatte:prosessering-spring-boot-starter, kun brukt av skyggekjøringInfotrygd-task inntil videre.
+efterlatte-prosessering:
+  node: ${HOSTNAME:ukjent-node}
 
 springdoc:
   api-docs:

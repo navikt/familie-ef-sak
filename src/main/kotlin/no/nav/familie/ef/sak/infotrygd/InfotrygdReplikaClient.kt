@@ -73,7 +73,7 @@ class InfotrygdReplikaClient(
                 .body(request)
                 .retrieve()
                 .body<InfotrygdPeriodeResponse>()!!
-        skyggekjør(SkyggeInfotrygdOperasjon.HENT_PERIODER, request, response, request.personIdenter)
+        skyggekjør(SkyggeInfotrygdOperasjon.HENT_PERIODER, request.personIdenter, request, response)
         return response
     }
 
@@ -85,7 +85,7 @@ class InfotrygdReplikaClient(
                 .body(request)
                 .retrieve()
                 .body<InfotrygdPeriodeResponse>()!!
-        skyggekjør(SkyggeInfotrygdOperasjon.HENT_SAMMENSLÅTTE_PERIODER, request, response, request.personIdenter)
+        skyggekjør(SkyggeInfotrygdOperasjon.HENT_SAMMENSLÅTTE_PERIODER, request.personIdenter, request, response)
         return response
     }
 
@@ -97,7 +97,7 @@ class InfotrygdReplikaClient(
                 .body(request)
                 .retrieve()
                 .body<InfotrygdSakResponse>()!!
-        skyggekjør(SkyggeInfotrygdOperasjon.HENT_SAKER, request, response, request.personIdenter)
+        skyggekjør(SkyggeInfotrygdOperasjon.HENT_SAKER, request.personIdenter, request, response)
         return response
     }
 
@@ -124,7 +124,7 @@ class InfotrygdReplikaClient(
                 .body(request)
                 .retrieve()
                 .body<InfotrygdFinnesResponse>()!!
-        skyggekjør(SkyggeInfotrygdOperasjon.HENT_INNSLAG_HOS_INFOTRYGD, request, response, request.personIdenter)
+        skyggekjør(SkyggeInfotrygdOperasjon.HENT_INNSLAG_HOS_INFOTRYGD, request.personIdenter, request, response)
         return response
     }
 
@@ -140,14 +140,16 @@ class InfotrygdReplikaClient(
      */
     private fun skyggekjør(
         operasjon: SkyggeInfotrygdOperasjon,
+        personIdenter: Set<String>,
         request: Any,
         forventetRespons: Any,
-        personIdenter: Set<String>,
     ) {
         if (featureToggleService.isEnabled(Toggle.SKYGGEKJØR_INFOTRYGD)) {
             try {
                 skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(
-                    SkyggekjørInfotrygdTask.opprettTask(operasjon, request, forventetRespons, personIdenter),
+                    type = SkyggekjørInfotrygdTask.TYPE,
+                    payload = SkyggekjørInfotrygdTask.opprettPayload(operasjon, personIdenter),
+                    metadata = SkyggekjørInfotrygdTask.opprettMetadata(request, forventetRespons),
                 )
             } catch (e: Exception) {
                 logger.error("Klarte ikke å opprette skyggetask for $operasjon mot familie-ef-infotrygd-replika", e)

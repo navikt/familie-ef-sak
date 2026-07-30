@@ -79,7 +79,7 @@ class InfotrygdReplikaGcpClient(
             .retrieve()
             .body<InfotrygdSakResponse>()!!
 
-    fun hentInslagHosInfotrygd(request: InfotrygdSøkRequest): InfotrygdFinnesResponse {
+    fun hentInfotrygdFinnes(request: InfotrygdSøkRequest): InfotrygdFinnesResponse {
         require(request.personIdenter.isNotEmpty()) { "Identer har ingen verdier" }
         return restClient
             .post()
