@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaGcpClient
 import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
@@ -157,16 +158,14 @@ enum class SkyggeInfotrygdOperasjon {
     HENT_INNSLAG_HOS_INFOTRYGD,
 }
 
-/**
- * Perioder/saker/treff kan i praksis komme i ulik rekkefølge fra on-prem og GCP-replikaen uten at det er et reelt avvik,
- * så listene sorteres på en stabil, innholdsbasert nøkkel før sammenligning.
- */
 private fun InfotrygdPeriodeResponse.normalisert(): InfotrygdPeriodeResponse =
     copy(
-        overgangsstønad = overgangsstønad.sortedBy { it.toString() },
-        barnetilsyn = barnetilsyn.sortedBy { it.toString() },
-        skolepenger = skolepenger.sortedBy { it.toString() },
+        overgangsstønad = overgangsstønad.normalisertePerioder(),
+        barnetilsyn = barnetilsyn.normalisertePerioder(),
+        skolepenger = skolepenger.normalisertePerioder(),
     )
+
+private fun List<InfotrygdPeriode>.normalisertePerioder(): List<InfotrygdPeriode> = map { it.copy(barnIdenter = it.barnIdenter.sorted()) }.sortedBy { it.toString() }
 
 private fun InfotrygdSakResponse.normalisert(): InfotrygdSakResponse = copy(saker = saker.sortedBy { it.toString() })
 
