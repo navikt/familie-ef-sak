@@ -7,10 +7,11 @@ enum class OppgaveSubtype {
     INNSTILLING_VEDRØRENDE_UTDANNING,
 }
 
-enum class OppgaverForAutomatiskFerdigstilling(
+enum class OppgaverSomKanAutomatiskFerdigstilles(
     val besluttOppgaveType: Oppgavetype,
 ) {
     Fremlegg(Oppgavetype.Fremlegg),
     VurderHenvendelse(Oppgavetype.VurderHenvendelse),
     VurderKonsekvensForYtelse(Oppgavetype.VurderKonsekvensForYtelse),
+    InnhentDokumentasjon(Oppgavetype.InnhentDokumentasjon),
 }
