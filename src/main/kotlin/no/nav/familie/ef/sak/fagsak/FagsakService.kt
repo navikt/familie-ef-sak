@@ -58,6 +58,9 @@ class FagsakService(
         personIdenter: Set<String>,
         gjeldendePersonIdent: String,
     ): List<Fagsak> {
+        feilHvis(personIdenter.isEmpty()) {
+            "Kan ikke slå opp fagsak uten personidenter for $gjeldendePersonIdent"
+        }
         val fagsaker = fagsakRepository.findBySøkerIdent(personIdenter)
 
         if (fagsaker.isEmpty()) {
@@ -81,9 +84,19 @@ class FagsakService(
     fun finnFagsak(
         personIdenter: Set<String>,
         stønadstype: StønadType,
-    ): Fagsak? = fagsakRepository.findBySøkerIdent(personIdenter, stønadstype)?.tilFagsakMedPerson()
+    ): Fagsak? {
+        feilHvis(personIdenter.isEmpty()) {
+            "Kan ikke slå opp fagsak uten personidenter"
+        }
+        return fagsakRepository.findBySøkerIdent(personIdenter, stønadstype)?.tilFagsakMedPerson()
+    }
 
-    fun finnFagsaker(personIdenter: Set<String>): List<Fagsak> = fagsakRepository.findBySøkerIdent(personIdenter).map { it.tilFagsakMedPerson() }
+    fun finnFagsaker(personIdenter: Set<String>): List<Fagsak> {
+        feilHvis(personIdenter.isEmpty()) {
+            "Kan ikke slå opp fagsaker uten personidenter"
+        }
+        return fagsakRepository.findBySøkerIdent(personIdenter).map { it.tilFagsakMedPerson() }
+    }
 
     fun hentFagsakMedBehandlinger(fagsakId: UUID): FagsakDto = fagsakTilDto(hentFagsak(fagsakId))
 
