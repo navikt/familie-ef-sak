@@ -9,8 +9,12 @@ import org.springframework.stereotype.Service
 class FullmaktService(
     val fullmaktClient: FullmaktClient,
 ) {
-    fun hentFullmakt(ident: String): List<Fullmakt> {
-        val fullmaktResponse = fullmaktClient.hentFullmakt(ident)
+    /**
+     * @return `null` dersom fullmakt er ukjent, f.eks. fordi saksbehandler mangler geografisk tilgang
+     * i tilgangsmaskinen. Dette skal ikke tolkes som at personen ikke har noen fullmakter.
+     */
+    fun hentFullmakt(ident: String): List<Fullmakt>? {
+        val fullmaktResponse = fullmaktClient.hentFullmakt(ident) ?: return null
         return fullmaktResponse.map {
             Fullmakt(
                 it.gyldigFraOgMed,

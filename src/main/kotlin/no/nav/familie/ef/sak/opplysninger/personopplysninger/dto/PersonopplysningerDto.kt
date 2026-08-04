@@ -22,7 +22,7 @@ data class PersonopplysningerDto(
     val statsborgerskap: List<StatsborgerskapDto>,
     val sivilstand: List<SivilstandDto>,
     val adresse: List<AdresseDto>,
-    val fullmakt: List<FullmaktDto>,
+    val fullmakt: List<FullmaktDto>?, // null = ukjent, f.eks. pga. manglende geografisk tilgang i tilgangsmaskinen
     val egenAnsatt: Boolean,
     val barn: List<BarnDto>,
     val innflyttingTilNorge: List<InnflyttingDto>,

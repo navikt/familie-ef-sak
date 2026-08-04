@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.felles.util.Timer.loggTid
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.kontantstøtte.HentUtbetalingsinfoKontantstøtteDto
 import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
@@ -20,6 +21,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForeld
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
 @Service
@@ -36,6 +38,10 @@ class GrunnlagsdataRegisterService(
         barneforeldreFraSøknad: List<String>,
     ): GrunnlagsdataDomene {
         val grunnlagsdataFraPdl = hentGrunnlagsdataFraPdl(personIdent, emptyList())
+        feilHvis(grunnlagsdataFraPdl.søker.fullmakt == null, HttpStatus.FORBIDDEN) {
+            "Fullmakt er ukjent, mangler geografisk tilgang i tilgangsmaskinen. " +
+                "Kan derfor ikke opprette/lagre grunnlagsdata for denne personen."
+        }
         val medlUnntak = medlService.hentMedlemskapsunntak(personIdent)
         val tidligereVedtaksperioder =
             tidligereVedtaksperioderService.hentTidligereVedtaksperioder(grunnlagsdataFraPdl.søker.folkeregisteridentifikator)

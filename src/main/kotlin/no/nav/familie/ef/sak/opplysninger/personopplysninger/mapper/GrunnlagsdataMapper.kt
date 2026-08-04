@@ -136,10 +136,11 @@ object GrunnlagsdataMapper {
             )
         }
 
+    // Returnerer `null` dersom fullmakt er ukjent (f.eks. pga. manglende geografisk tilgang), ikke ved ingen fullmakter
     private fun mapFullmakt(
         pdlSøker: PdlSøker,
         andrePersoner: Map<String, PdlPersonKort>,
-    ): List<FullmaktMedNavn> =
+    ): List<FullmaktMedNavn>? =
         pdlSøker.fullmakt?.map {
             FullmaktMedNavn(
                 gyldigFraOgMed = it.gyldigFraOgMed,
@@ -148,5 +149,5 @@ object GrunnlagsdataMapper {
                 navn = andrePersoner[it.motpartsPersonident]?.navn?.gjeldende()?.visningsnavn(),
                 områder = it.omraader,
             )
-        } ?: emptyList()
+        }
 }

@@ -1,12 +1,17 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt
 
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
 import java.net.URI
 import java.time.LocalDate
+
+// Feilkode fra tilgangsmaskinen når saksbehandler er geografisk avvist tilgang til å slå opp fullmakt
+private const val SAKSBEHANDLER_AVVIST_TILGANGSMASKINEN_GEOGRAFISK = "SAKSBEHANDLER_AVVIST_TILGANGSMASKINEN_GEOGRAFISK"
 
 @Service
 class FullmaktClient(
@@ -15,14 +20,29 @@ class FullmaktClient(
     @Qualifier("reprApiRestClient")
     private val restClient: RestClient,
 ) {
-    fun hentFullmakt(ident: String): List<FullmaktResponse> {
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    /**
+     * @return liste med fullmakter, eller `null` dersom vi ikke fikk hentet fullmakt fordi saksbehandler
+     * mangler geografisk tilgang i tilgangsmaskinen. `null` skal tolkes som "ukjent" og ikke "ingen fullmakt".
+     */
+    fun hentFullmakt(ident: String): List<FullmaktResponse>? {
         val url = URI.create("$fullmaktUrl/api/internbruker/fullmakt/fullmaktsgiver")
-        return restClient
-            .post()
-            .uri(url)
-            .body(FullmaktRequest(ident))
-            .retrieve()
-            .body<List<FullmaktResponse>>()!!
+        return try {
+            restClient
+                .post()
+                .uri(url)
+                .body(FullmaktRequest(ident))
+                .retrieve()
+                .body<List<FullmaktResponse>>()!!
+        } catch (e: HttpClientErrorException.Forbidden) {
+            if (e.responseBodyAsString.contains(SAKSBEHANDLER_AVVIST_TILGANGSMASKINEN_GEOGRAFISK)) {
+                logger.warn("Saksbehandler mangler geografisk tilgang i tilgangsmaskinen til å hente fullmakt. Viser fullmakt som ukjent.")
+                null
+            } else {
+                throw e
+            }
+        }
     }
 }
 
