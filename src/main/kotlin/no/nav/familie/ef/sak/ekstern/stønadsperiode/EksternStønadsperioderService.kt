@@ -75,6 +75,7 @@ class EksternStønadsperioderService(
                 it.stønadFom,
                 it.stønadTom,
                 stønadType,
+                erNyttRegelverk2026 = it.erNyttRegelverk2026,
             )
         }
 
