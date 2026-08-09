@@ -53,7 +53,7 @@
         <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
         <sonar.organization>navit</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <okhttp3.version>4.9.1</okhttp3.version> <!-- overskrever spring sin versjon, blir brukt av mock-oauth2-server -->
+        <okhttp.version>5.4.0</okhttp.version> <!-- må matche okhttp-jvm som mock-oauth2-server 6.x drar inn, ellers NoSuchMethodError i TaskRunner -->
         <brukervarsel-builder.version>2.2.0</brukervarsel-builder.version>
         <!--suppress UnresolvedMavenProperty -->
         <sonar.login>${SONAR_LOGIN}</sonar.login>
@@ -208,6 +208,18 @@
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>unleash</artifactId>
             <version>${felles.version}</version>
+            <exclusions>
+                <!-- okhttp 4.x kolliderer med okhttp-jvm 5.x som mock-oauth2-server 6.x bruker i tester (NoSuchMethodError i TaskRunner) -->
+                <exclusion>
+                    <groupId>com.squareup.okhttp3</groupId>
+                    <artifactId>okhttp</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp-jvm</artifactId>
+            <version>${okhttp.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.familie.felles</groupId>
