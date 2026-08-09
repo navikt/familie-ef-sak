@@ -21,9 +21,15 @@ object OpprettBehandlingUtil {
         tidligereBehandlinger: List<Behandling>,
         erMigrering: Boolean = false,
     ) {
+        val resultaterSomIkkeSkalHindreNyBehandling =
+            if (erMigrering) {
+                setOf(BehandlingResultat.HENLAGT, BehandlingResultat.AVSLÅTT)
+            } else {
+                setOf(BehandlingResultat.HENLAGT)
+            }
         val sisteBehandling =
             tidligereBehandlinger
-                .filter { it.resultat != BehandlingResultat.HENLAGT }
+                .filter { it.resultat !in resultaterSomIkkeSkalHindreNyBehandling }
                 .sisteFerdigstilteBehandling()
 
         validerTidligereBehandlingerErFerdigstilte(tidligereBehandlinger)
