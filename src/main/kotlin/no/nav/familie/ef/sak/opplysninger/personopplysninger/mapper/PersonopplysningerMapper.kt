@@ -73,7 +73,7 @@ class PersonopplysningerMapper(
             adresse = tilAdresser(søker),
             fullmakt =
                 søker.fullmakt
-                    .map {
+                    ?.map {
                         FullmaktDto(
                             gyldigFraOgMed = it.gyldigFraOgMed,
                             gyldigTilOgMed = it.gyldigTilOgMed,
@@ -81,7 +81,8 @@ class PersonopplysningerMapper(
                             navn = it.navn,
                             områder = it.områder?.let { it.map { område -> mapOmråde(område) } } ?: emptyList(),
                         )
-                    }.sortedByDescending { it.gyldigFraOgMed },
+                    }?.sortedByDescending { it.gyldigFraOgMed },
+            fullmaktIkkeTilgangÅrsak = personopplysninger.fullmaktIkkeTilgangÅrsak,
             egenAnsatt = egenAnsatt,
             barn =
                 personopplysninger.barn

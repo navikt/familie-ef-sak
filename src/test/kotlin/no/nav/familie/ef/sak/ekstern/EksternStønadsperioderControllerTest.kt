@@ -29,8 +29,8 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
         headers.setBearerAuth(clientToken("familie-ef-proxy", false))
 
         utførKallOgVerifiser<EksternePerioderResponse>("/api/ekstern/perioder") { response ->
-            assertThat(response.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-            assertThat(response.body?.status).isEqualTo(Ressurs.Status.FEILET)
+            assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+            assertThat(response.body?.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)
         }
     }
 
@@ -49,8 +49,8 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
         headers.setBearerAuth(clientToken("familie-ef-proxy", false))
 
         utførKallOgVerifiser<EksternePerioderResponse>("/api/ekstern/perioder/alle-stonader") { response ->
-            assertThat(response.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-            assertThat(response.body?.status).isEqualTo(Ressurs.Status.FEILET)
+            assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+            assertThat(response.body?.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)
         }
     }
 
@@ -104,8 +104,8 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
         headers.setBearerAuth(clientToken("familie-ef-proxy", false))
 
         utførKallOgVerifiser<EksternePerioderResponse>("/api/ekstern/perioder/overgangsstonad") { response ->
-            assertThat(response.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-            assertThat(response.body?.status).isEqualTo(Ressurs.Status.FEILET)
+            assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+            assertThat(response.body?.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)
         }
     }
 
@@ -123,8 +123,8 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
         headers.setBearerAuth(clientToken("familie-ef-proxy", false))
 
         utførKallOgVerifiser<EksternePerioderMedBeløpResponse>("/api/ekstern/perioder/overgangsstonad/med-belop") { response ->
-            assertThat(response.statusCode).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
-            assertThat(response.body?.status).isEqualTo(Ressurs.Status.FEILET)
+            assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+            assertThat(response.body?.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)
         }
     }
 
