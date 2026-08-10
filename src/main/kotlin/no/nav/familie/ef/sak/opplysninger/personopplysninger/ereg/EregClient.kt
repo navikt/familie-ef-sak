@@ -1,10 +1,10 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.ereg
 
-import no.nav.familie.restklient.client.AbstractPingableRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
@@ -12,9 +12,9 @@ import java.net.URI
 class EregClient(
     @Value("\${FAMILIE_EF_PROXY_URL}")
     private val familieEfProxyUri: URI,
-    @Qualifier("azure")
-    private val restOperations: RestOperations,
-) : AbstractPingableRestClient(restOperations, "ereg") {
+    @Qualifier("efProxyRestClient")
+    private val restClient: RestClient,
+) {
     fun hentOrganisasjoner(organisasjonsnumre: List<String>): List<OrganisasjonDto> {
         val uriBuilder =
             UriComponentsBuilder
@@ -22,12 +22,10 @@ class EregClient(
                 .pathSegment("api/ereg")
                 .queryParam("organisasjonsnumre", organisasjonsnumre)
 
-        return getForEntity(uriBuilder.build().toUri())
-    }
-
-    override val pingUri = familieEfProxyUri
-
-    override fun ping() {
-        operations.optionsForAllow(pingUri)
+        return restClient
+            .get()
+            .uri(uriBuilder.build().toUri())
+            .retrieve()
+            .body<List<OrganisasjonDto>>()!!
     }
 }

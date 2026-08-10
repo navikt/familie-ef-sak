@@ -26,10 +26,9 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.http.HttpHeaders
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
-import org.springframework.web.client.RestTemplate
+import org.springframework.web.client.RestClient
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
@@ -220,13 +219,14 @@ class IverksettClientTest {
             wiremockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
             wiremockServer.start()
 
-            val restTemplate: RestTemplate =
-                RestTemplateBuilder()
-                    .additionalMessageConverters(
-                        JacksonJsonHttpMessageConverter(JsonMapperProvider.jsonMapper),
-                    ).build()
+            val restClient: RestClient =
+                RestClient
+                    .builder()
+                    .messageConverters { converters ->
+                        converters.add(0, JacksonJsonHttpMessageConverter(JsonMapperProvider.jsonMapper))
+                    }.build()
 
-            client = IverksettClient(wiremockServer.baseUrl(), restTemplate)
+            client = IverksettClient(wiremockServer.baseUrl(), restClient)
         }
 
         @AfterAll

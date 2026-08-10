@@ -80,7 +80,7 @@ internal class OppdaterVilkårTest {
     }
 
     @Test
-    fun `ALDER_PÅ_BARN-vurderinger skal automatisk vurderes ved opprettelse - barnetilsyn`() {
+    fun `ALDER_PÅ_BARN-vurderinger skal ikke vurderes automatisk ved opprettelse - barnetilsyn`() {
         val behandlingId = UUID.randomUUID()
         val barn =
             BehandlingBarn(
@@ -119,7 +119,7 @@ internal class OppdaterVilkårTest {
         for (vilkårsvurdering in alderPåBarnVilkår) {
             val delvilkårsvurderinger = vilkårsvurdering.delvilkårsvurdering.delvilkårsvurderinger
             assertThat(delvilkårsvurderinger.size).isEqualTo(1)
-            assertThat(delvilkårsvurderinger.first().resultat).isEqualTo(Vilkårsresultat.AUTOMATISK_OPPFYLT)
+            assertThat(delvilkårsvurderinger.first().resultat).isEqualTo(Vilkårsresultat.IKKE_TATT_STILLING_TIL)
         }
     }
 

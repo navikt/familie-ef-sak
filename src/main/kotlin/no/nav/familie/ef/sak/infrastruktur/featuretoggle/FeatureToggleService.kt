@@ -14,7 +14,6 @@ enum class Toggle(
     val beskrivelse: String? = null,
 ) {
     // Release
-    REGELENDRINGER_2026("familie.ef.soknad.overgangsstonad-regelendringer-2026", "Release"),
     FRONTEND_KOPIER_KNAPP_ERROR_ALERT("familie.ef.sak.frontend-alert-error-med-copy-button", "Release"),
     FRONTEND_VIS_BEREGNINGSSKJEMA("familie.ef.sak.frontend-vis-beregningsskjema", "Release"),
     VIS_ANDRE_YTELSER("familie.ef.sak.vis-andre-ytelser", "Release"),
@@ -25,6 +24,7 @@ enum class Toggle(
     INNVILGE_KUN_OPPHØR_OG_SANKSJON("familie.ef.sak.innvilge-kun-opphor-og-sanskjon", "Operational"),
     G_BEREGNING_SCHEDULER("familie.ef.sak.g-beregning-scheduler", "Operational"),
     SATSENDRING_BRUK_IKKE_VEDTATT_MAXSATS("familie.ef.sak.bruk-nye-maxsatser", "Operational"),
+    SKYGGEKJØR_INFOTRYGD("familie-ef-sak.skyggekjor-infotrygd", "Operational"),
     FRONTEND_VIS_IKKE_PUBLISERTE_BREVMALER(
         "familie.ef.sak.frontend-vis-ikke-publiserte-brevmaler",
         "Operational- kun preprod",

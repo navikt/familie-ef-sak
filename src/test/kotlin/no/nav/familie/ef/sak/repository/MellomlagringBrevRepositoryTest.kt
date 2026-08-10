@@ -26,4 +26,20 @@ internal class MellomlagringBrevRepositoryTest : OppslagSpringRunnerTest() {
 
         assertThat(mellomlagerBrevRepository.findById(behandling.id)).get().usingRecursiveComparison().isEqualTo(mellomlagretBrev)
     }
+
+    @Test
+    internal fun `upsert skal oppdatere eksisterende mellomlagret brev uten å feile på duplicate key`() {
+        val fagsak = testoppsettService.lagreFagsak(fagsak())
+        val behandling = behandlingRepository.insert(behandling(fagsak))
+        val opprinneligDato = LocalDate.now().minusDays(1)
+
+        mellomlagerBrevRepository.upsert(behandling.id, "{}", "mal", "1", opprinneligDato)
+        mellomlagerBrevRepository.upsert(behandling.id, "{\"felt\":1}", "mal2", "2", LocalDate.now())
+
+        val lagret = mellomlagerBrevRepository.findById(behandling.id).get()
+        assertThat(lagret.brevverdier).isEqualTo("{\"felt\":1}")
+        assertThat(lagret.brevmal).isEqualTo("mal2")
+        assertThat(lagret.sanityVersjon).isEqualTo("2")
+        assertThat(lagret.opprettetTid).isEqualTo(LocalDate.now())
+    }
 }

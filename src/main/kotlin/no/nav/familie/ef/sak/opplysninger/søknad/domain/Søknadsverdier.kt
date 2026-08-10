@@ -21,6 +21,7 @@ data class Søknadsverdier(
     val adresseopplysninger: Adresseopplysninger?,
     val dokumentasjon: DokumentasjonFraSøknadDto,
     val inntekter: List<String> = emptyList(),
+    val erSøknadRegelendring2026: Boolean = false,
 )
 
 data class DokumentasjonFraSøknadDto(
@@ -104,4 +105,5 @@ fun SøknadsskjemaOvergangsstønad.tilSøknadsverdier() =
         datoPåbegyntSøknad = this.datoPåbegyntSøknad,
         dokumentasjon = DokumentasjonMapper.tilDokumentasjonDto(this),
         inntekter = this.inntekter?.verdier ?: emptyList(),
+        erSøknadRegelendring2026 = this.erRegelendring2026,
     )

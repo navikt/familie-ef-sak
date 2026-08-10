@@ -12,6 +12,8 @@ spring:
     password: test
 
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+NAIS_TOKEN_ENDPOINT: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+NAIS_TOKEN_EXCHANGE_ENDPOINT: https://tokenx.dev-gcp.nais.io/token
 AUTHORIZATION_URL: https://login.microsoftonline.com/${AZURE_APP_TENANT_ID}/oauth2/v2.0/authorize
 API_SCOPE: api://${AZURE_APP_CLIENT_ID}/.default
 

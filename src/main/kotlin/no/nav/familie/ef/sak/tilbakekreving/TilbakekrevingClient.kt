@@ -11,21 +11,20 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevReq
 import no.nav.familie.kontrakter.felles.tilbakekreving.KanBehandlingOpprettesManueltRespons
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
-import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 @Component
 class TilbakekrevingClient(
-    @Qualifier("azure") restOperations: RestOperations,
+    @Qualifier("tilbakekrevingRestClient") private val restClient: RestClient,
     @Value("\${FAMILIE_TILBAKE_URL}") private val familieTilbakeUri: URI,
-) : AbstractRestClient(restOperations, "familie.tilbakekreving") {
+) {
     private val hentForhåndsvisningVarselbrevUri: URI =
         UriComponentsBuilder
             .fromUri(familieTilbakeUri)
@@ -79,24 +78,41 @@ class TilbakekrevingClient(
             .toUri()
 
     fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray =
-        postForEntity(
-            hentForhåndsvisningVarselbrevUri,
-            forhåndsvisVarselbrevRequest,
-            HttpHeaders().apply { accept = listOf(MediaType.APPLICATION_PDF) },
-        )
+        restClient
+            .post()
+            .uri(hentForhåndsvisningVarselbrevUri)
+            .headers { it.accept = listOf(MediaType.APPLICATION_PDF) }
+            .body(forhåndsvisVarselbrevRequest)
+            .retrieve()
+            .body<ByteArray>()!!
 
     fun finnesÅpenBehandling(fagsakEksternId: Long): Boolean {
-        val response: Ressurs<FinnesBehandlingResponse> = getForEntity(finnesÅpenBehandlingUri(fagsakEksternId))
+        val response: Ressurs<FinnesBehandlingResponse> =
+            restClient
+                .get()
+                .uri(finnesÅpenBehandlingUri(fagsakEksternId))
+                .retrieve()
+                .body<Ressurs<FinnesBehandlingResponse>>()!!
         return response.getDataOrThrow().finnesÅpenBehandling
     }
 
     fun finnBehandlinger(eksternFagsakId: Long): List<Behandling> {
-        val response: Ressurs<List<Behandling>> = getForEntity(finnBehandlingerUri(eksternFagsakId))
+        val response: Ressurs<List<Behandling>> =
+            restClient
+                .get()
+                .uri(finnBehandlingerUri(eksternFagsakId))
+                .retrieve()
+                .body<Ressurs<List<Behandling>>>()!!
         return response.getDataOrThrow()
     }
 
     fun finnVedtak(eksternFagsakId: Long): List<FagsystemVedtak> {
-        val response: Ressurs<List<FagsystemVedtak>> = getForEntity(finnVedtakUri(eksternFagsakId))
+        val response: Ressurs<List<FagsystemVedtak>> =
+            restClient
+                .get()
+                .uri(finnVedtakUri(eksternFagsakId))
+                .retrieve()
+                .body<Ressurs<List<FagsystemVedtak>>>()!!
         return response.getDataOrThrow()
     }
 
@@ -105,7 +121,11 @@ class TilbakekrevingClient(
         eksternFagsakId: Long,
     ): KanBehandlingOpprettesManueltRespons {
         val response: Ressurs<KanBehandlingOpprettesManueltRespons> =
-            getForEntity(kanBehandlingOpprettesManueltUri(stønadstype, eksternFagsakId))
+            restClient
+                .get()
+                .uri(kanBehandlingOpprettesManueltUri(stønadstype, eksternFagsakId))
+                .retrieve()
+                .body<Ressurs<KanBehandlingOpprettesManueltRespons>>()!!
 
         return response.getDataOrThrow()
     }
@@ -115,12 +135,15 @@ class TilbakekrevingClient(
         kravgrunnlagsreferanse: String,
         stønadstype: StønadType,
     ): Ressurs<String> =
-        postForEntity(
-            opprettManueltTilbakekrevingUri,
-            OpprettManueltTilbakekrevingRequest(
-                eksternFagsakId.toString(),
-                Ytelsestype.valueOf(stønadstype.name),
-                kravgrunnlagsreferanse,
-            ),
-        )
+        restClient
+            .post()
+            .uri(opprettManueltTilbakekrevingUri)
+            .body(
+                OpprettManueltTilbakekrevingRequest(
+                    eksternFagsakId.toString(),
+                    Ytelsestype.valueOf(stønadstype.name),
+                    kravgrunnlagsreferanse,
+                ),
+            ).retrieve()
+            .body<Ressurs<String>>()!!
 }

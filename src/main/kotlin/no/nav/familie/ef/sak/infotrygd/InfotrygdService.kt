@@ -118,6 +118,7 @@ class InfotrygdService(
         stønadstyper: Set<StønadType> = StønadType.values().toSet(),
     ): InfotrygdPeriodeResponse {
         require(stønadstyper.isNotEmpty()) { "Må sende med stønadstype" }
+        if (identer.isEmpty()) return tomInfotrygdPeriodeResponseUtenIdenter()
         val request = InfotrygdPeriodeRequest(identer, stønadstyper)
         return infotrygdReplikaClient.hentPerioder(request)
     }
@@ -127,8 +128,22 @@ class InfotrygdService(
         stønadstyper: Set<StønadType> = StønadType.values().toSet(),
     ): InfotrygdPeriodeResponse {
         require(stønadstyper.isNotEmpty()) { "Må sende med stønadstype" }
+        if (identer.isEmpty()) return tomInfotrygdPeriodeResponseUtenIdenter()
         val request = InfotrygdPeriodeRequest(identer, stønadstyper)
         return infotrygdReplikaClient.hentSammenslåttePerioder(request)
+    }
+
+    /**
+     * familie-ef-infotrygd svarer med 400 (uten body) dersom identer er tom. En tom identer-liste betyr at PDL ikke
+     * har noen identer å slå opp perioder på (bl.a. dersom PDL ikke finner noen FOLKEREGISTERIDENT for personen,
+     * se [no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient.hentPersonidenter]), og da finnes det
+     * heller ingen perioder å hente i Infotrygd. Vi returnerer derfor et tomt resultat i stedet for å kaste en feil,
+     * som ellers ville ført til gjentatt ERROR-logging og feilende kall for f.eks. Arena/Barnetrygd/Bidrag/Tilleggstønader
+     * som kaller disse metodene i batch.
+     */
+    private fun tomInfotrygdPeriodeResponseUtenIdenter(): InfotrygdPeriodeResponse {
+        secureLogger.warn("Finner ingen identer, returnerer tomme perioder fra replika")
+        return InfotrygdPeriodeResponse(emptyList(), emptyList(), emptyList())
     }
 
     private fun hentPersonIdenter(personIdent: String): Set<String> = personService.hentPersonIdenter(personIdent).identer()

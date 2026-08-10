@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.blankett
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Regelendring2026Service
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.behandling.revurdering.ÅrsakRevurderingService
@@ -32,6 +33,7 @@ class BlankettService(
     private val årsakRevurderingService: ÅrsakRevurderingService,
     private val grunnlagsdataService: GrunnlagsdataService,
     private val samværsavtaleService: SamværsavtaleService,
+    private val regelendring2026Service: Regelendring2026Service,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -56,6 +58,8 @@ class BlankettService(
                     harKontantstøttePerioder = grunnlagsdata.harKontantstøttePerioder,
                     kontantstøttePerioderFraKs = grunnlagsdata.kontantstøttePerioder,
                     registeropplysningerOpprettetDato = vilkårVurderinger.grunnlag.registeropplysningerOpprettetTid.toLocalDate(),
+                    erRegelendring2026 = behandling.erRegelendring2026,
+                    regelendring2026Begrunnelse = regelendring2026Service.hent(behandlingId)?.begrunnelse?.takeIf { it.isNotBlank() },
                 ),
                 lagPersonopplysningerDto(behandling),
                 vilkårVurderinger,

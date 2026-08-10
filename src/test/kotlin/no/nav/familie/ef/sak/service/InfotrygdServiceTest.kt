@@ -85,6 +85,24 @@ internal class InfotrygdServiceTest {
         assertThat(infotrygdService.hentSaker(ident).saker).containsExactly(c, d, b, a)
     }
 
+    @Test
+    internal fun `hentSammenslåttePerioderSomInternPerioder skal returnere tomt resultat hvis identer er tom`() {
+        val perioder = infotrygdService.hentSammenslåttePerioderSomInternPerioder(emptySet())
+
+        assertThat(perioder.overgangsstønad).isEmpty()
+        assertThat(perioder.barnetilsyn).isEmpty()
+        assertThat(perioder.skolepenger).isEmpty()
+    }
+
+    @Test
+    internal fun `hentPerioderFraReplika med identer skal returnere tomt resultat hvis identer er tom`() {
+        val perioder = infotrygdService.hentPerioderFraReplika(emptySet())
+
+        assertThat(perioder.overgangsstønad).isEmpty()
+        assertThat(perioder.barnetilsyn).isEmpty()
+        assertThat(perioder.skolepenger).isEmpty()
+    }
+
     private fun mockPdl(historiskIdent: String? = null) {
         val pdlIdenter = mutableListOf(PdlIdent(ident, false))
         if (historiskIdent != null) {

@@ -5,20 +5,20 @@ import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
 import no.nav.familie.kontrakter.felles.klage.OpprettKlagebehandlingRequest
-import no.nav.familie.restklient.client.AbstractRestClient
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 import java.util.UUID
 
 @Component
 class KlageClient(
-    @Qualifier("azure") restOperations: RestOperations,
+    @Qualifier("klageRestClient") private val restClient: RestClient,
     @Value("\${FAMILIE_KLAGE_URL}") private val familieKlageUri: URI,
-) : AbstractRestClient(restOperations, "familie.klage") {
+) {
     private val opprettKlage =
         UriComponentsBuilder
             .fromUri(familieKlageUri)
@@ -34,7 +34,13 @@ class KlageClient(
             ).build()
             .toUri()
 
-    fun opprettKlage(opprettKlagebehandlingRequest: OpprettKlagebehandlingRequest): Any = postForEntity(opprettKlage, opprettKlagebehandlingRequest)
+    fun opprettKlage(opprettKlagebehandlingRequest: OpprettKlagebehandlingRequest): Any =
+        restClient
+            .post()
+            .uri(opprettKlage)
+            .body(opprettKlagebehandlingRequest)
+            .retrieve()
+            .body<Any>()!!
 
     fun hentKlagebehandlinger(eksternIder: Set<Long>): Map<Long, List<KlagebehandlingDto>> {
         val uri =
@@ -43,11 +49,21 @@ class KlageClient(
                 .queryParam("eksternFagsakId", eksternIder.joinToString(","))
                 .build()
                 .toUri()
-        return getForEntity<Ressurs<Map<Long, List<KlagebehandlingDto>>>>(uri).getDataOrThrow()
+        return restClient
+            .get()
+            .uri(uri)
+            .retrieve()
+            .body<Ressurs<Map<Long, List<KlagebehandlingDto>>>>()!!
+            .getDataOrThrow()
     }
 
     fun oppdaterOppgaveTilÅGjeldeTilbakekreving(behandlingId: UUID) {
         val uri = URI.create("$familieKlageUri/api/ekstern/behandling/$behandlingId/gjelder-tilbakekreving")
-        return patchForEntity(uri, "")
+        restClient
+            .patch()
+            .uri(uri)
+            .body("")
+            .retrieve()
+            .toBodilessEntity()
     }
 }

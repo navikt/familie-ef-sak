@@ -27,6 +27,7 @@ data class VilkårGrunnlagDto(
     val harAvsluttetArbeidsforhold: Boolean?,
     val harKontantstøttePerioder: Boolean?,
     val kontantstøttePerioder: List<KontantstøttePeriode>,
+    val erSøknadRegelendring2026: Boolean = false,
 )
 
 data class PersonaliaDto(

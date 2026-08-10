@@ -76,6 +76,7 @@ class TestSaksbehandlingController(
     private val migreringService: MigreringService,
     private val vurderingService: VurderingService,
     private val vurderingStegService: VurderingStegService,
+    private val regelendring2026Service: Regelendring2026Service,
 ) {
     @PostMapping("{behandlingId}/utfyll-vilkar")
     fun utfyllVilkår(
@@ -85,6 +86,7 @@ class TestSaksbehandlingController(
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         val regler = vilkårsreglerForStønad(saksbehandling.stønadstype).associateBy { it.vilkårType }
 
+        regelendring2026Service.oppdaterBegrunnelse(behandlingId, "begrunnelse")
         vurderinger.forEach { vurdering ->
             val delvilkår = lagDelvilkår(regler, vurdering)
             vurderingStegService.oppdaterVilkår(SvarPåVurderingerDto(vurdering.id, behandlingId, delvilkår))

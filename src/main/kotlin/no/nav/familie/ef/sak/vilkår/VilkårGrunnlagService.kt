@@ -100,6 +100,7 @@ class VilkårGrunnlagService(
             harAvsluttetArbeidsforhold = grunnlagsdata.harAvsluttetArbeidsforhold,
             harKontantstøttePerioder = grunnlagsdata.harKontantstøttePerioder,
             kontantstøttePerioder = grunnlagsdata.kontantstøttePerioder,
+            erSøknadRegelendring2026 = søknad?.erSøknadRegelendring2026 ?: false,
         )
     }
 

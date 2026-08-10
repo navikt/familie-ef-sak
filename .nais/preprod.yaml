@@ -30,8 +30,8 @@ spec:
     limits:
       memory: 1024Mi
     requests:
-      memory: 512Mi
-      cpu: 50m
+      memory: 1024Mi
+      cpu: 300m
   gcp:
     sqlInstances:
       - name: familie-ef-sak-17
@@ -89,6 +89,7 @@ spec:
         - application: familie-ef-iverksett
         - application: familie-dokument
         - application: familie-ks-sak
+        - application: familie-ef-infotrygd-replika
         - application: familie-ef-proxy
           cluster: dev-fss
         - application: historisk-pensjon

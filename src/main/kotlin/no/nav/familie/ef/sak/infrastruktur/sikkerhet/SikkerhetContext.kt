@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 
 object SikkerhetContext {
@@ -17,6 +18,8 @@ object SikkerhetContext {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     private fun getJwtToken(): JwtAuthenticationToken? = SecurityContextHolder.getContext().authentication as? JwtAuthenticationToken
+
+    fun hentJwt(): Jwt? = getJwtToken()?.token
 
     fun erMaskinTilMaskinToken(): Boolean {
         val jwt = getJwtToken()?.token ?: return false

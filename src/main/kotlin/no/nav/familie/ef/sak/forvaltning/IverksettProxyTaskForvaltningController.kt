@@ -2,7 +2,6 @@ package no.nav.familie.ef.sak.forvaltning
 
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
-import no.nav.familie.restklient.client.AbstractRestClient
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -10,7 +9,8 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.client.RestOperations
+import org.springframework.web.client.RestClient
+import org.springframework.web.client.body
 import java.net.URI
 
 @RestController
@@ -19,9 +19,9 @@ class IverksettProxyTaskForvaltningController(
     private val tilgangService: TilgangService,
     @Value("\${FAMILIE_EF_IVERKSETT_URL}")
     private val familieEfIverksettUri: String,
-    @Qualifier("azure")
-    private val restOperations: RestOperations,
-) : AbstractRestClient(restOperations, "familie.ef.iverksett.forvaltning") {
+    @Qualifier("iverksettRestClient")
+    private val restClient: RestClient,
+) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @PostMapping("kopier/taskid/{taskId}")
@@ -38,7 +38,13 @@ class IverksettProxyTaskForvaltningController(
     ): KopiertTaskResponse {
         tilgangService.validerHarForvalterrolle()
         val url = URI.create("$familieEfIverksettUri/api/forvaltning/task/restart/$taskId")
-        val postForEntity = postForEntity<KopiertTaskResponse>(uri = url, payload = "")
+        val postForEntity =
+            restClient
+                .post()
+                .uri(url)
+                .body("")
+                .retrieve()
+                .body<KopiertTaskResponse>()!!
         logger.info("Kopiert task med id ${postForEntity.fraTaskId} -> ${postForEntity.tilNyTaskId}")
         return postForEntity
     }

@@ -30,6 +30,8 @@ data class BlankettPdfBehandling(
     val harKontantstøttePerioder: Boolean?,
     val kontantstøttePerioderFraKs: List<KontantstøttePeriode>,
     val registeropplysningerOpprettetDato: LocalDate,
+    val erRegelendring2026: Boolean = false,
+    val regelendring2026Begrunnelse: String? = null,
 )
 
 data class PersonopplysningerDto(

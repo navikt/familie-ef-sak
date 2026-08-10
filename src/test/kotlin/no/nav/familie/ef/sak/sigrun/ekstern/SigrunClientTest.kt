@@ -6,22 +6,21 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.familie.ef.sak.sigrun.ekstern.SigrunClient
 import no.nav.familie.ef.sak.sigrun.ekstern.Skatteordning
-import org.apache.hc.core5.http.ContentType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
-import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.web.client.RestOperations
+import org.springframework.http.MediaType
+import org.springframework.web.client.RestClient
 import java.net.URI
 import java.time.LocalDate
 
 class SigrunClientTest {
     companion object {
-        private val restOperations: RestOperations = RestTemplateBuilder().build()
+        private val restClient: RestClient = RestClient.builder().build()
         lateinit var sigrunClient: SigrunClient
         lateinit var wiremockServerItem: WireMockServer
 
@@ -30,7 +29,7 @@ class SigrunClientTest {
         fun initClass() {
             wiremockServerItem = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
             wiremockServerItem.start()
-            sigrunClient = SigrunClient(URI.create(wiremockServerItem.baseUrl()), restOperations)
+            sigrunClient = SigrunClient(URI.create(wiremockServerItem.baseUrl()), restClient)
         }
 
         @AfterAll
@@ -54,7 +53,7 @@ class SigrunClientTest {
                     WireMock
                         .aResponse()
                         .withStatus(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(pensjonsgivendeInntektResponseJson),
                 ),
         )
@@ -81,7 +80,7 @@ class SigrunClientTest {
                     WireMock
                         .aResponse()
                         .withStatus(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(beregnetSkattRessursResponseJson),
                 ),
         )
@@ -100,7 +99,7 @@ class SigrunClientTest {
                     WireMock
                         .aResponse()
                         .withStatus(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(beregnetSkattMedOppgjørsdatoJson),
                 ),
         )
@@ -119,7 +118,7 @@ class SigrunClientTest {
                     WireMock
                         .aResponse()
                         .withStatus(HttpStatus.OK.value())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .withBody(summertSkattegrunnlagJson),
                 ),
         )

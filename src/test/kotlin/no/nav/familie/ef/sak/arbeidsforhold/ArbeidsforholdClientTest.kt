@@ -5,23 +5,22 @@ import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdClient
-import org.apache.hc.core5.http.ContentType
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.springframework.boot.restclient.RestTemplateBuilder
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
-import org.springframework.web.client.RestOperations
+import org.springframework.http.MediaType
+import org.springframework.web.client.RestClient
 import java.net.URI
 import java.time.LocalDate
 
 class ArbeidsforholdClientTest {
     companion object {
         val server: WireMockServer = WireMockServer(WireMockConfiguration.wireMockConfig().dynamicPort())
-        private val restOperations: RestOperations = RestTemplateBuilder().build()
+        private val restClient: RestClient = RestClient.builder().build()
         lateinit var arbeidsforholdClient: ArbeidsforholdClient
 
         @BeforeAll
@@ -31,7 +30,7 @@ class ArbeidsforholdClientTest {
             arbeidsforholdClient =
                 ArbeidsforholdClient(
                     URI.create(server.baseUrl()),
-                    restOperations,
+                    restClient,
                 )
         }
 
@@ -54,7 +53,7 @@ class ArbeidsforholdClientTest {
                 WireMock
                     .aResponse()
                     .withStatus(HttpStatus.OK.value())
-                    .withHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.mimeType)
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .withBody(aaregIntegrasjonerResponse),
             ),
         )

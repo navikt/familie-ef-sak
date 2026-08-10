@@ -30,10 +30,10 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.InnhentDokumentasjon
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.VurderHenvendelse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
-import no.nav.familie.restklient.client.RessursException
 import org.slf4j.LoggerFactory
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -268,8 +268,8 @@ class OppgaveService(
     ) {
         try {
             ferdigstillOppgave(oppgave.gsakOppgaveId)
-        } catch (e: RessursException) {
-            if (ignorerFeilregistrert && e.ressurs.melding.contains("Oppgave har status feilregistrert")) {
+        } catch (e: HttpClientErrorException) {
+            if (ignorerFeilregistrert && e.responseBodyAsString.contains("Oppgave har status feilregistrert")) {
                 logger.warn("Ignorerer ferdigstill av oppgave=${oppgave.gsakOppgaveId} som har status feilregistrert")
             } else {
                 throw e

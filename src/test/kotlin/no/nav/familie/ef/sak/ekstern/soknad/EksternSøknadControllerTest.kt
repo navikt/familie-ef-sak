@@ -237,25 +237,25 @@ class EksternSøknadControllerTest : OppslagSpringRunnerTest() {
     }
 
     @Test
-    fun `skal returnere JA når siste behandling er en gammel barnetilsyn`() {
+    fun `skal returnere NEI når siste behandling er en gammel barnetilsyn`() {
         testoppsettService.lagreFagsak(fagsakBarnetilsyn)
         behandlingRepository.insert(behandling(fagsakBarnetilsyn).innvilgetOgFerdigstilt())
 
         val response = hentHarTidligereInnvilgetVedtak()
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.JA)
+        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.NEI)
     }
 
     @Test
-    fun `skal returnere JA når siste behandling er en gammel skolepenger`() {
+    fun `skal returnere Nei når siste behandling er en gammel skolepenger`() {
         testoppsettService.lagreFagsak(fagsakSkolepenger)
         behandlingRepository.insert(behandling(fagsakSkolepenger).innvilgetOgFerdigstilt())
 
         val response = hentHarTidligereInnvilgetVedtak()
 
         assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
-        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.JA)
+        assertThat(response.body?.data).isEqualTo(TidligereVedtakStatus.NEI)
     }
 
     @Test
@@ -355,8 +355,74 @@ class EksternSøknadControllerTest : OppslagSpringRunnerTest() {
 
     private fun hentHarTidligereInnvilgetVedtak() =
         testRestTemplate.exchange<Ressurs<TidligereVedtakStatus>>(
-            localhost("/api/ekstern/soknad/har-vedtak-pa-gammelt-regelverk"),
+            localhost("/api/ekstern/soknad/har-overgangsstonad-pa-gammelt-regelverk"),
             HttpMethod.GET,
             HttpEntity<Ressurs<TidligereVedtakStatus>>(headers),
         )
+
+    private fun hentHarGyldigBarnetilsynVedRegelendring() =
+        testRestTemplate.exchange<Ressurs<Boolean>>(
+            localhost("/api/ekstern/soknad/har-gyldig-barnetilsyn-ved-regelendring"),
+            HttpMethod.GET,
+            HttpEntity<Ressurs<Boolean>>(headers),
+        )
+
+    @Test
+    fun `skal returnere true når barnetilsyn har løpende andel som dekker 30-06-2026`() {
+        testoppsettService.lagreFagsak(fagsakBarnetilsyn)
+        val behandling = behandlingRepository.insert(behandling(fagsakBarnetilsyn).innvilgetOgFerdigstilt())
+        lagreAndel(
+            behandling,
+            beløp = 5000,
+            fraOgMed = LocalDate.of(2026, 1, 1),
+            tilOgMed = LocalDate.of(2026, 12, 31),
+        )
+
+        val response = hentHarGyldigBarnetilsynVedRegelendring()
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.body?.data).isTrue()
+    }
+
+    @Test
+    fun `skal returnere false når barnetilsyn ikke har løpende andel som dekker 30-06-2026`() {
+        testoppsettService.lagreFagsak(fagsakBarnetilsyn)
+        val behandling = behandlingRepository.insert(behandling(fagsakBarnetilsyn).innvilgetOgFerdigstilt())
+        lagreAndel(
+            behandling,
+            beløp = 5000,
+            fraOgMed = LocalDate.of(2025, 1, 1),
+            tilOgMed = LocalDate.of(2026, 5, 31),
+        )
+
+        val response = hentHarGyldigBarnetilsynVedRegelendring()
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.body?.data).isFalse()
+    }
+
+    @Test
+    fun `skal returnere false når det ikke finnes noen barnetilsyn behandling`() {
+        val response = hentHarGyldigBarnetilsynVedRegelendring()
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.body?.data).isFalse()
+    }
+
+    @Test
+    fun `skal returnere false når barnetilsyn kun har andel i mars til mai 2026`() {
+        testoppsettService.lagreFagsak(fagsakBarnetilsyn)
+        val behandling = behandlingRepository.insert(behandling(fagsakBarnetilsyn).innvilgetOgFerdigstilt())
+        lagreAndel(
+            behandling,
+            beløp = 5000,
+            fraOgMed = LocalDate.of(2026, 3, 1),
+            tilOgMed = LocalDate.of(2026, 5, 31),
+        )
+
+        val response = hentHarGyldigBarnetilsynVedRegelendring()
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(response.body?.data).isFalse()
+    }
 }

@@ -165,6 +165,9 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     @Autowired
     private lateinit var barnRepository: BarnRepository
 
+    @Autowired
+    private lateinit var regelendring2026Repository: Regelendring2026Repository
+
     private val periodeFraMåned = YearMonth.of(2022, 7)
     private val opphørsmåned = YearMonth.of(2023, 5)
     private val migrerFraDato = YearMonth.of(2023, 5)
@@ -580,6 +583,8 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
     inner class StateIEfSak {
         private fun henlagtBehandling() = behandling(fagsak, status = BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.HENLAGT)
 
+        private fun avslåttBehandling() = behandling(fagsak, status = BehandlingStatus.FERDIGSTILT, resultat = BehandlingResultat.AVSLÅTT)
+
         @Test
         internal fun `har ikke fagsak, men fagsakPerson`() {
             val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
@@ -598,6 +603,42 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
         @Test
         internal fun `skal kunne migrere når det finnes en henlagt behandling som er ferdigstilt`() {
             behandlingRepository.insert(henlagtBehandling())
+
+            val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
+
+            assertThat(migreringInfo.kanMigreres).isTrue
+        }
+
+        @Test
+        internal fun `skal kunne migrere når det kun finnes avslåtte behandlinger`() {
+            behandlingRepository.insert(avslåttBehandling())
+            val migrering = opprettOgIverksettMigrering()
+
+            verifiserBehandlingErFerdigstilt(migrering)
+        }
+
+        @Test
+        internal fun `skal kunne migrere når det finnes en avslått behandling som er ferdigstilt`() {
+            behandlingRepository.insert(avslåttBehandling())
+
+            val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
+
+            assertThat(migreringInfo.kanMigreres).isTrue
+        }
+
+        @Test
+        internal fun `skal kunne migrere når det finnes både en avslått og en henlagt behandling`() {
+            behandlingRepository.insert(avslåttBehandling().copy(eksternId = 1))
+            behandlingRepository.insert(henlagtBehandling().copy(eksternId = 2))
+            val migrering = opprettOgIverksettMigrering()
+
+            verifiserBehandlingErFerdigstilt(migrering)
+        }
+
+        @Test
+        internal fun `skal kunne migrere - kanMigreres skal være true når det finnes både en avslått og en henlagt behandling`() {
+            behandlingRepository.insert(avslåttBehandling().copy(eksternId = 1))
+            behandlingRepository.insert(henlagtBehandling().copy(eksternId = 2))
 
             val migreringInfo = migreringService.hentMigreringInfo(fagsak.fagsakPersonId)
 
@@ -880,6 +921,7 @@ internal class MigreringServiceTest : OppslagSpringRunnerTest() {
             )
         val brevrequest = jsonMapper.readTree("123")
         opprettOppgave(saksbehandling.id)
+        regelendring2026Repository.upsert(saksbehandling.id, "Begrunnelse for regelverksvalg")
         testWithBrukerContext(preferredUsername = "Z999999", groups = listOf(rolleConfig.saksbehandlerRolle)) {
             stegService.håndterSteg(saksbehandling, årsakRevurderingSteg, revurderingsinformasjon())
             stegService.håndterSteg(saksbehandling, beregnYtelseSteg, innvilget)

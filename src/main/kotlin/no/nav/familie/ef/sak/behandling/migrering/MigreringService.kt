@@ -444,7 +444,7 @@ class MigreringService(
             val behandlinger =
                 behandlingService
                     .hentBehandlinger(fagsak.id)
-                    .filterNot { it.erAvsluttet() && it.resultat == BehandlingResultat.HENLAGT }
+                    .filterNot { it.erAvsluttet() && (it.resultat == BehandlingResultat.HENLAGT || it.resultat == BehandlingResultat.AVSLÅTT) }
             if (behandlinger.isNotEmpty()) {
                 throw MigreringException(
                     "Fagsaken har allerede behandlinger",

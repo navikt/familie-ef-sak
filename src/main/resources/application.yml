@@ -7,235 +7,6 @@ server:
       max-file-size: 200MB
       max-request-size: 200MB
 
-no.nav.security.jwt:
-  client:
-    registration:
-      familie-integrasjoner:
-        resource-url: ${FAMILIE_INTEGRASJONER_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${FAMILIE_INTEGRASJONER_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      familie-integrasjoner-clientcredentials:
-        resource-url: ${FAMILIE_INTEGRASJONER_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
-        scope: ${FAMILIE_INTEGRASJONER_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      infotrygd-replika:
-        resource-url: ${INFOTRYGD_REPLIKA_API_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
-        scope: ${INFOTRYGD_REPLIKA_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      familie-ef-iverksett-clientcredentials:
-        resource-url: ${FAMILIE_EF_IVERKSETT_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
-        scope: ${EF_IVERKSETT_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      familie-ef-iverksett:
-        resource-url: ${FAMILIE_EF_IVERKSETT_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${EF_IVERKSETT_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      pdl:
-        resource-url: ${PDL_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${PDL_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      pdl-clientcredentials:
-        resource-url: ${PDL_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
-        scope: ${PDL_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      repr-api:
-        resource-url: ${REPR_API_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${REPR_API_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      repr-api-clientcredentials:
-        resource-url: ${REPR_API_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
-        scope: ${REPR_API_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      familie-tilbake-clientcredentials:
-        resource-url: ${FAMILIE_TILBAKE_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
-        scope: ${FAMILIE_TILBAKE_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      familie-tilbake-onbehalfof:
-        resource-url: ${FAMILIE_TILBAKE_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${FAMILIE_TILBAKE_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      familie-klage-onbehalfof:
-        resource-url: ${FAMILIE_KLAGE_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${FAMILIE_KLAGE_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      familie-klage:
-        resource-url: ${FAMILIE_KLAGE_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
-        scope: ${FAMILIE_KLAGE_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      ef-proxy:
-        resource-url: ${FAMILIE_EF_PROXY_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
-        scope: ${FAMILIE_EF_PROXY_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      arbeidssoker-clientcredentials:
-        resource-url: ${ARBEIDSSOKER_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
-        scope: ${ARBEIDSSOKER_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      arbeidssoker:
-        resource-url: ${ARBEIDSSOKER_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${ARBEIDSSOKER_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      historisk-pensjon-clientcredentials:
-        resource-url: ${HISTORISK_PENSJON_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
-        scope: ${HISTORISK_PENSJON_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      familie-ks-sak-clientcredentials:
-        resource-url: ${FAMILIE_KS_SAK_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
-        scope: ${FAMILIE_KS_SAK_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      skjermede-personer-clientcredentials:
-        resource-url: ${SKJERMEDE_PERSONER_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
-        scope: ${SKJERMEDE_PERSONER_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      skjermede-personer:
-        resource-url: ${SKJERMEDE_PERSONER_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${SKJERMEDE_PERSONER_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      inntektskomponenten:
-        resource-url: ${INNTEKT_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
-        scope: ${INNTEKT_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      inntektskomponenten-clientcredentials:
-        resource-url: ${INNTEKT_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
-        scope: ${INNTEKT_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      aap-client_credentials:
-        resource-url: ${ARBEIDSAVKLARINGSPENGER_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
-        scope: ${ARBEIDSAVKLARINGSPENGER_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      aareg-client_credentials:
-        resource-url: ${AAREG_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
-        scope: ${AAREG_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-      medl-clientcredentials:
-        resource-url: ${MEDL_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
-        grant-type: client_credentials
-        scope: ${MEDL_SCOPE}
-        authentication:
-          client-id: ${AZURE_APP_CLIENT_ID}
-          client-secret: ${AZURE_APP_CLIENT_SECRET}
-          client-auth-method: client_secret_basic
-
 PDL_SCOPE: api://${DEPLOY_ENV}-fss.pdl.pdl-api/.default
 REPR_API_SCOPE: api://${DEPLOY_ENV}-gcp.repr.repr-api/.default
 EF_IVERKSETT_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ef-iverksett/.default
@@ -243,6 +14,7 @@ FAMILIE_TILBAKE_SCOPE: api://${DEPLOY_ENV}-gcp.tilbake.tilbakekreving-backend/.d
 FAMILIE_KLAGE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-klage/.default
 FAMILIE_EF_PROXY_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-proxy/.default
 INFOTRYGD_REPLIKA_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-infotrygd/.default
+INFOTRYGD_REPLIKA_GCP_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ef-infotrygd-replika/.default
 ARBEIDSSOKER_SCOPE: api://${DEPLOY_ENV}-gcp.paw.paw-arbeidssoekerregisteret-api-oppslag-v2/.default
 FAMILIE_INTEGRASJONER_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-integrasjoner/.default
 HISTORISK_PENSJON_SCOPE: api://${DEPLOY_ENV}-gcp.historisk.historisk-pensjon/.default
@@ -258,7 +30,7 @@ spring:
     format:
       date: iso
       date-time: iso
-  autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
+  autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration,efterlatte.prosessering.spring.ProsesseringAutoConfiguration
   data:
     jdbc:
       repositories:
@@ -321,6 +93,7 @@ FAMILIE_KLAGE_URL: http://familie-klage
 
 FAMILIE_INTEGRASJONER_URL: https://familie-integrasjoner.${ON_PREM_URL_ENV}-fss-pub.nais.io
 INFOTRYGD_REPLIKA_API_URL: https://familie-ef-infotrygd.${ON_PREM_URL_ENV}-fss-pub.nais.io
+INFOTRYGD_REPLIKA_GCP_API_URL: http://familie-ef-infotrygd-replika
 PDL_URL: https://pdl-api.${ON_PREM_URL_ENV}-fss-pub.nais.io
 REPR_API_URL: http://repr-api.repr
 FAMILIE_EF_PROXY_URL: https://familie-ef-proxy.${ON_PREM_URL_ENV}-fss-pub.nais.io
@@ -367,6 +140,10 @@ prosessering:
   delete:
     after:
       weeks: 16
+
+# Pilot: no.nav.efterlatte:prosessering-spring-boot-starter, kun brukt av skyggekjøringInfotrygd-task inntil videre.
+efterlatte-prosessering:
+  node: ${HOSTNAME:ukjent-node}
 
 springdoc:
   api-docs:

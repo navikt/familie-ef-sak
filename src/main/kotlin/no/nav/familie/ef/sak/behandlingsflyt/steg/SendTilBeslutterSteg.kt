@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.behandlingsflyt.steg
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.behandling.Regelendring2026Repository
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
@@ -23,7 +24,6 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.NAVIDENT_REGEX
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.ef.sak.repository.findByIdOrThrow
 import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
@@ -33,6 +33,8 @@ import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType.INNVILGE_UTEN_UTBETALING
 import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
+import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
+import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.http.HttpStatus
@@ -57,6 +59,7 @@ class SendTilBeslutterSteg(
     private val behandlingshistorikkService: BehandlingshistorikkService,
     private val tilordnetRessursService: TilordnetRessursService,
     private val oppfølgingsoppgaveService: OppfølgingsoppgaveService,
+    private val regelendring2026Repository: Regelendring2026Repository,
 ) : BehandlingSteg<SendTilBeslutterDto?> {
     override fun validerSteg(saksbehandling: Saksbehandling) {
         validerSaksbehandlingHarSammeStegtype(saksbehandling)
@@ -68,6 +71,16 @@ class SendTilBeslutterSteg(
         validerHarGammelGOgKanLagres(saksbehandling)
         validerHarGyldigRevurderingsinformasjon(saksbehandling)
         validerAtDetFinnesOppgave(saksbehandling)
+        validerBegrunnelseForRegelveksvalgErSatt(saksbehandling)
+    }
+
+    private fun validerBegrunnelseForRegelveksvalgErSatt(saksbehandling: Saksbehandling) {
+        if (saksbehandling.årsak == BehandlingÅrsak.G_OMREGNING) return
+        val begrunnelse: String? = regelendring2026Repository.findByBehandlingId(saksbehandling.id)?.begrunnelse
+        when (saksbehandling.stønadstype) {
+            StønadType.OVERGANGSSTØNAD, StønadType.BARNETILSYN -> brukerfeilHvis(begrunnelse.isNullOrBlank()) { "Begrunnelse for valg av regelverk er påkrevd. Behandling: ${saksbehandling.id}" }
+            StønadType.SKOLEPENGER -> return
+        }
     }
 
     private fun validerHarGyldigRevurderingsinformasjon(saksbehandling: Saksbehandling) {
