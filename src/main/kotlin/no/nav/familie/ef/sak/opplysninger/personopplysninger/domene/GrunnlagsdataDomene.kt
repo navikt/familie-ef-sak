@@ -87,6 +87,7 @@ data class Personopplysninger(
     val søker: Søker,
     val annenForelder: List<AnnenForelderMedIdent>,
     val barn: List<BarnMedIdent>,
+    val fullmaktIkkeTilgangÅrsak: String? = null, // kun relevant ved visning, ikke persistert - se Søker.fullmakt
 )
 
 data class Søker(

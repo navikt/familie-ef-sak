@@ -82,6 +82,7 @@ class PersonopplysningerMapper(
                             områder = it.områder?.let { it.map { område -> mapOmråde(område) } } ?: emptyList(),
                         )
                     }?.sortedByDescending { it.gyldigFraOgMed },
+            fullmaktIkkeTilgangÅrsak = personopplysninger.fullmaktIkkeTilgangÅrsak,
             egenAnsatt = egenAnsatt,
             barn =
                 personopplysninger.barn

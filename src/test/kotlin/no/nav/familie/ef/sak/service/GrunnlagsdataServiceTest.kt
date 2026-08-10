@@ -20,6 +20,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerI
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedtaksperioderService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktResultat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.medl.MedlService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fullmakt
@@ -100,13 +101,15 @@ internal class GrunnlagsdataServiceTest {
     internal fun setUp() {
         every { søknadService.hentOvergangsstønad(any()) } returns søknad
         every { fullmaktService.hentFullmakt(any()) } returns
-            listOf(
-                Fullmakt(
-                    LocalDate.of(2020, 1, 1),
-                    LocalDate.of(2021, 1, 1),
-                    "11111133333",
-                    MotpartsRolle.FULLMEKTIG,
-                    listOf(),
+            FullmaktResultat(
+                listOf(
+                    Fullmakt(
+                        LocalDate.of(2020, 1, 1),
+                        LocalDate.of(2021, 1, 1),
+                        "11111133333",
+                        MotpartsRolle.FULLMEKTIG,
+                        listOf(),
+                    ),
                 ),
             )
     }
@@ -131,10 +134,11 @@ internal class GrunnlagsdataServiceTest {
     @Test
     internal fun `skal kaste feil hvis fullmakt er ukjent - grunnlagsdata skal ikke kunne opprettes uten avklart fullmakt`() {
         every { personService.hentSøker(any()) } returns PdlClientConfig.opprettPdlSøker()
-        every { fullmaktService.hentFullmakt(any()) } returns null
+        every { fullmaktService.hentFullmakt(any()) } returns FullmaktResultat(fullmakter = null, ikkeTilgangÅrsak = "mangler geografisk tilgang i tilgangsmaskinen")
 
         val feil = assertThrows<Feil> { service.hentFraRegisterForPersonOgAndreForeldre("1", emptyList()) }
         assertThat(feil.httpStatus).isEqualTo(HttpStatus.FORBIDDEN)
+        assertThat(feil.frontendFeilmelding).contains("mangler geografisk tilgang i tilgangsmaskinen")
     }
 
     @Test
@@ -164,7 +168,7 @@ internal class GrunnlagsdataServiceTest {
                     fullmakt = emptyList(),
                     vergemaalEllerFremtidsfullmakt = emptyList(),
                 )
-        every { fullmaktService.hentFullmakt(any()) } returns listOf()
+        every { fullmaktService.hentFullmakt(any()) } returns FullmaktResultat(fullmakter = emptyList())
         service.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
 
         verify(exactly = 0) { pdlClient.hentPersonKortBolk(any()) }

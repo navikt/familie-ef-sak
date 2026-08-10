@@ -10,11 +10,9 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestClient
 import java.time.LocalDate
 
@@ -55,9 +53,9 @@ class FullmaktClientTest {
             ),
         )
 
-        val response = fullmaktClient.hentFullmakt("12345678911111")
-        assertThat(response).isNotNull
-        val fullmakter = response!!
+        val resultat = fullmaktClient.hentFullmakt("12345678911111")
+        assertThat(resultat.fullmakter).isNotNull
+        val fullmakter = resultat.fullmakter!!
         assertThat(fullmakter.size).isEqualTo(1)
         assertThat(fullmakter.first().fullmektigsNavn).isEqualTo("fullmektigsNavn")
         assertThat(fullmakter.first().fullmektig).isEqualTo("fullmektigIdent")
@@ -74,7 +72,7 @@ class FullmaktClientTest {
     }
 
     @Test
-    fun `hent fullmakt returnerer null når saksbehandler er geografisk avvist av tilgangsmaskinen`() {
+    fun `hent fullmakt returnerer null med årsak når saksbehandler er geografisk avvist av tilgangsmaskinen`() {
         WireMock.stubFor(
             queryMappingForHentFullmakt.willReturn(
                 WireMock
@@ -87,12 +85,13 @@ class FullmaktClientTest {
             ),
         )
 
-        val response = fullmaktClient.hentFullmakt("12345678911111")
-        assertThat(response).isNull()
+        val resultat = fullmaktClient.hentFullmakt("12345678911111")
+        assertThat(resultat.fullmakter).isNull()
+        assertThat(resultat.ikkeTilgangÅrsak).isEqualTo("mangler geografisk tilgang i tilgangsmaskinen")
     }
 
     @Test
-    fun `hent fullmakt kaster videre ved andre 403-feil`() {
+    fun `hent fullmakt returnerer null med generisk årsak ved andre 403-feil`() {
         WireMock.stubFor(
             queryMappingForHentFullmakt.willReturn(
                 WireMock
@@ -103,7 +102,9 @@ class FullmaktClientTest {
             ),
         )
 
-        assertThrows<HttpClientErrorException.Forbidden> { fullmaktClient.hentFullmakt("12345678911111") }
+        val resultat = fullmaktClient.hentFullmakt("12345678911111")
+        assertThat(resultat.fullmakter).isNull()
+        assertThat(resultat.ikkeTilgangÅrsak).isEqualTo("tilgangsmaskinen avviste kallet med feilkode EN_ANNEN_FEILKODE")
     }
 
     private val queryMappingForHentFullmakt: MappingBuilder = WireMock.post(WireMock.urlPathEqualTo("/api/internbruker/fullmakt/fullmaktsgiver"))

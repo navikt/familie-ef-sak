@@ -22,7 +22,8 @@ data class PersonopplysningerDto(
     val statsborgerskap: List<StatsborgerskapDto>,
     val sivilstand: List<SivilstandDto>,
     val adresse: List<AdresseDto>,
-    val fullmakt: List<FullmaktDto>?, // null = ukjent, f.eks. pga. manglende geografisk tilgang i tilgangsmaskinen
+    val fullmakt: List<FullmaktDto>?, // null = ukjent, f.eks. pga. manglende tilgang i tilgangsmaskinen
+    val fullmaktIkkeTilgangÅrsak: String? = null, // satt dersom fullmakt er null - beskriver hvorfor tilgangen mangler
     val egenAnsatt: Boolean,
     val barn: List<BarnDto>,
     val innflyttingTilNorge: List<InnflyttingDto>,

@@ -39,7 +39,7 @@ class GrunnlagsdataRegisterService(
     ): GrunnlagsdataDomene {
         val grunnlagsdataFraPdl = hentGrunnlagsdataFraPdl(personIdent, emptyList())
         feilHvis(grunnlagsdataFraPdl.søker.fullmakt == null, HttpStatus.FORBIDDEN) {
-            "Fullmakt er ukjent, mangler geografisk tilgang i tilgangsmaskinen. " +
+            "Fullmakt er ukjent (${grunnlagsdataFraPdl.fullmaktIkkeTilgangÅrsak ?: "ukjent årsak"}). " +
                 "Kan derfor ikke opprette/lagre grunnlagsdata for denne personen."
         }
         val medlUnntak = medlService.hentMedlemskapsunntak(personIdent)
@@ -79,6 +79,7 @@ class GrunnlagsdataRegisterService(
             søker = mapSøker(grunnlagsdataFraPdl.søker, grunnlagsdataFraPdl.andrePersoner),
             annenForelder = mapAnnenForelder(grunnlagsdataFraPdl.barneForeldre, emptyMap()),
             barn = mapBarn(grunnlagsdataFraPdl.barn),
+            fullmaktIkkeTilgangÅrsak = grunnlagsdataFraPdl.fullmaktIkkeTilgangÅrsak,
         )
     }
 
@@ -87,7 +88,8 @@ class GrunnlagsdataRegisterService(
         barneforeldreFraSøknad: List<String>,
     ): GrunnlagsdataFraPdl {
         val søker = personService.hentSøker(personIdent)
-        val søkerMedFullmakt = søker.copy(fullmakt = fullmaktService.hentFullmakt(personIdent))
+        val fullmaktResultat = fullmaktService.hentFullmakt(personIdent)
+        val søkerMedFullmakt = søker.copy(fullmakt = fullmaktResultat.fullmakter)
         val barn = hentPdlBarn(søkerMedFullmakt)
         val andreForeldre = hentPdlBarneForeldre(barn, personIdent, barneforeldreFraSøknad)
         val dataTilAndreIdenter = hentDataTilAndreIdenter(søkerMedFullmakt)
@@ -97,6 +99,7 @@ class GrunnlagsdataRegisterService(
             barn = barn,
             barneForeldre = andreForeldre,
             andrePersoner = dataTilAndreIdenter,
+            fullmaktIkkeTilgangÅrsak = fullmaktResultat.ikkeTilgangÅrsak,
         )
     }
 
@@ -144,6 +147,7 @@ data class GrunnlagsdataFraPdl(
     val barn: Map<String, PdlPersonForelderBarn>,
     val barneForeldre: Map<String, PdlAnnenForelder>,
     val andrePersoner: Map<String, PdlPersonKort>,
+    val fullmaktIkkeTilgangÅrsak: String? = null, // satt dersom søker.fullmakt er null pga. manglende tilgang i tilgangsmaskinen
 )
 
 fun GrunnlagsdataFraPdl.gjeldendeIdentForSøker() =
