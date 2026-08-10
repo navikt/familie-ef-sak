@@ -1,14 +1,17 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.behandlingsflyt.steg.BehandlerRolle
 import no.nav.familie.ef.sak.fagsak.FagsakPersonService
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
+import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonOpplysningerService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonopplysningerDto
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
@@ -50,7 +53,28 @@ class PersonopplysningerController(
     ): Ressurs<PersonopplysningerDto> {
         tilgangService.validerTilgangTilFagsakPerson(fagsakPersonId, AuditLoggerEvent.ACCESS)
         val aktivIdent = fagsakPersonService.hentAktivIdent(fagsakPersonId)
-        return Ressurs.success(personopplysningerService.hentPersonopplysningerFraRegister(aktivIdent))
+        val personopplysninger = personopplysningerService.hentPersonopplysningerFraRegister(aktivIdent)
+        validerFullmaktIkkeUkjentForSaksbehandler(personopplysninger)
+        return Ressurs.success(personopplysninger)
+    }
+
+    /**
+     * Om fullmakt er ukjent (`null`) avgjøres alltid av svaret fra tilgangsmaskinen (se [FullmaktClient]) - ikke av
+     * hvilken rolle innlogget bruker har. Rollen avgjør kun hvordan dette skal presenteres videre:
+     * - Veileder (bl.a. utviklere i produksjon, men også andre som kun har denne rollen) får se personopplysninger
+     *   med fullmakt markert som ukjent i grensesnittet.
+     * - En reell saksbehandler/beslutter får i stedet en tydelig feilmelding om at fullmaktsdata mangler,
+     *   med et hint om årsaken fra tilgangsmaskinen der det er tilgjengelig.
+     */
+    private fun validerFullmaktIkkeUkjentForSaksbehandler(personopplysninger: PersonopplysningerDto) {
+        feilHvis(
+            personopplysninger.fullmakt == null && tilgangService.harTilgangTilRolle(BehandlerRolle.SAKSBEHANDLER),
+            HttpStatus.FORBIDDEN,
+        ) {
+            "Du har ikke tilgang til fullmaktsdata for denne personen" +
+                (personopplysninger.fullmaktIkkeTilgangÅrsak?.let { " ($it)" } ?: "") +
+                "."
+        }
     }
 
     @PostMapping("/nav-kontor")
