@@ -12,6 +12,8 @@ import no.nav.familie.ef.sak.behandling.dto.tilDto
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleForvalter
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleSaksbehandlerEllerApplikasjon
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vedtak.NullstillVedtakService
 import no.nav.familie.ef.sak.vilkår.gjenbruk.GjenbrukVilkårService
@@ -56,33 +58,33 @@ class BehandlingController(
         return Ressurs.success(gamleBehandlinger)
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("{behandlingId}/vent")
     fun settPåVent(
         @PathVariable behandlingId: UUID,
         @RequestBody settPåVentRequest: SettPåVentRequest,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         behandlingPåVentService.settPåVent(behandlingId, settPåVentRequest)
 
         return Ressurs.success(behandlingId)
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @GetMapping("{behandlingId}/kan-ta-av-vent")
     fun kanTaAvVent(
         @PathVariable behandlingId: UUID,
     ): Ressurs<TaAvVentStatusDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.ACCESS)
-        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(behandlingPåVentService.kanTaAvVent(behandlingId))
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("{behandlingId}/aktiver")
     fun taAvVent(
         @PathVariable behandlingId: UUID,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         behandlingPåVentService.taAvVent(behandlingId)
         return Ressurs.success(behandlingId)
     }
@@ -96,22 +98,22 @@ class BehandlingController(
         return Ressurs.success(saksbehandling.tilDto())
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @GetMapping("/gjenbruk/{behandlingId}")
     fun hentBehandlingForGjenbrukAvVilkår(
         @PathVariable behandlingId: UUID,
     ): Ressurs<List<BehandlingDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(gjenbrukVilkårService.finnBehandlingerForGjenbruk(behandlingId))
     }
 
+    @HarRolleForvalter
     @PostMapping("{behandlingId}/oppdater-status")
     fun oppdaterStatus(
         @PathVariable behandlingId: UUID,
         @RequestBody oppdaterStatusDto: OppdaterStatusDto,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarForvalterrolle()
         feilHvis(!featureToggleService.isEnabled(toggle = Toggle.OPPDATER_BEHANDLINGSTATUS)) {
             "Manuell oppdatering av behandlingstatus er ikke mulig fordi toggle ikke er enablet for bruker"
         }
@@ -119,6 +121,7 @@ class BehandlingController(
         return Ressurs.success(behandlingId)
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("{behandlingId}/regelendring-2026")
     fun oppdaterErRegelendring2026(
         @PathVariable behandlingId: UUID,
