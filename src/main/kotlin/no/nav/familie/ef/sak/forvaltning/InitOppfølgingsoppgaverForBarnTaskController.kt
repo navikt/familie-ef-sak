@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.forvaltning
 
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleForvalter
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OppfølgingOppgaveBarnFyllerÅrService
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.OpprettTasksForBarnFyltÅrTask
@@ -20,15 +21,15 @@ class InitOppfølgingsoppgaverForBarnTaskController(
     private val barnFyllerÅrOppfølgingsoppgaveService: OppfølgingOppgaveBarnFyllerÅrService,
     private val tilgangService: TilgangService,
 ) {
+    @HarRolleForvalter
     @PostMapping("/initialiser")
     fun opprettTask() {
-        tilgangService.validerHarForvalterrolle()
         taskService.save(OpprettTasksForBarnFyltÅrTask.opprettTask(LocalDate.now().plusDays(1)))
     }
 
+    @HarRolleForvalter
     @PostMapping("/dry-run")
     fun dryRun() {
-        tilgangService.validerHarForvalterrolle()
         barnFyllerÅrOppfølgingsoppgaveService.opprettTasksForAlleBarnSomHarFyltÅr(dryRun = true)
     }
 }

@@ -5,6 +5,7 @@ import no.nav.familie.ef.sak.behandling.dto.RevurderingDto
 import no.nav.familie.ef.sak.behandling.dto.RevurderingsinformasjonDto
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleSaksbehandlerEllerApplikasjon
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.VilkårsbehandleNyeBarn
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -24,12 +25,12 @@ class RevurderingController(
     private val revurderingService: RevurderingService,
     private val tilgangService: TilgangService,
 ) {
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("{fagsakId}")
     fun startRevurdering(
         @RequestBody revurderingDto: RevurderingDto,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsak(revurderingDto.fagsakId, AuditLoggerEvent.CREATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         brukerfeilHvis(revurderingDto.behandlingsårsak == BehandlingÅrsak.SØKNAD) {
             "Systemet har ikke støtte for å revurdere med årsak “Søknad”. " +
                 "Vurder om behandlingen skal opprettes via en oppgave i oppgavebenken, " +
@@ -47,25 +48,25 @@ class RevurderingController(
         return Ressurs.success(revurdering.id)
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("informasjon/{behandlingId}")
     fun lagreRevurderingsinformasjon(
         @PathVariable behandlingId: UUID,
         @RequestBody revurderingsinformasjonDto: RevurderingsinformasjonDto,
     ): Ressurs<RevurderingsinformasjonDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.CREATE)
-        tilgangService.validerHarSaksbehandlerrolle()
 
         val oppdatertRevurderingsinformasjon =
             revurderingService.lagreRevurderingsinformasjon(behandlingId, revurderingsinformasjonDto)
         return Ressurs.success(oppdatertRevurderingsinformasjon)
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @DeleteMapping("informasjon/{behandlingId}")
     fun slettRevurderingsinformasjon(
         @PathVariable behandlingId: UUID,
     ): Ressurs<String> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.CREATE)
-        tilgangService.validerHarSaksbehandlerrolle()
 
         revurderingService.slettRevurderingsinformasjon(behandlingId)
 

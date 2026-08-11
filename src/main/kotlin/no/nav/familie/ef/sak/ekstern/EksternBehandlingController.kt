@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.felles.util.FnrUtil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleSaksbehandlerEllerApplikasjon
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.ef.søknad.KanSendePåminnelseRequest
@@ -56,24 +57,24 @@ class EksternBehandlingController(
         @RequestBody personIdent: PersonIdent,
     ): Ressurs<Boolean> = Ressurs.success(eksternBehandlingService.harLøpendeBarnetilsyn(personIdent.ident))
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @GetMapping("kan-opprette-revurdering-klage/{eksternFagsakId}")
     fun kanOppretteRevurdering(
         @PathVariable eksternFagsakId: Long,
     ): Ressurs<KanOppretteRevurderingResponse> {
         tilgangService.validerTilgangTilEksternFagsak(eksternFagsakId, AuditLoggerEvent.CREATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         feilHvisIkke(SikkerhetContext.kallKommerFraKlage(), HttpStatus.UNAUTHORIZED) {
             IKKE_AUTORISERT_KLIENT_MELDING
         }
         return Ressurs.success(eksternBehandlingService.kanOppretteRevurdering(eksternFagsakId))
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("opprett-revurdering-klage/{eksternFagsakId}")
     fun opprettRevurderingKlage(
         @PathVariable eksternFagsakId: Long,
     ): Ressurs<OpprettRevurderingResponse> {
         tilgangService.validerTilgangTilEksternFagsak(eksternFagsakId, AuditLoggerEvent.CREATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         feilHvisIkke(SikkerhetContext.kallKommerFraKlage(), HttpStatus.UNAUTHORIZED) {
             IKKE_AUTORISERT_KLIENT_MELDING
         }

@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.oppgave
 
 import no.nav.familie.ef.sak.felles.util.FnrUtil.validerOptionalIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleSaksbehandlerEllerApplikasjon
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
@@ -92,13 +93,13 @@ class OppgaveController(
         return Ressurs.success(oppgaveResponse.tilDto())
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping(path = ["/{gsakOppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun fordelOppgave(
         @PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,
         @RequestParam("saksbehandler") saksbehandler: String,
         @RequestParam("versjon") versjon: Int?,
     ): Ressurs<Long> {
-        tilgangService.validerHarSaksbehandlerrolle()
         if (!tilgangService.validerSaksbehandler(saksbehandler)) {
             throw ApiFeil("Kunne ikke validere saksbehandler : $saksbehandler", HttpStatus.BAD_REQUEST)
         }
@@ -106,20 +107,18 @@ class OppgaveController(
         return Ressurs.success(oppgaveService.fordelOppgave(gsakOppgaveId, saksbehandler, versjon, endretAvSaksbehandler))
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping(path = ["/{gsakOppgaveId}/tilbakestill"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun tilbakestillFordelingPåOppgave(
         @PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,
         @RequestParam(name = "versjon") versjon: Int?,
-    ): Ressurs<Long> {
-        tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(oppgaveService.tilbakestillFordelingPåOppgave(gsakOppgaveId, versjon))
-    }
+    ): Ressurs<Long> = Ressurs.success(oppgaveService.tilbakestillFordelingPåOppgave(gsakOppgaveId, versjon))
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @GetMapping(path = ["/{gsakOppgaveId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentOppgave(
         @PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,
     ): Ressurs<OppgaveDto> {
-        tilgangService.validerHarSaksbehandlerrolle()
         val efOppgave = oppgaveService.hentEfOppgave(gsakOppgaveId)
         return efOppgave?.let { Ressurs.success(OppgaveDto(it.behandlingId, it.gsakOppgaveId)) }
             ?: Ressurs.funksjonellFeil(
@@ -128,13 +127,11 @@ class OppgaveController(
             )
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @GetMapping("/oppslag/{gsakOppgaveId}")
     fun hentOppgaveFraGosys(
         @PathVariable(name = "gsakOppgaveId") gsakOppgaveId: Long,
-    ): Ressurs<OppgaveEfDto> {
-        tilgangService.validerHarSaksbehandlerrolle()
-        return Ressurs.success(oppgaveService.hentOppgave(gsakOppgaveId).tilDto())
-    }
+    ): Ressurs<OppgaveEfDto> = Ressurs.success(oppgaveService.hentOppgave(gsakOppgaveId).tilDto())
 
     @Deprecated("Har ikke lenger behov for logging - fjern etter at frontend slutter å kalle på dette endepunktet")
     @GetMapping("{behandlingId}/tilordnet-ressurs")

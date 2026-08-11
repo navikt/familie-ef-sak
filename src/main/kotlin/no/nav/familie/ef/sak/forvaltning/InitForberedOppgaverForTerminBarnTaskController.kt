@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.forvaltning
 
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleForvalter
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.iverksett.oppgaveterminbarn.ForberedOppgaverTerminbarnTask
 import no.nav.familie.prosessering.domene.Task
@@ -18,9 +19,9 @@ class InitForberedOppgaverForTerminBarnTaskController(
     private val taskService: TaskService,
     private val tilgangService: TilgangService,
 ) {
+    @HarRolleForvalter
     @PostMapping("/initialiser")
     fun opprettTask(): ResponseEntity<Unit> {
-        tilgangService.validerHarForvalterrolle()
         taskService.save(
             Task(
                 ForberedOppgaverTerminbarnTask.TYPE,

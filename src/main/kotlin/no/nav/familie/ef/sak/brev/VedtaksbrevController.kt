@@ -2,6 +2,8 @@ package no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleBeslutterEllerApplikasjon
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleSaksbehandlerEllerApplikasjon
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.validation.annotation.Validated
@@ -30,6 +32,7 @@ class VedtaksbrevController(
         return Ressurs.success(brevService.hentBeslutterbrevEllerRekonstruerSaksbehandlerBrev(behandlingId))
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("/{behandlingId}/{brevMal}")
     fun lagSaksbehandlerbrev(
         @PathVariable behandlingId: UUID,
@@ -38,7 +41,6 @@ class VedtaksbrevController(
     ): Ressurs<ByteArray> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(brevService.lagSaksbehandlerSanitybrev(saksbehandling, brevRequest, brevMal))
     }
 
@@ -48,6 +50,7 @@ class VedtaksbrevController(
         @PathVariable behandlingId: UUID,
     ): Ressurs<ByteArray> = foråndsvisBeslutterbrev(behandlingId)
 
+    @HarRolleBeslutterEllerApplikasjon
     @PostMapping("/beslutter/vis/{behandlingId}")
     fun forhåndsvisBeslutterbrev(
         @PathVariable behandlingId: UUID,
@@ -56,7 +59,6 @@ class VedtaksbrevController(
     private fun foråndsvisBeslutterbrev(behandlingId: UUID): Ressurs<ByteArray> {
         val saksbehandling = behandlingService.hentSaksbehandling(behandlingId)
         tilgangService.validerTilgangTilBehandling(saksbehandling, AuditLoggerEvent.ACCESS)
-        tilgangService.validerHarBeslutterrolle()
         return Ressurs.success(brevService.forhåndsvisBeslutterBrev(saksbehandling))
     }
 }

@@ -128,7 +128,6 @@ class BehandlingController(
         @RequestBody dto: OppdaterErRegelendring2026Dto,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
 
         behandlingService.oppdaterErRegelendring2026(behandlingId, dto.erRegelendring2026)
 
@@ -151,13 +150,13 @@ class BehandlingController(
         )
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("{behandlingId}/regelendring-2026/begrunnelse")
     fun lagreRegelendring2026(
         @PathVariable behandlingId: UUID,
         @RequestBody dto: OppdaterRegelendring2026BegrunnelseDto,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         feilHvis(dto.begrunnelse.isBlank()) { "Begrunnelse kan ikke være tom" }
         regelendring2026Service.oppdaterBegrunnelse(behandlingId, dto.begrunnelse)
         return Ressurs.success(behandlingId)

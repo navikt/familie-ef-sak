@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.brev
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.brev.dto.MellomlagreBrevRequestDto
 import no.nav.familie.ef.sak.brev.dto.MellomlagretBrevResponse
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleSaksbehandlerEllerApplikasjon
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.web.bind.annotation.GetMapping
@@ -20,13 +21,13 @@ class BrevMellomlagerController(
     private val tilgangService: TilgangService,
     private val mellomlagringBrevService: MellomlagringBrevService,
 ) {
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("/{behandlingId}")
     fun mellomlagreBrevverdier(
         @PathVariable behandlingId: UUID,
         @RequestBody mellomlagretBrev: MellomlagreBrevRequestDto,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
 
         return Ressurs.success(
             mellomlagringBrevService.mellomLagreBrev(
@@ -53,13 +54,13 @@ class BrevMellomlagerController(
         )
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("/fagsak/{fagsakId}")
     fun mellomlagreFrittståendeSanitybrev(
         @PathVariable fagsakId: UUID,
         @RequestBody mellomlagreBrev: MellomlagreBrevRequestDto,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
 
         return Ressurs.success(
             mellomlagringBrevService.mellomLagreFrittståendeSanitybrev(

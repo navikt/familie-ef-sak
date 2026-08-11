@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.resttestclient.exchange
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import java.util.UUID
 
@@ -41,6 +42,16 @@ internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
         val response = søkOppgave("19117313797")
         assertThat(response.body?.status).isEqualTo(Ressurs.Status.FUNKSJONELL_FEIL)
         assertThat(response.body?.frontendFeilmelding).isEqualTo("Finner ingen personer for valgt personident")
+    }
+
+    @Test
+    internal fun `Skal returnere 403 FORBIDDEN med status IKKE_TILGANG dersom bruker kun har veilederrolle ved fordeling av oppgave`() {
+        headers.setBearerAuth(lokalVeilederToken)
+
+        val response = fordelOppgave(gsakOppgaveId = 24680L, saksbehandler = "Z999999")
+
+        assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
+        assertThat(response.body?.status).isEqualTo(Ressurs.Status.IKKE_TILGANG)
     }
 
     @Test
@@ -222,6 +233,16 @@ internal class OppgaveControllerIntegrasjonsTest : OppslagSpringRunnerTest() {
             localhost("/api/oppgave/soek"),
             HttpMethod.POST,
             HttpEntity(FinnOppgaveRequestDto(ident = personIdent), headers),
+        )
+
+    private fun fordelOppgave(
+        gsakOppgaveId: Long,
+        saksbehandler: String,
+    ): ResponseEntity<Ressurs<Long>> =
+        testRestTemplate.exchange(
+            localhost("/api/oppgave/$gsakOppgaveId/fordel?saksbehandler=$saksbehandler"),
+            HttpMethod.POST,
+            HttpEntity<Ressurs<Long>>(headers),
         )
 
     private fun hentAnsvarligSaksbehandler(behandlingId: UUID): ResponseEntity<Ressurs<SaksbehandlerDto>> =

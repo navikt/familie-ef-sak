@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.vilkår
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleSaksbehandlerEllerApplikasjon
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vilkår.dto.EnkeltVilkårForGjenbrukRequest
 import no.nav.familie.ef.sak.vilkår.dto.GjenbruktVilkårResponseDto
@@ -38,12 +39,12 @@ class VurderingController(
     @GetMapping("regler")
     fun hentRegler(): Ressurs<Vilkårsregler> = Ressurs.success(Vilkårsregler.ALLE_VILKÅRSREGLER)
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("vilkar")
     fun oppdaterVurderingVilkår(
         @RequestBody vilkårsvurdering: SvarPåVurderingerDto,
     ): Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(vilkårsvurdering.behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         try {
             return Ressurs.success(vurderingStegService.oppdaterVilkår(vilkårsvurdering))
         } catch (e: Exception) {
@@ -57,21 +58,21 @@ class VurderingController(
         }
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("nullstill")
     fun nullstillVilkår(
         @RequestBody request: OppdaterVilkårsvurderingDto,
     ): Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.DELETE)
-        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(vurderingStegService.nullstillVilkår(request))
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("ikkevurder")
     fun settVilkårTilSkalIkkeVurderes(
         @RequestBody request: OppdaterVilkårsvurderingDto,
     ): Ressurs<VilkårsvurderingDto> {
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(vurderingStegService.settVilkårTilSkalIkkeVurderes(request))
     }
 
@@ -83,15 +84,16 @@ class VurderingController(
         return Ressurs.success(vurderingService.hentOpprettEllerOppdaterVurderinger(behandlingId))
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @GetMapping("{behandlingId}/oppdater")
     fun oppdaterRegisterdata(
         @PathVariable behandlingId: UUID,
     ): Ressurs<VilkårDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(vurderingService.oppdaterGrunnlagsdataOgHentEllerOpprettVurderinger(behandlingId))
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("gjenbruk-enkelt-vilkar")
     fun gjenbrukEnkeltVilkår(
         @RequestBody request: EnkeltVilkårForGjenbrukRequest,
@@ -100,7 +102,6 @@ class VurderingController(
 
         tilgangService.validerTilgangTilBehandling(behandlingForGjenbruk.id, AuditLoggerEvent.ACCESS)
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
 
         val (_, metadata) = vurderingService.hentGrunnlagOgMetadata(request.behandlingId)
         val gjenbruktVilkårResponse = gjenbrukVilkårService.gjenbrukInngangsvilkårVurderingOgSamværsavtale(request.behandlingId, behandlingForGjenbruk.id, request.vilkårId, metadata.barn)

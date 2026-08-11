@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.forvaltning
 
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleForvalter
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
@@ -16,12 +17,12 @@ class OppgaveOppryddingForvaltningsController(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    @HarRolleForvalter
     @PostMapping("start-opprydding")
     fun ryddOppgaver(
         @RequestBody runType: RunType,
     ) {
         logger.info("Starter opprydding av oppgaver")
-        tilgangService.validerHarForvalterrolle()
         val task = taskService.save(OppgaveOppryddingForvaltningsTask.opprettTask(runType))
 
         logger.info("Opprettet task for opprydding av oppfølgingsoppgaver: ${task.id}")

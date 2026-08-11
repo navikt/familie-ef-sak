@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.klage
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleSaksbehandlerEllerApplikasjon
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.klage.dto.KlagebehandlingerDto
 import no.nav.familie.ef.sak.klage.dto.OpprettKlageDto
@@ -23,13 +24,13 @@ class KlageController(
     private val klageService: KlageService,
     private val fagsakService: FagsakService,
 ) {
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("/fagsak/{fagsakId}")
     fun opprettKlage(
         @PathVariable fagsakId: UUID,
         @RequestBody opprettKlageDto: OpprettKlageDto,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.CREATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         klageService.validerOgOpprettKlage(fagsakService.hentFagsak(fagsakId), opprettKlageDto)
         return Ressurs.success(fagsakId)
     }

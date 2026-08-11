@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.samværsavtale
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleSaksbehandlerEllerApplikasjon
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.samværsavtale.dto.JournalførBeregnetSamværRequest
 import no.nav.familie.ef.sak.samværsavtale.dto.SamværsavtaleDto
@@ -29,32 +30,32 @@ class SamværsavtaleController(
         return Ressurs.success(samværsavtaleService.hentSamværsavtalerForBehandling(behandlingId).tilDto())
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping
     fun oppdaterSamværsavtale(
         @RequestBody request: SamværsavtaleDto,
     ): Ressurs<List<SamværsavtaleDto>> {
         tilgangService.validerTilgangTilBehandling(request.behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         samværsavtaleService.opprettEllerErstattSamværsavtale(request)
         return Ressurs.success(samværsavtaleService.hentSamværsavtalerForBehandling(request.behandlingId).tilDto())
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("/journalfor")
     fun journalførBeregnetSamvær(
         @RequestBody request: JournalførBeregnetSamværRequest,
     ): Ressurs<String> {
         tilgangService.validerTilgangTilPersonMedBarn(request.personIdent, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(samværsavtaleService.journalførBeregnetSamvær(request))
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @DeleteMapping("{behandlingId}/{behandlingBarnId}")
     fun slettSamværsavtale(
         @PathVariable behandlingId: UUID,
         @PathVariable behandlingBarnId: UUID,
     ): Ressurs<List<SamværsavtaleDto>> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.DELETE)
-        tilgangService.validerHarSaksbehandlerrolle()
         samværsavtaleService.slettSamværsavtale(behandlingId, behandlingBarnId)
         return Ressurs.success(samværsavtaleService.hentSamværsavtalerForBehandling(behandlingId).tilDto())
     }

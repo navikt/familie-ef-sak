@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.felles.util.isEqualOrAfter
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleSaksbehandlerEllerApplikasjon
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
@@ -46,13 +47,13 @@ class HenleggBehandlingController(
         return Ressurs.success(henleggService.genererHenleggelsesbrev(behandlingId))
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("{behandlingId}/henlegg")
     fun henleggBehandling(
         @PathVariable behandlingId: UUID,
         @RequestBody henlagt: HenlagtDto,
     ): Ressurs<BehandlingDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         val henlagtBehandling = henleggService.henleggBehandling(behandlingId, henlagt)
         val fagsak: Fagsak = fagsakService.hentFagsak(henlagtBehandling.fagsakId)
         if (henlagt.skalSendeHenleggelsesbrev) {
@@ -100,13 +101,13 @@ class HenleggBehandlingController(
         }
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("{behandlingId}/henlegg/behandling-uten-oppgave")
     fun henleggBehandlingUtenOppgave(
         @PathVariable behandlingId: UUID,
         @RequestBody henlagt: HenlagtDto,
     ): Ressurs<BehandlingDto> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         feilHvis(!featureToggleService.isEnabled(toggle = Toggle.HENLEGG_BEHANDLING_UTEN_OPPGAVE)) {
             "Henleggelse av behandling uten å henlegge oppgave er ikke mulig - toggle ikke enablet for bruker"
         }
