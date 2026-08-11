@@ -322,7 +322,7 @@ class OppgaveService(
         secureLogger.info("hent flere oppgaver -  aktørId: $aktørId")
 
         val oppgaverForAutomatiskFerdigstilling =
-            OppgaverForAutomatiskFerdigstilling.values().flatMap { type ->
+            OppgaverSomKanAutomatiskFerdigstilles.entries.flatMap { type ->
                 val enhet = arbeidsfordelingService.hentNavEnhet(aktørId)?.enhetId
                 val request =
                     FinnOppgaveRequest(

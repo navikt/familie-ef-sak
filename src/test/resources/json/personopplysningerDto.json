@@ -50,6 +50,7 @@
     "navn" : "11111133333 mellomnavn Etternavn",
     "områder" : [ ]
   } ],
+  "fullmaktIkkeTilgangÅrsak" : null,
   "egenAnsatt" : true,
   "barn" : [ {
     "personIdent" : "01012067050",

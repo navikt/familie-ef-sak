@@ -53,21 +53,58 @@ class FullmaktClientTest {
             ),
         )
 
-        val response = fullmaktClient.hentFullmakt("12345678911111")
-        assertThat(response).isNotNull
-        assertThat(response.size).isEqualTo(1)
-        assertThat(response.first().fullmektigsNavn).isEqualTo("fullmektigsNavn")
-        assertThat(response.first().fullmektig).isEqualTo("fullmektigIdent")
-        assertThat(response.first().gyldigFraOgMed).isEqualTo(LocalDate.of(2024, 7, 8))
-        assertThat(response.first().gyldigTilOgMed).isEqualTo(LocalDate.of(2024, 7, 9))
-        assertThat(response.first().omraade.size).isEqualTo(1)
+        val resultat = fullmaktClient.hentFullmakt("12345678911111")
+        assertThat(resultat.fullmakter).isNotNull
+        val fullmakter = resultat.fullmakter!!
+        assertThat(fullmakter.size).isEqualTo(1)
+        assertThat(fullmakter.first().fullmektigsNavn).isEqualTo("fullmektigsNavn")
+        assertThat(fullmakter.first().fullmektig).isEqualTo("fullmektigIdent")
+        assertThat(fullmakter.first().gyldigFraOgMed).isEqualTo(LocalDate.of(2024, 7, 8))
+        assertThat(fullmakter.first().gyldigTilOgMed).isEqualTo(LocalDate.of(2024, 7, 9))
+        assertThat(fullmakter.first().omraade.size).isEqualTo(1)
         assertThat(
-            response
+            fullmakter
                 .first()
                 .omraade
                 .first()
                 .tema,
         ).isEqualTo("ENF")
+    }
+
+    @Test
+    fun `hent fullmakt returnerer null med årsak når saksbehandler er geografisk avvist av tilgangsmaskinen`() {
+        WireMock.stubFor(
+            queryMappingForHentFullmakt.willReturn(
+                WireMock
+                    .aResponse()
+                    .withStatus(HttpStatus.FORBIDDEN.value())
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody(
+                        """{"errorCode":"SAKSBEHANDLER_AVVIST_TILGANGSMASKINEN_GEOGRAFISK"}""",
+                    ),
+            ),
+        )
+
+        val resultat = fullmaktClient.hentFullmakt("12345678911111")
+        assertThat(resultat.fullmakter).isNull()
+        assertThat(resultat.ikkeTilgangÅrsak).isEqualTo("mangler geografisk tilgang i tilgangsmaskinen")
+    }
+
+    @Test
+    fun `hent fullmakt returnerer null med generisk årsak ved andre 403-feil`() {
+        WireMock.stubFor(
+            queryMappingForHentFullmakt.willReturn(
+                WireMock
+                    .aResponse()
+                    .withStatus(HttpStatus.FORBIDDEN.value())
+                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .withBody("""{"errorCode":"EN_ANNEN_FEILKODE"}"""),
+            ),
+        )
+
+        val resultat = fullmaktClient.hentFullmakt("12345678911111")
+        assertThat(resultat.fullmakter).isNull()
+        assertThat(resultat.ikkeTilgangÅrsak).isEqualTo("tilgangsmaskinen avviste kallet med feilkode EN_ANNEN_FEILKODE")
     }
 
     private val queryMappingForHentFullmakt: MappingBuilder = WireMock.post(WireMock.urlPathEqualTo("/api/internbruker/fullmakt/fullmaktsgiver"))

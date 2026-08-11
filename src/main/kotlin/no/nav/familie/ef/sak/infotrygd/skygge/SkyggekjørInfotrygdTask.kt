@@ -7,8 +7,10 @@ import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaGcpClient
 import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriode
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.felles.jsonMapper
@@ -44,7 +46,7 @@ class SkyggekjørInfotrygdTask(
                     request = request,
                     forventetRespons = forventetRespons,
                     faktiskRespons = { infotrygdReplikaGcpClient.hentPerioder(jsonMapper.readValue<InfotrygdPeriodeRequest>(request)) },
-                    normaliser = InfotrygdPeriodeResponse::normalisert,
+                    normaliser = InfotrygdPeriodeResponse::trim,
                 )
             }
 
@@ -56,7 +58,7 @@ class SkyggekjørInfotrygdTask(
                     faktiskRespons = {
                         infotrygdReplikaGcpClient.hentSammenslåttePerioder(jsonMapper.readValue<InfotrygdPeriodeRequest>(request))
                     },
-                    normaliser = InfotrygdPeriodeResponse::normalisert,
+                    normaliser = InfotrygdPeriodeResponse::trim,
                 )
             }
 
@@ -66,7 +68,7 @@ class SkyggekjørInfotrygdTask(
                     request = request,
                     forventetRespons = forventetRespons,
                     faktiskRespons = { infotrygdReplikaGcpClient.hentSaker(jsonMapper.readValue<InfotrygdSøkRequest>(request)) },
-                    normaliser = InfotrygdSakResponse::normalisert,
+                    normaliser = InfotrygdSakResponse::trim,
                 )
             }
 
@@ -78,7 +80,7 @@ class SkyggekjørInfotrygdTask(
                     faktiskRespons = {
                         infotrygdReplikaGcpClient.hentInfotrygdFinnes(jsonMapper.readValue<InfotrygdSøkRequest>(request))
                     },
-                    normaliser = InfotrygdFinnesResponse::normalisert,
+                    normaliser = InfotrygdFinnesResponse::trim,
                 )
             }
         }
@@ -157,20 +159,35 @@ enum class SkyggeInfotrygdOperasjon {
     HENT_INNSLAG_HOS_INFOTRYGD,
 }
 
-/**
- * Perioder/saker/treff kan i praksis komme i ulik rekkefølge fra on-prem og GCP-replikaen uten at det er et reelt avvik,
- * så listene sorteres på en stabil, innholdsbasert nøkkel før sammenligning.
- */
-private fun InfotrygdPeriodeResponse.normalisert(): InfotrygdPeriodeResponse =
+private fun InfotrygdPeriodeResponse.trim(): InfotrygdPeriodeResponse =
     copy(
-        overgangsstønad = overgangsstønad.sortedBy { it.toString() },
-        barnetilsyn = barnetilsyn.sortedBy { it.toString() },
-        skolepenger = skolepenger.sortedBy { it.toString() },
+        overgangsstønad = overgangsstønad.normalisertePerioder(),
+        barnetilsyn = barnetilsyn.normalisertePerioder(),
+        skolepenger = skolepenger.normalisertePerioder(),
     )
 
-private fun InfotrygdSakResponse.normalisert(): InfotrygdSakResponse = copy(saker = saker.sortedBy { it.toString() })
+private fun List<InfotrygdPeriode>.normalisertePerioder(): List<InfotrygdPeriode> = map { it.copy(barnIdenter = it.barnIdenter.sorted()) }.sortedBy { it.toString() }
 
-private fun InfotrygdFinnesResponse.normalisert(): InfotrygdFinnesResponse =
+private fun InfotrygdSakResponse.trim(): InfotrygdSakResponse = copy(saker = saker.map { it.trim() }.sortedBy { it.toString() })
+
+/**
+ * Enkelte String-felter fra Infotrygd er fastbredde CHAR-kolonner i DB2. On-prem og GCP-replikaen kan derfor
+ * returnere disse med ulik whitespace-padding selv om verdien reelt sett er lik (eller tom). Trimmes bort her
+ * for at slike rene formateringsforskjeller ikke skal trigge falske avvik i skyggekjøringen.
+ */
+private fun InfotrygdSak.trim(): InfotrygdSak =
+    copy(
+        saksnr = saksnr?.trim(),
+        saksblokk = saksblokk?.trim(),
+        kapittelnr = kapittelnr?.trim(),
+        årsakskode = årsakskode?.trim(),
+        behandlendeEnhet = behandlendeEnhet?.trim(),
+        registrertAvEnhet = registrertAvEnhet?.trim(),
+        tkNr = tkNr?.trim(),
+        region = region?.trim(),
+    )
+
+private fun InfotrygdFinnesResponse.trim(): InfotrygdFinnesResponse =
     copy(
         vedtak = vedtak.sortedBy { it.toString() },
         saker = saker.sortedBy { it.toString() },
