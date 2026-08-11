@@ -87,6 +87,7 @@ data class Personopplysninger(
     val søker: Søker,
     val annenForelder: List<AnnenForelderMedIdent>,
     val barn: List<BarnMedIdent>,
+    val fullmaktIkkeTilgangÅrsak: String? = null, // kun relevant ved visning, ikke persistert - se Søker.fullmakt
 )
 
 data class Søker(
@@ -96,7 +97,7 @@ data class Søker(
     val forelderBarnRelasjon: List<ForelderBarnRelasjon>,
     val fødsel: List<Fødsel>, // Er en liste i PDLSøker
     val folkeregisterpersonstatus: List<Folkeregisterpersonstatus>,
-    val fullmakt: List<FullmaktMedNavn>,
+    val fullmakt: List<FullmaktMedNavn>?, // null = ukjent, f.eks. pga. manglende geografisk tilgang i tilgangsmaskinen
     val kjønn: KjønnType,
     val kontaktadresse: List<Kontaktadresse>,
     val navn: Navn,

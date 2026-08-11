@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.infrastruktur.exception
 
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.exceptions.JwtTokenMissingException
 import org.slf4j.LoggerFactory
@@ -8,6 +9,7 @@ import org.springframework.core.NestedExceptionUtils
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import java.net.SocketTimeoutException
@@ -101,6 +103,24 @@ class ApiExceptionHandler(
                 Ressurs.funksjonellFeil(
                     frontendFeilmelding = "Finner ingen personer for valgt personident",
                     melding = "Finner ingen personer for valgt personident",
+                ),
+            )
+    }
+
+    @ExceptionHandler(AccessDeniedException::class)
+    fun handleThrowable(accessDeniedException: AccessDeniedException): ResponseEntity<Ressurs<Nothing>> {
+        val saksbehandler = SikkerhetContext.hentSaksbehandlerEllerSystembruker()
+        secureLogger.warn("Saksbehandler $saksbehandler mangler nødvendig rolle for å utføre handlingen", accessDeniedException)
+        logger.warn("En håndtert tilgangsfeil har oppstått")
+        return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
+            .body(
+                Ressurs(
+                    data = null,
+                    status = Ressurs.Status.IKKE_TILGANG,
+                    frontendFeilmelding = "Mangler nødvendig rolle for å utføre handlingen",
+                    melding = "Saksbehandler $saksbehandler mangler nødvendig rolle for å utføre handlingen",
+                    stacktrace = null,
                 ),
             )
     }

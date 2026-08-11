@@ -17,11 +17,11 @@ jobs:
     name: Build and push docker image
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # ratchet:actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v4
         with:
           persist-credentials: false
       - name: Set up JDK 21
-        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # ratchet:actions/setup-java@v4
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # ratchet:actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
@@ -53,7 +53,7 @@ jobs:
           mkdir -p ~/.cache/testcontainers-images
           docker save testcontainers/ryuk:0.14.0 postgres:17.6 \
             -o ~/.cache/testcontainers-images/images.tar 2>/dev/null || true
-      - uses: nais/docker-build-push@31c3a7321909bcb20799fdf46153fec721fd9512 # ratchet:nais/docker-build-push@v0
+      - uses: nais/docker-build-push@2d2b0a7193e65422b7f0355d4afb445e0a8b2cc3 # ratchet:nais/docker-build-push@v0
         id: docker-push
         with:
           team: teamfamilie
@@ -71,7 +71,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # ratchet:actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # ratchet:actions/checkout@v4
       - name: Deploy til dev
         uses: nais/deploy/actions/deploy@2d18f050f07b6a007864c6a57070ed915d571beb # ratchet:nais/deploy/actions/deploy@v2
         env:

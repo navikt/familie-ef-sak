@@ -29,6 +29,22 @@ object BehandlingOppsettUtil {
                     ),
             )
 
+    val avslåttFørstegangsbehandling =
+        behandling(fagsak)
+            .copy(
+                type = BehandlingType.FØRSTEGANGSBEHANDLING,
+                status = BehandlingStatus.FERDIGSTILT,
+                resultat = BehandlingResultat.AVSLÅTT,
+                vedtakstidspunkt = SporbarUtils.now(),
+                sporbar =
+                    Sporbar(
+                        opprettetTid =
+                            LocalDateTime
+                                .now()
+                                .minusDays(4),
+                    ),
+            )
+
     val iverksattFørstegangsbehandling =
         behandling(fagsak)
             .copy(
