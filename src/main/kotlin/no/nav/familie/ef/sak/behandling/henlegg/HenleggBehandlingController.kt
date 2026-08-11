@@ -88,14 +88,14 @@ class HenleggBehandlingController(
         val harVerge = personopplysninger.vergemål.isNotEmpty()
         val harFullmakt: Boolean =
             personopplysninger.fullmakt
-                .filter {
+                ?.filter {
                     it.gyldigTilOgMed == null ||
                         (
                             it.gyldigTilOgMed.isEqualOrAfter(
                                 LocalDate.now(),
                             )
                         )
-                }.isNotEmpty()
+                }?.isNotEmpty() ?: true
         feilHvis(harVerge || harFullmakt) {
             "Skal ikke sende brev hvis person er tilknyttet vergemål eller fullmakt"
         }

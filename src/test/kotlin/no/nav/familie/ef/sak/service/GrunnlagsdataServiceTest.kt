@@ -8,6 +8,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingType
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig.Companion.ANNEN_FORELDER_FNR
+import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
@@ -19,6 +20,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerI
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedtaksperioderService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereInnvilgetVedtak
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.TidligereVedtaksperioder
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktResultat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.medl.MedlService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fullmakt
@@ -37,8 +39,10 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpStatus
 import java.time.LocalDate
 
 internal class GrunnlagsdataServiceTest {
@@ -97,13 +101,15 @@ internal class GrunnlagsdataServiceTest {
     internal fun setUp() {
         every { søknadService.hentOvergangsstønad(any()) } returns søknad
         every { fullmaktService.hentFullmakt(any()) } returns
-            listOf(
-                Fullmakt(
-                    LocalDate.of(2020, 1, 1),
-                    LocalDate.of(2021, 1, 1),
-                    "11111133333",
-                    MotpartsRolle.FULLMEKTIG,
-                    listOf(),
+            FullmaktResultat(
+                listOf(
+                    Fullmakt(
+                        LocalDate.of(2020, 1, 1),
+                        LocalDate.of(2021, 1, 1),
+                        "11111133333",
+                        MotpartsRolle.FULLMEKTIG,
+                        listOf(),
+                    ),
                 ),
             )
     }
@@ -123,6 +129,16 @@ internal class GrunnlagsdataServiceTest {
         assertThat(catchThrowable { service.hentGrunnlagsdata(behandlingId) })
 
         verify(exactly = 0) { personService.hentSøker(any()) }
+    }
+
+    @Test
+    internal fun `skal kaste feil hvis fullmakt er ukjent - grunnlagsdata skal ikke kunne opprettes uten avklart fullmakt`() {
+        every { personService.hentSøker(any()) } returns PdlClientConfig.opprettPdlSøker()
+        every { fullmaktService.hentFullmakt(any()) } returns FullmaktResultat(fullmakter = null, ikkeTilgangÅrsak = "mangler geografisk tilgang i tilgangsmaskinen")
+
+        val feil = assertThrows<Feil> { service.hentFraRegisterForPersonOgAndreForeldre("1", emptyList()) }
+        assertThat(feil.httpStatus).isEqualTo(HttpStatus.FORBIDDEN)
+        assertThat(feil.frontendFeilmelding).contains("mangler geografisk tilgang i tilgangsmaskinen")
     }
 
     @Test
@@ -152,7 +168,7 @@ internal class GrunnlagsdataServiceTest {
                     fullmakt = emptyList(),
                     vergemaalEllerFremtidsfullmakt = emptyList(),
                 )
-        every { fullmaktService.hentFullmakt(any()) } returns listOf()
+        every { fullmaktService.hentFullmakt(any()) } returns FullmaktResultat(fullmakter = emptyList())
         service.hentFraRegisterForPersonOgAndreForeldre("1", emptyList())
 
         verify(exactly = 0) { pdlClient.hentPersonKortBolk(any()) }

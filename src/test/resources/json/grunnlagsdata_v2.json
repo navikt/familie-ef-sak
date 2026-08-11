@@ -350,7 +350,7 @@
             "nullable" : true
           }
         },
-        "nullable" : false
+        "nullable" : true
       },
       "kjønn" : {
         "name" : "kjønn",

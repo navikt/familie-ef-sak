@@ -16,6 +16,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerI
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedtaksperioderService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.egenansatt.EgenAnsattClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktResultat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.InnflyttingUtflyttingMapper
@@ -65,7 +66,7 @@ internal class PersonopplysningerServiceTest {
                 finnesUtbetaling = false,
                 emptyList(),
             )
-        every { fullmaktService.hentFullmakt(any()) } returns listOf(Fullmakt(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1), "11111133333", MotpartsRolle.FULLMEKTIG, listOf()))
+        every { fullmaktService.hentFullmakt(any()) } returns FullmaktResultat(listOf(Fullmakt(LocalDate.of(2020, 1, 1), LocalDate.of(2021, 1, 1), "11111133333", MotpartsRolle.FULLMEKTIG, listOf())))
         val grunnlagsdataRegisterService =
             GrunnlagsdataRegisterService(
                 personService,
