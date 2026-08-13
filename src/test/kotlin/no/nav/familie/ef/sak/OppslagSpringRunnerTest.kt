@@ -215,6 +215,11 @@ abstract class OppslagSpringRunnerTest {
             return onBehalfOfToken(roles = listOf(rolleConfig.forvalter, rolleConfig.veilederRolle))
         }
 
+    protected val lokalVeilederToken: String
+        get() {
+            return onBehalfOfToken(role = rolleConfig.veilederRolle)
+        }
+
     protected fun onBehalfOfToken(
         role: String = rolleConfig.beslutterRolle,
         saksbehandler: String = "julenissen",

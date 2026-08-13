@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleSaksbehandlerEllerApplikasjon
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.web.bind.annotation.GetMapping
@@ -26,13 +27,13 @@ class BrevmottakereController(
         return Ressurs.success(brevmottakereService.hentBrevmottakere(behandlingId))
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("/{behandlingId}")
     fun velgBrevmottakere(
         @PathVariable behandlingId: UUID,
         @RequestBody brevmottakere: BrevmottakereDto,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
 
         return Ressurs.success(brevmottakereService.lagreBrevmottakere(behandlingId, brevmottakere))
     }
@@ -46,13 +47,13 @@ class BrevmottakereController(
         return Ressurs.success(brevmottakereService.hentBrevnottakereForFagsak(fagsakId))
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("fagsak/{fagsakId}")
     fun velgBrevmottakereForFagsak(
         @PathVariable fagsakId: UUID,
         @RequestBody brevmottakere: BrevmottakereDto,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
 
         return Ressurs.success(brevmottakereService.lagreBrevmottakereForFagsak(fagsakId, brevmottakere))
     }

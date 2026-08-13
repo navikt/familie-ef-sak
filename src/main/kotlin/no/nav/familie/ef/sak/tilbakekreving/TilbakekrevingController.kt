@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.tilbakekreving
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.BehandlingService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleSaksbehandlerEllerApplikasjon
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilbakekreving.domain.tilDto
 import no.nav.familie.ef.sak.tilbakekreving.dto.TilbakekrevingDto
@@ -24,23 +25,23 @@ class TilbakekrevingController(
     private val behandlingService: BehandlingService,
     private val tilbakekrevingService: TilbakekrevingService,
 ) {
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("/{behandlingId}")
     fun lagreTilbakekreving(
         @PathVariable behandlingId: UUID,
         @RequestBody tilbakekrevingDto: TilbakekrevingDto,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         tilbakekrevingService.lagreTilbakekreving(tilbakekrevingDto, behandlingId)
         return Ressurs.success(behandlingId)
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("/fagsak/{fagsakId}/opprett-tilbakekreving")
     fun opprettManuellTilbakekreving(
         @PathVariable fagsakId: UUID,
     ): Ressurs<String> {
         tilgangService.validerTilgangTilFagsak(fagsakId = fagsakId, AuditLoggerEvent.CREATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         tilbakekrevingService.opprettManuellTilbakekreving(fagsakId)
         return Ressurs.success("Opprettelse av manuell behandling iverksatt.")
     }

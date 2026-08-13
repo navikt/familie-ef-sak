@@ -150,31 +150,6 @@ internal class JournalpostControllerTest {
     }
 
     @Test
-    internal fun `skal feile hvis bruker er veileder`() {
-        every {
-            journalpostService.hentJournalpost(any())
-        } returns journalpostMedFødselsnummer
-
-        every {
-            tilgangService.validerHarSaksbehandlerrolle()
-        } throws ManglerTilgang("Bruker mangler tilgang", "Mangler tilgang til bruker")
-
-        assertThrows<ManglerTilgang> {
-            journalpostController.fullførJournalpostV2(
-                journalpostMedFødselsnummer.journalpostId,
-                JournalføringRequestV2(
-                    dokumentTitler = null,
-                    fagsakId = UUID.randomUUID(),
-                    oppgaveId = "dummy-oppgave",
-                    journalførendeEnhet = "9991",
-                    aksjon = Journalføringsaksjon.OPPRETT_BEHANDLING,
-                    årsak = Journalføringsårsak.DIGITAL_SØKNAD,
-                ),
-            )
-        }
-    }
-
-    @Test
     fun `skal journalføre som klage i v2 hvis årsak er klage`() {
         setupFullførJournalføringV2()
 

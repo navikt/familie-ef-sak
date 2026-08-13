@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.forvaltning
 
 import io.swagger.v3.oas.annotations.Operation
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleForvalter
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
@@ -24,6 +25,7 @@ class IverksettProxyTaskForvaltningController(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    @HarRolleForvalter
     @PostMapping("kopier/taskid/{taskId}")
     @Operation(
         description =
@@ -36,7 +38,6 @@ class IverksettProxyTaskForvaltningController(
     fun restartIverksettTask(
         @PathVariable taskId: Long,
     ): KopiertTaskResponse {
-        tilgangService.validerHarForvalterrolle()
         val url = URI.create("$familieEfIverksettUri/api/forvaltning/task/restart/$taskId")
         val postForEntity =
             restClient

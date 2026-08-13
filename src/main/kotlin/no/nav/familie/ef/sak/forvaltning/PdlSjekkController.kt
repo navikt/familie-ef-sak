@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.forvaltning
 
 import no.nav.familie.ef.sak.fagsak.FagsakService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleForvalter
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
@@ -27,11 +28,11 @@ class PdlSjekkController(
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
+    @HarRolleForvalter
     @PostMapping
     fun sjekkIdenter(
         @RequestBody identer: Set<String>,
     ): Int {
-        tilgangService.validerHarForvalterrolle()
         val count =
             identer
                 .map { aktørId ->
@@ -49,11 +50,11 @@ class PdlSjekkController(
         return count
     }
 
+    @HarRolleForvalter
     @PostMapping("/annenforelder")
     fun sjekkAnnenForelder(
         @RequestBody ident: String,
     ): Int {
-        tilgangService.validerHarForvalterrolle()
         val søker = personService.hentSøker(ident)
         val strengesteAdressebeskyttelseForPersonMedRelasjoner = personopplysningerService.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(ident)
 

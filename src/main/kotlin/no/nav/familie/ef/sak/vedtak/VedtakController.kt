@@ -11,6 +11,7 @@ import no.nav.familie.ef.sak.behandlingsflyt.steg.StegService
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvisIkke
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleSaksbehandlerEllerApplikasjon
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.secureLogger
@@ -148,12 +149,12 @@ class VedtakController(
         return Ressurs.success(stegService.håndterSteg(behandling, beregnYtelseSteg, vedtak).id)
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @DeleteMapping("/{behandlingId}")
     fun nullstillVedtak(
         @PathVariable behandlingId: UUID,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.DELETE)
-        tilgangService.validerHarSaksbehandlerrolle()
 
         nullstillVedtakService.nullstillVedtak(behandlingId)
         return Ressurs.success(behandlingId)

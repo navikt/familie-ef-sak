@@ -8,7 +8,6 @@ import io.mockk.mockkObject
 import io.mockk.slot
 import io.mockk.unmockkObject
 import io.mockk.verify
-import no.nav.familie.ef.sak.infrastruktur.exception.ManglerTilgang
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.oppfølgingsoppgave.OppfølgingsoppgaveService
@@ -26,7 +25,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.util.UUID
 
 internal class OppgaveControllerTest {
@@ -122,21 +120,6 @@ internal class OppgaveControllerTest {
         oppgaveController.hentOppgaver(FinnOppgaveRequestDto(ident = null))
         verify(exactly = 0) { personService.hentAktørIder(any()) }
         assertThat(finnOppgaveRequestSlot.captured.aktørId).isEqualTo(null)
-    }
-
-    @Test
-    internal fun `skal feile hvis bruker er veileder`() {
-        every {
-            tilgangService.validerTilgangTilPersonMedBarn(any(), any())
-        } just Runs
-
-        every {
-            tilgangService.validerHarSaksbehandlerrolle()
-        } throws ManglerTilgang("Bruker mangler tilgang", "Mangler tilgang")
-
-        assertThrows<ManglerTilgang> {
-            oppgaveController.fordelOppgave(123, "dummy saksbehandler", null)
-        }
     }
 
     @Test

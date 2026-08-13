@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.forvaltning
 
 import io.swagger.v3.oas.annotations.Operation
 import no.nav.familie.ef.sak.AuditLoggerEvent
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleForvalter
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.internal.TaskService
@@ -36,6 +37,7 @@ class OppgaveforvaltningsController(
     private val taskService: TaskService,
     private val tilgangService: TilgangService,
 ) {
+    @HarRolleForvalter
     @PostMapping("behandling/{behandlingId}")
     @Operation(
         description =
@@ -46,7 +48,6 @@ class OppgaveforvaltningsController(
     fun loggOppgavemetadataFor(
         @PathVariable behandlingId: UUID,
     ) {
-        tilgangService.validerHarForvalterrolle()
         val task = LoggOppgaveMetadataTask.opprettTask(behandlingId)
         taskService.save(task)
     }
@@ -60,11 +61,11 @@ class OppgaveforvaltningsController(
         summary =
             "Lag ny ekstern BehandleSak- eller GodkjenneVedtak-oppgave",
     )
+    @HarRolleForvalter
     @PostMapping("gjenopprett-oppgave/behandling/{behandlingId}")
     fun gjenopprettOppgaveForBehandling(
         @PathVariable behandlingId: UUID,
     ) {
-        tilgangService.validerHarForvalterrolle()
         val task = GjennoprettOppgavePåBehandlingTask.opprettTask(behandlingId)
         taskService.save(task)
     }
@@ -75,12 +76,12 @@ class OppgaveforvaltningsController(
         summary =
             "Ferdigstill BehandleSak- eller GodkjenneVedtak-oppgave i EF-sak og feilregistrer  oppgave i Gosys",
     )
+    @HarRolleForvalter
     @PostMapping("ferdigstill/oppgavetype/{oppgavetype}/behandlingid/{behandlingId}")
     fun ferdigstillOppgavtypeForBehandling(
         @PathVariable behandlingId: UUID,
         @PathVariable oppgavetype: OppgavetypeSomKanFerdigstilles,
     ) {
-        tilgangService.validerHarForvalterrolle()
         val task = FerdigstillOppgavetypePåBehandlingTask.opprettTask(ForvaltningFerdigstillRequest(behandlingId = behandlingId, oppgavetype = oppgavetype))
         taskService.save(task)
     }
@@ -89,11 +90,11 @@ class OppgaveforvaltningsController(
         description = "Synk oppgave med behandling",
         summary = "Synk oppgave med behandling",
     )
+    @HarRolleForvalter
     @PostMapping("synkroniser/{behandlingId}")
     fun synkroniserOppgaveMedBehandling(
         @PathVariable behandlingId: UUID,
     ) {
-        tilgangService.validerHarForvalterrolle()
         tilgangService.validerTilgangTilBehandling(behandlingId, AuditLoggerEvent.UPDATE)
         val task = SynkOppgaveForBehandlingTask.opprettTask(behandlingId)
         taskService.save(task)

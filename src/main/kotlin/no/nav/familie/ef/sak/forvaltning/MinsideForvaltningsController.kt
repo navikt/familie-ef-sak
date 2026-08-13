@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.forvaltning
 
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleForvalter
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.minside.MinSideKafkaProducerService
 import org.springframework.web.bind.annotation.PostMapping
@@ -14,20 +15,20 @@ class MinsideForvaltningsController(
     private val minSideKafkaProducerService: MinSideKafkaProducerService,
     private val tilgangService: TilgangService,
 ) {
+    @HarRolleForvalter
     @PostMapping("aktiver")
     fun aktiverPersonForMinSide(
         @RequestBody personIdentDto: PersonIdentDto,
     ) {
-        tilgangService.validerHarForvalterrolle()
         validerPersonIdent(personIdentDto)
         minSideKafkaProducerService.aktiver(personIdent = personIdentDto.personIdent)
     }
 
+    @HarRolleForvalter
     @PostMapping("deaktiver")
     fun deaktiverPersonForMinSide(
         @RequestBody personIdentDto: PersonIdentDto,
     ) {
-        tilgangService.validerHarForvalterrolle()
         validerPersonIdent(personIdentDto)
         minSideKafkaProducerService.deaktiver(personIdent = personIdentDto.personIdent)
     }

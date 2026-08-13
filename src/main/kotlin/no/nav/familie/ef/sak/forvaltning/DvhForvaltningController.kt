@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.behandlingsflyt.task.BehandlingsstatistikkTask
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleForvalter
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.prosessering.internal.TaskService
 import org.springframework.web.bind.annotation.PostMapping
@@ -20,11 +21,11 @@ class DvhForvaltningController(
     private val behandlingService: BehandlingService,
     private val tilgangService: TilgangService,
 ) {
+    @HarRolleForvalter
     @PostMapping(path = ["/sak/ferdigstill"])
     fun sendFerdigstiltBehandlingTilDvh(
         @RequestBody dvhForvaltning: DvhForvaltningDto,
     ) {
-        tilgangService.validerHarForvalterrolle()
         val behandling = behandlingService.hentBehandling(dvhForvaltning.behandlingId)
         if (behandling.status != BehandlingStatus.FERDIGSTILT) {
             throw Feil("Behandlingen må være ferdigstilt for at man skal kunne sende ferdig-hendelse til DVH")
