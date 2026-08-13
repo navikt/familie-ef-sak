@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.forvaltning
 
 import no.nav.familie.ef.sak.behandlingsflyt.task.KonsistensavstemmingPayload
 import no.nav.familie.ef.sak.behandlingsflyt.task.KonsistensavstemmingTask
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleForvalter
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -24,9 +25,9 @@ class KonsistensavstemmingForvaltningController(
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    @HarRolleForvalter
     @PostMapping
     fun kjørKonsistensavstemming() {
-        tilgangService.validerHarForvalterrolle()
         val triggerdato = LocalDate.now()
         logger.info("Oppretter manuell tasks for konsistensavstemming for dato=$triggerdato")
         taskService.saveAll(
@@ -43,11 +44,9 @@ class KonsistensavstemmingForvaltningController(
         )
     }
 
+    @HarRolleForvalter
     @GetMapping("test-timeout")
     fun timeoutTest(
         @RequestParam(name = "sekunder") sekunder: Long,
-    ): String {
-        tilgangService.validerHarForvalterrolle()
-        return iverksettClient.timeoutTest(sekunder)
-    }
+    ): String = iverksettClient.timeoutTest(sekunder)
 }

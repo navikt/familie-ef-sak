@@ -11,3 +11,8 @@ annotation class HarRolleSaksbehandlerEllerApplikasjon
 @Retention(AnnotationRetention.RUNTIME)
 @PreAuthorize("hasRole('FORVALTER')")
 annotation class HarRolleForvalter
+
+@Target(AnnotationTarget.FUNCTION, AnnotationTarget.CLASS)
+@Retention(AnnotationRetention.RUNTIME)
+@PreAuthorize("hasAnyRole('BESLUTTER', 'APPLICATION')")
+annotation class HarRolleBeslutterEllerApplikasjon

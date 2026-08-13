@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.behandling
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.behandling.dto.FørstegangsbehandlingDto
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleSaksbehandlerEllerApplikasjon
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.web.bind.annotation.PathVariable
@@ -17,13 +18,13 @@ class FørstegangsbehandlingController(
     private val førstegangsbehandlingService: FørstegangsbehandlingService,
     private val tilgangService: TilgangService,
 ) {
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("{fagsakId}/opprett")
     fun opprettFørstegangsbehandlingManuelt(
         @PathVariable fagsakId: UUID,
         @RequestBody førstegangsBehandlingRequest: FørstegangsbehandlingDto,
     ): Ressurs<UUID> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.CREATE)
-        tilgangService.validerHarSaksbehandlerrolle()
 
         val behandling = førstegangsbehandlingService.opprettFørstegangsbehandling(fagsakId, førstegangsBehandlingRequest)
         return Ressurs.success(behandling.id)

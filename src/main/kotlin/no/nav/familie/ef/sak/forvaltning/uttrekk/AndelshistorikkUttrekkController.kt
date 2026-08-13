@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.forvaltning.uttrekk
 
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleForvalter
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.vedtak.historikk.VedtakHistorikkService
 import org.slf4j.LoggerFactory
@@ -25,9 +26,9 @@ class AndelshistorikkUttrekkController(
     private val logger = LoggerFactory.getLogger(javaClass)
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
+    @HarRolleForvalter
     @GetMapping("/manglertilsyn")
     fun hentDataManglerTilsyn2022(): ResponseEntity<String> {
-        tilgangService.validerHarForvalterrolle()
         val fagsakerMedTilsynManglerKandidater = andelshistorikkUttrekkRepository.finnFagsakerMedTilsynManglerKandidater()
 
         val fagsakerMedAndelshistorikk: List<UttrekkFagsakMedAndelshistorikk> =

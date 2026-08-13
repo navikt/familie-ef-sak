@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.brev
 
 import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.brev.dto.FrittståendeSanitybrevDto
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleSaksbehandlerEllerApplikasjon
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.web.bind.annotation.PathVariable
@@ -18,6 +19,7 @@ class FrittståendeBrevController(
     private val frittståendeBrevService: FrittståendeBrevService,
     private val tilgangService: TilgangService,
 ) {
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("/{fagsakId}/{brevMal}")
     fun forhåndsvisFrittsåendeSanitybrev(
         @PathVariable fagsakId: UUID,
@@ -25,17 +27,16 @@ class FrittståendeBrevController(
         @RequestBody brevRequest: JsonNode,
     ): Ressurs<ByteArray> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(frittståendeBrevService.lagFrittståendeSanitybrev(fagsakId, brevMal, brevRequest))
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("/send/{fagsakId}")
     fun sendFrittsåendeSanitybrev(
         @PathVariable fagsakId: UUID,
         @RequestBody sendBrevRequest: FrittståendeSanitybrevDto,
     ): Ressurs<Unit> {
         tilgangService.validerTilgangTilFagsak(fagsakId, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         return Ressurs.success(frittståendeBrevService.sendFrittståendeSanitybrev(fagsakId, sendBrevRequest))
     }
 }

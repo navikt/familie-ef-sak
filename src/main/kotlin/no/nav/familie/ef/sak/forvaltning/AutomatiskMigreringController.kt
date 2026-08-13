@@ -4,6 +4,7 @@ import no.nav.familie.ef.sak.behandling.migrering.AutomatiskMigreringService
 import no.nav.familie.ef.sak.behandling.migrering.MigreringExceptionType
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleForvalter
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -19,30 +20,30 @@ class AutomatiskMigreringController(
     private val automatiskMigreringService: AutomatiskMigreringService,
     private val tilgangService: TilgangService,
 ) {
+    @HarRolleForvalter
     @GetMapping
     fun migrerAutomatiskt(
         @RequestParam antall: Int,
     ) {
-        tilgangService.validerHarForvalterrolle()
         brukerfeilHvis(antall > 100) {
             "Kan ikke migrere fler enn 100"
         }
         automatiskMigreringService.migrerAutomatisk(antall)
     }
 
+    @HarRolleForvalter
     @PostMapping("rekjoer")
     fun rekjoer(
         @RequestBody personIdent: PersonIdent,
     ) {
-        tilgangService.validerHarForvalterrolle()
         automatiskMigreringService.rekjør(personIdent.ident)
     }
 
+    @HarRolleForvalter
     @PostMapping("rekjoer/{arsak}")
     fun rekjoer(
         @PathVariable("arsak") årsak: MigreringExceptionType,
     ) {
-        tilgangService.validerHarForvalterrolle()
         automatiskMigreringService.rekjør(årsak)
     }
 }

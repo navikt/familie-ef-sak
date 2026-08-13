@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleSaksbehandlerEllerApplikasjon
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringRequestV2
 import no.nav.familie.ef.sak.journalføring.dto.JournalføringResponse
@@ -76,6 +77,7 @@ class JournalpostController(
         return journalpostService.hentDokument(journalpostId, dokumentInfoId)
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("/{journalpostId}/fullfor/v2")
     fun fullførJournalpostV2(
         @PathVariable journalpostId: String,
@@ -83,7 +85,6 @@ class JournalpostController(
     ): Ressurs<String> {
         val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
 
         if (journalføringRequest.gjelderKlage()) {
             journalføringKlageService.fullførJournalpostV2(journalføringRequest, journalpost)
@@ -93,6 +94,7 @@ class JournalpostController(
         return Ressurs.success(journalpostId)
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("/{journalpostId}/oppdater-dokumenter")
     fun oppdaterDokumenter(
         @PathVariable journalpostId: String,
@@ -100,13 +102,13 @@ class JournalpostController(
     ): Ressurs<String> {
         val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
 
         journalpostService.oppdaterDokumenterPåJournalpost(journalpost, request)
 
         return Ressurs.success(journalpostId)
     }
 
+    @HarRolleSaksbehandlerEllerApplikasjon
     @PostMapping("/{journalpostId}/opprett-behandling-med-soknadsdata-fra-en-ferdigstilt-journalpost")
     fun opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(
         @PathVariable journalpostId: String,
@@ -117,7 +119,6 @@ class JournalpostController(
         }
         val (journalpost, personIdent) = finnJournalpostOgPersonIdent(journalpostId)
         tilgangService.validerTilgangTilPersonMedBarn(personIdent, AuditLoggerEvent.UPDATE)
-        tilgangService.validerHarSaksbehandlerrolle()
         brukerfeilHvisIkke(journalpost.harStrukturertSøknad()) { "Journalposten inneholder ikke en digital søknad" }
         return Ressurs.success(
             journalføringService.opprettBehandlingMedSøknadsdataFraEnFerdigstiltJournalpost(

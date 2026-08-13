@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.beregning.Grunnbeløpsperioder
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvisIkke
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.sikkerhet.HarRolleForvalter
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.tilkjentytelse.TilkjentYtelseService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -30,18 +31,18 @@ class ManuellGOmregningController(
 ) {
     val logger: Logger = LoggerFactory.getLogger(javaClass)
 
+    @HarRolleForvalter
     @PostMapping(path = ["startjobb"])
     fun opprettGOmregningTasksForBehandlingerMedGammeltGBelop(): Ressurs<Int> {
-        tilgangService.validerHarForvalterrolle()
         val antallTaskerOpprettet = gOmregningTaskService.opprettGOmregningTaskForBehandlingerMedUtdatertG()
         return Ressurs.success(antallTaskerOpprettet)
     }
 
+    @HarRolleForvalter
     @PostMapping(path = ["{fagsakId}"])
     fun opprettGOmregningTaskForFagsak(
         @PathVariable fagsakId: UUID,
     ) {
-        tilgangService.validerHarForvalterrolle()
         validerHarLøpendeStønadEtterSisteGrunnbeløpdato(fagsakId)
 
         val opprettTask = gOmregningTask.opprettTask(fagsakId)
