@@ -27,7 +27,7 @@ class SigrunClient(
         val uri =
             UriComponentsBuilder
                 .fromUri(uri)
-                .pathSegment("api", "v1", "pensjonsgivendeinntektforfolketrygden")
+                .pathSegment("v1", "pensjonsgivendeinntektforfolketrygden")
                 .build()
                 .toUri()
 
@@ -54,3 +54,14 @@ data class PensjonsgivendeInntektRequest(
     val inntektsaar: String,
     val rettighetspakke: String = "navEnsligForsoerger",
 )
+
+
+fun main() {
+    val request =
+        PensjonsgivendeInntektRequest(
+            personident = "fødselsnummer",
+            inntektsaar = "inntektsår",
+        )
+
+    println("request: $request")
+}
