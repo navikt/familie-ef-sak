@@ -23,12 +23,14 @@ class SigrunClient(
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-    // Legger på en loggende interceptor sist i kjeden, slik at Authorization-headeren
-    // (satt av auth-interceptoren i entraIDRestClientFactory) er med når vi logger.
+    // Legger på en loggende interceptor FØRST i kjeden (før token-interceptoren i
+    // entraIDRestClientFactory). Dette er bevisst, siden token-henting (Azure AD)
+    // kan feile før selve HTTP-kallet til Sigrun bygges - da må vi likevel ha logget
+    // at et kall var på vei, ellers forsvinner det sporløst.
     private val restClient: RestClient =
         sigrunClient
             .mutate()
-            .requestInterceptor(loggendeInterceptor())
+            .requestInterceptors { interceptors -> interceptors.add(0, loggendeInterceptor()) }
             .build()
 
     private fun loggendeInterceptor(): ClientHttpRequestInterceptor =
@@ -83,12 +85,17 @@ class SigrunClient(
             )
 
         val response =
-            restClient
-                .post()
-                .uri(uri)
-                .body(request)
-                .retrieve()
-                .body<PensjonsgivendeInntektResponse>()!!
+            try {
+                restClient
+                    .post()
+                    .uri(uri)
+                    .body(request)
+                    .retrieve()
+                    .body<PensjonsgivendeInntektResponse>()!!
+            } catch (e: Exception) {
+                secureLogger.error("Feil ved kall til Sigrun ($uri): ${e.message}", e)
+                throw e
+            }
         secureLogger.info("Pensjonsgivende inntekt for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
         return response
     }
