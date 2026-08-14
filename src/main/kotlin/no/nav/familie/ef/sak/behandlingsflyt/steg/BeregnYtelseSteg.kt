@@ -254,6 +254,9 @@ class BeregnYtelseSteg(
             barnService.validerBarnFinnesPåBehandling(saksbehandling.id, data.perioder.flatMap { it.barn }.toSet())
             validerInnvilgelseBarnetilsyn(data.perioder, saksbehandling)
         }
+        if (data is VedtakSkolepengerDto) {
+            beregningSkolepengerService.beregnYtelse(data.skoleårsperioder, saksbehandling.id, data.erOpphør())
+        }
     }
 
     private fun validerInnvilgelseBarnetilsyn(

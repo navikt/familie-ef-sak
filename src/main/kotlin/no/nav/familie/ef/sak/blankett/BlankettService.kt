@@ -15,8 +15,11 @@ import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleHelper.lagBeregnetSamv
 import no.nav.familie.ef.sak.samværsavtale.SamværsavtaleService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.VedtakDto
+import no.nav.familie.ef.sak.vedtak.dto.VedtakSkolepengerDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.dto.tilDto
+import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.jsonMapper
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -36,6 +39,7 @@ class BlankettService(
     private val regelendring2026Service: Regelendring2026Service,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
     fun lagBlankett(behandlingId: UUID): ByteArray {
         logger.info("Start - lag saksbehandlingsblankett for behandlingId=$behandlingId")
@@ -69,6 +73,7 @@ class BlankettService(
                 samværsavtaleService.hentSamværsavtalerForBehandling(behandlingId).map { lagBeregnetSamvær(it) },
             )
         logger.info("Ferdig med å lage blankettPdfRequest for behandlingId=$behandlingId ")
+        loggSkolepengerVedtakForFeilsøking(behandlingId, behandling.stønadstype, blankettPdfRequest.vedtak)
         val blankettPdfAsByteArray = brevClient.genererBlankett(blankettPdfRequest)
         logger.info("Ferdig med å generere blankettPdf for behandlingId=$behandlingId")
         oppdaterEllerOpprettBlankett(behandlingId, blankettPdfAsByteArray)
@@ -85,6 +90,25 @@ class BlankettService(
             return blankettRepository.update(blankett)
         }
         return blankettRepository.insert(blankett)
+    }
+
+    /**
+     * Midlertidig logging for å kunne reprodusere at skoleårsperioder mangler `årMånedFra`/`årMånedTil`
+     * i requesten som faktisk sendes til familie-brev, selv om det som ligger lagret i databasen (Vedtak-domenet)
+     * ser riktig ut. Sammenlignes med tilsvarende logging i familie-brev for å se om dataene endres underveis.
+     * Fjernes når vi har funnet og rettet årsaken.
+     */
+    private fun loggSkolepengerVedtakForFeilsøking(
+        behandlingId: UUID,
+        stønadstype: StønadType,
+        vedtak: VedtakDto,
+    ) {
+        if (stønadstype == StønadType.SKOLEPENGER && vedtak is VedtakSkolepengerDto) {
+            secureLogger.info(
+                "Skolepenger-vedtak sendes til familie-brev for blankett-pdf, behandlingId=$behandlingId: " +
+                    jsonMapper.writeValueAsString(vedtak.skoleårsperioder),
+            )
+        }
     }
 
     private fun lagSøknadsdatoer(behandlingId: UUID): SøknadDatoerDto? {
