@@ -103,6 +103,7 @@ class BlankettService(
         stønadstype: StønadType,
         vedtak: VedtakDto,
     ) {
+        secureLogger.info("Hei" + stønadstype.toString(), vedtak.toString())
         if (stønadstype == StønadType.SKOLEPENGER && vedtak is VedtakSkolepengerDto) {
             secureLogger.info(
                 "Skolepenger-vedtak sendes til familie-brev for blankett-pdf, behandlingId=$behandlingId: " +
