@@ -99,6 +99,9 @@ spec:
           namespace: team-rocket
         - application: logging
           namespace: nais-system
+        - application: sigrun-q2
+          namespace: team-inntekt
+          cluster: dev-fss
       external:
         - host: api-gw-q1.oera.no
         - host: familie-oppdrag.dev-fss-pub.nais.io
