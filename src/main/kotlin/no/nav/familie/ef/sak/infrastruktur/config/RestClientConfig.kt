@@ -68,7 +68,11 @@ class RestClientConfig(
     @Bean("sigrunRestClient")
     fun sigrunRestClient(
         @Value("\${SIGRUN_SCOPE}") scope: String,
-    ): RestClient = entraIDRestClientFactory.lagMaskinTilMaskinRestKlient(scope).medTimeout()
+    ): RestClient =
+        entraIDRestClientFactory
+            .lagOboRestKlient(scope) {
+                SikkerhetContext.hentJwt()?.tokenValue ?: error("OBO-kall mot Sigrun uten innlogget bruker")
+            }.medTimeout()
 
     /**
      * medlemskap MEDL (MedlClient)
