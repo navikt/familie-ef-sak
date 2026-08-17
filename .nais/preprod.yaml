@@ -111,7 +111,7 @@ spec:
         - host: ikomp-q2.dev-fss-pub.nais.io
         - host: aareg-services.dev-fss-pub.nais.io
         - host: ereg-services.dev-fss-pub.nais.io
-        - host: team-inntekt-proxy.dev-fss-pub.nais.io
+        - host: sigrun-q2.dev-fss-pub.nais.io
         - host: arbeid-og-inntekt-q2.dev-fss-pub.nais.io
   azure:
     application:
