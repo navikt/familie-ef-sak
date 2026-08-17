@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpRequest
 import org.springframework.http.client.ClientHttpRequestInterceptor
 import org.springframework.stereotype.Component
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestClient
 import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
@@ -92,11 +93,12 @@ class SigrunClient(
                     .body(request)
                     .retrieve()
                     .body<PensjonsgivendeInntektResponse>()!!
+            } catch (e: HttpClientErrorException.NotFound) {
+                return PensjonsgivendeInntektResponse(fødselsnummer, inntektsår, emptyList())
             } catch (e: Exception) {
                 secureLogger.error("Feil ved kall til Sigrun ($uri): ${e.message}", e)
                 throw e
             }
-        secureLogger.info("Pensjonsgivende inntekt for inntektsår $inntektsår: $response") // Fjernes når det er litt mer kjennskap til dataene
         return response
     }
 }
