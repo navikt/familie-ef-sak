@@ -10,7 +10,9 @@ import org.springframework.boot.http.client.HttpClientSettings
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.client.ClientHttpRequestFactory
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter
 import org.springframework.web.client.RestClient
+import tools.jackson.databind.json.JsonMapper
 import java.time.Duration
 
 @Configuration
@@ -18,6 +20,7 @@ class RestClientConfig(
     private val entraIDRestClientFactory: EntraIDRestClientFactory,
     private val consumerIdClientInterceptor: ConsumerIdClientInterceptor,
     private val mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor,
+    private val jsonMapper: JsonMapper,
 ) {
     private val requestFactory: ClientHttpRequestFactory =
         ClientHttpRequestFactoryBuilder
@@ -29,7 +32,40 @@ class RestClientConfig(
                     .withReadTimeout(Duration.ofSeconds(30)),
             )
 
-    private fun RestClient.medTimeout(): RestClient = this.mutate().requestFactory(requestFactory).build()
+    /**
+     * RestClient.builder() (og EntraIDRestClientFactory sine fabrikkmetoder) bruker Spring sin
+     * default JsonMapper, som ikke har KotlinFeature.KotlinPropertyNameAsImplicitName aktivert.
+     * Da blir felter med navn som starter med æ/ø/å (f.eks. årMånedFra) mistet under serialisering.
+     *
+     * Rotårsak: Kotlin-kompilatoren kapitaliserer ikke æ/ø/å i genererte getter-navn, så en
+     * property "årMånedFra" får getteren "getårMånedFra()" (ikke "getÅrMånedFra()" som man
+     * skulle forvente). Jackson 3 sin default AccessorNamingStrategy krever at basenavnet som er
+     * igjen etter at "get"-prefikset er fjernet starter med stor bokstav, og forkaster derfor
+     * "årMånedFra" som en gyldig property - feltet blir usynlig for serialisering. Med
+     * KotlinFeature.KotlinPropertyNameAsImplicitName slått på bruker Kotlin-modulen det faktiske
+     * Kotlin-egenskapsnavnet direkte i stedet for å utlede navnet fra getter-metoden, og unngår
+     * dermed problemet. Vi bruker derfor eksplisitt vår egen jsonMapper, som bygger videre på
+     * no.nav.familie.kontrakter.felles.jsonMapper (fra Maven-artifaktet no.nav.familie.kontrakter:felles),
+     * som har denne featuren aktivert.
+     */
+    private fun RestClient.medJsonMapperFraFellesKontrakter(): RestClient =
+        this
+            .mutate()
+            .configureMessageConverters { converters ->
+                converters
+                    .registerDefaults()
+                    // withJsonConverter overstyrer JSON-converteren som ellers auto-detekteres,
+                    // uavhengig av hvor i listen den defaultmessig havner (f.eks. foran YAML-converteren
+                    // som også er på classpath via springdoc/swagger-core)
+                    .withJsonConverter(JacksonJsonHttpMessageConverter(jsonMapper))
+            }.build()
+
+    private fun RestClient.medTimeout(): RestClient =
+        this
+            .mutate()
+            .requestFactory(requestFactory)
+            .build()
+            .medJsonMapperFraFellesKontrakter()
 
     private fun hybrid(scope: String): RestClient = entraIDRestClientFactory.lagHybridRestKlient(scope) { SikkerhetContext.hentJwt()?.tokenValue }.medTimeout()
 
@@ -180,4 +216,5 @@ class RestClientConfig(
             .requestInterceptor(mdcValuesPropagatingClientInterceptor)
             .requestFactory(requestFactory)
             .build()
+            .medJsonMapperFraFellesKontrakter()
 }
