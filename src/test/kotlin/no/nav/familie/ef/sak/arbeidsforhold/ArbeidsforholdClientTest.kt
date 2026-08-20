@@ -15,7 +15,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.client.RestClient
 import java.net.URI
-import java.time.LocalDate
 
 class ArbeidsforholdClientTest {
     companion object {

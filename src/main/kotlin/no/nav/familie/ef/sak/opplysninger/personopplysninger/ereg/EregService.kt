@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service
 class EregService(
     private val eregClient: EregClient,
 ) {
-
     fun hentOrganisasjon(organisasjonsnummer: String): Organisasjon {
         val organisasjon = eregClient.hentOrganisasjoner(listOf(organisasjonsnummer)).firstOrNull()
 
