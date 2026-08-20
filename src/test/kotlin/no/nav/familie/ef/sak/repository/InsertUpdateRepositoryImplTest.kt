@@ -10,7 +10,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.dao.IncorrectUpdateSemanticsDataAccessException
 
 internal class InsertUpdateRepositoryImplTest : OppslagSpringRunnerTest() {
     @Autowired
