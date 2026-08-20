@@ -1,7 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.ereg
 
 import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.MappingBuilder
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import org.assertj.core.api.Assertions.assertThat
@@ -43,13 +42,26 @@ class EregClientTest {
     @Test
     fun `hent organisasjon response`() {
         WireMock.stubFor(
-            queryMappingForHentOrganisasjon.willReturn(
-                WireMock
-                    .aResponse()
-                    .withStatus(HttpStatus.OK.value())
-                    .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .withBody(eregHentOrganisasjonResponse),
-            ),
+            WireMock
+                .get(WireMock.urlPathEqualTo("/v1/organisasjon/${orgnumre[0]}"))
+                .willReturn(
+                    WireMock
+                        .aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(eregOrganisasjonResponse(orgnumre[0], "PENGELØS SPAREBANK")),
+                ),
+        )
+        WireMock.stubFor(
+            WireMock
+                .get(WireMock.urlPathEqualTo("/v1/organisasjon/${orgnumre[1]}"))
+                .willReturn(
+                    WireMock
+                        .aResponse()
+                        .withStatus(HttpStatus.OK.value())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .withBody(eregOrganisasjonResponse(orgnumre[1], "SJOKKERENDE ELEKTRIKER")),
+                ),
         )
 
         val response = eregClient.hentOrganisasjoner(orgnumre)
@@ -64,157 +76,82 @@ class EregClientTest {
 
     private val orgnumre = listOf("972674818", "999999929")
 
-    private val queryMappingForHentOrganisasjon: MappingBuilder = WireMock.get(WireMock.urlPathEqualTo("/api/ereg"))
-
-    private val eregHentOrganisasjonResponse =
-        """
-        [
-            {
-                "organisasjonsnummer": "972674818",
-                "type": "Virksomhet",
-                "navn": {
-                    "redigertnavn": "PENGELØS SPAREBANK",
-                    "navnelinje1": "PENGELØS SPAREBANK",
-                    "bruksperiode": {
-                        "fom": "2021-06-02T09:23:59.803"
-                    },
-                    "gyldighetsperiode": {
-                        "fom": "2021-06-02"
-                    }
+    private fun eregOrganisasjonResponse(
+        organisasjonsnummer: String,
+        redigertnavn: String,
+    ) = """
+        {
+            "organisasjonsnummer": "$organisasjonsnummer",
+            "type": "Virksomhet",
+            "navn": {
+                "redigertnavn": "$redigertnavn",
+                "navnelinje1": "$redigertnavn",
+                "bruksperiode": {
+                    "fom": "2021-06-02T09:23:59.803"
                 },
-                "organisasjonDetaljer": {
-                    "registreringsdato": "2020-03-31T00:00:00",
-                    "enhetstyper": [
-                        {
-                            "enhetstype": "BEDR",
-                            "bruksperiode": {
-                                "fom": "2020-03-31T13:37:24.419"
-                            },
-                            "gyldighetsperiode": {
-                                "fom": "2020-03-31"
-                            }
-                        }
-                    ],
-                    "navn": [
-                        {
-                            "redigertnavn": "PENGELØS SPAREBANK",
-                            "navnelinje1": "PENGELØS SPAREBANK",
-                            "bruksperiode": {
-                                "fom": "2021-06-02T09:23:59.803"
-                            },
-                            "gyldighetsperiode": {
-                                "fom": "2021-06-02"
-                            }
-                        }
-                    ],
-                    "forretningsadresser": [
-                        {
-                            "type": "Forretningsadresse",
-                            "adresselinje1": "BOLSTADVEIEN 30",
-                            "postnummer": "4532",
-                            "poststed": "ØYSLEBØ",
-                            "landkode": "NO",
-                            "kommunenummer": "4205",
-                            "bruksperiode": {
-                                "fom": "2021-06-02T09:23:59.805"
-                            },
-                            "gyldighetsperiode": {
-                                "fom": "2021-06-02"
-                            }
-                        }
-                    ],
-                    "postadresser": [
-                        {
-                            "type": "Postadresse",
-                            "adresselinje1": "BOLSTADVEIEN 30",
-                            "postnummer": "4532",
-                            "poststed": "ØYSLEBØ",
-                            "landkode": "NO",
-                            "kommunenummer": "4205",
-                            "bruksperiode": {
-                                "fom": "2021-06-02T09:23:59.807"
-                            },
-                            "gyldighetsperiode": {
-                                "fom": "2021-06-02"
-                            }
-                        }
-                    ],
-                    "sistEndret": "2021-06-02"
+                "gyldighetsperiode": {
+                    "fom": "2021-06-02"
                 }
             },
-            {
-                "organisasjonsnummer": "999999929",
-                "type": "Virksomhet",
-                "navn": {
-                    "redigertnavn": "SJOKKERENDE ELEKTRIKER",
-                    "navnelinje1": "SJOKKERENDE ELEKTRIKER",
-                    "bruksperiode": {
-                        "fom": "2021-06-02T09:23:59.839"
-                    },
-                    "gyldighetsperiode": {
-                        "fom": "2021-06-02"
+            "organisasjonDetaljer": {
+                "registreringsdato": "2020-03-31T00:00:00",
+                "enhetstyper": [
+                    {
+                        "enhetstype": "BEDR",
+                        "bruksperiode": {
+                            "fom": "2020-03-31T13:37:24.419"
+                        },
+                        "gyldighetsperiode": {
+                            "fom": "2020-03-31"
+                        }
                     }
-                },
-                "organisasjonDetaljer": {
-                    "registreringsdato": "2021-06-02T00:00:00",
-                    "enhetstyper": [
-                        {
-                            "enhetstype": "BEDR",
-                            "bruksperiode": {
-                                "fom": "2021-06-02T09:21:17.472"
-                            },
-                            "gyldighetsperiode": {
-                                "fom": "2021-06-02"
-                            }
+                ],
+                "navn": [
+                    {
+                        "redigertnavn": "$redigertnavn",
+                        "navnelinje1": "$redigertnavn",
+                        "bruksperiode": {
+                            "fom": "2021-06-02T09:23:59.803"
+                        },
+                        "gyldighetsperiode": {
+                            "fom": "2021-06-02"
                         }
-                    ],
-                    "navn": [
-                        {
-                            "redigertnavn": "SJOKKERENDE ELEKTRIKER",
-                            "navnelinje1": "SJOKKERENDE ELEKTRIKER",
-                            "bruksperiode": {
-                                "fom": "2021-06-02T09:23:59.839"
-                            },
-                            "gyldighetsperiode": {
-                                "fom": "2021-06-02"
-                            }
+                    }
+                ],
+                "forretningsadresser": [
+                    {
+                        "type": "Forretningsadresse",
+                        "adresselinje1": "BOLSTADVEIEN 30",
+                        "postnummer": "4532",
+                        "poststed": "ØYSLEBØ",
+                        "landkode": "NO",
+                        "kommunenummer": "4205",
+                        "bruksperiode": {
+                            "fom": "2021-06-02T09:23:59.805"
+                        },
+                        "gyldighetsperiode": {
+                            "fom": "2021-06-02"
                         }
-                    ],
-                    "forretningsadresser": [
-                        {
-                            "type": "Forretningsadresse",
-                            "adresselinje1": "DRIVHUSVEGEN 40",
-                            "postnummer": "9027",
-                            "poststed": "RAMFJORDBOTN",
-                            "landkode": "NO",
-                            "kommunenummer": "5401",
-                            "bruksperiode": {
-                                "fom": "2021-06-02T09:23:59.84"
-                            },
-                            "gyldighetsperiode": {
-                                "fom": "2021-06-02"
-                            }
+                    }
+                ],
+                "postadresser": [
+                    {
+                        "type": "Postadresse",
+                        "adresselinje1": "BOLSTADVEIEN 30",
+                        "postnummer": "4532",
+                        "poststed": "ØYSLEBØ",
+                        "landkode": "NO",
+                        "kommunenummer": "4205",
+                        "bruksperiode": {
+                            "fom": "2021-06-02T09:23:59.807"
+                        },
+                        "gyldighetsperiode": {
+                            "fom": "2021-06-02"
                         }
-                    ],
-                    "postadresser": [
-                        {
-                            "type": "Postadresse",
-                            "adresselinje1": "DRIVHUSVEGEN 40",
-                            "postnummer": "9027",
-                            "poststed": "RAMFJORDBOTN",
-                            "landkode": "NO",
-                            "kommunenummer": "5401",
-                            "bruksperiode": {
-                                "fom": "2021-06-02T09:23:59.841"
-                            },
-                            "gyldighetsperiode": {
-                                "fom": "2021-06-02"
-                            }
-                        }
-                    ],
-                    "sistEndret": "2021-06-02"
-                }
+                    }
+                ],
+                "sistEndret": "2021-06-02"
             }
-        ]
+        }
         """.trimIndent()
 }

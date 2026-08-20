@@ -98,13 +98,17 @@ class RestClientConfig(
     ): RestClient = hybrid(scope)
 
     /**
-     * familie-ef-proxy (EregClient, ArbeidOgInntektClient, SigrunClient)
+     * Sigrun (SigrunClient)
      * Kun maskin-til-maskin, appen har ingen OBO/jwt-bearer-registrering i Azure AD.
      */
-    @Bean("efProxyRestClient")
-    fun efProxyRestClient(
-        @Value("\${FAMILIE_EF_PROXY_SCOPE}") scope: String,
-    ): RestClient = entraIDRestClientFactory.lagMaskinTilMaskinRestKlient(scope).medTimeout()
+    @Bean("sigrunRestClient")
+    fun sigrunRestClient(
+        @Value("\${SIGRUN_SCOPE}") scope: String,
+    ): RestClient =
+        entraIDRestClientFactory
+            .lagOboRestKlient(scope) {
+                SikkerhetContext.hentJwt()?.tokenValue ?: error("OBO-kall mot Sigrun uten innlogget bruker")
+            }.medTimeout()
 
     /**
      * medlemskap MEDL (MedlClient)
@@ -199,7 +203,11 @@ class RestClientConfig(
         @Value("\${EF_IVERKSETT_SCOPE}") scope: String,
     ): RestClient = hybrid(scope)
 
-    /** Uten autentisering – for interne familie-tjenester uten auth (BrevClient, FamilieDokumentClient) */
+    /**
+     * Uten autentisering – for interne familie-tjenester uten auth (BrevClient, FamilieDokumentClient)
+     * og for eksterne FSS-tjenester som kun er beskyttet av nettverkstilgang, ikke Azure AD-token
+     * (EregClient, ArbeidOgInntektClient)
+     */
     @Bean("utenAuthRestClient")
     fun utenAuthRestClient(): RestClient =
         RestClient

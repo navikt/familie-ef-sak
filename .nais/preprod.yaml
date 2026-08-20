@@ -61,9 +61,6 @@ spec:
         - application: familie-ef-proxy
           namespace: teamfamilie
           cluster: dev-fss
-        - application: familie-ef-proxy-test
-          namespace: teamfamilie
-          cluster: dev-fss
         - application: familie-ba-sak
         - application: bidrag-grunnlag
           namespace: bidrag
@@ -90,8 +87,6 @@ spec:
         - application: familie-dokument
         - application: familie-ks-sak
         - application: familie-ef-infotrygd-replika
-        - application: familie-ef-proxy
-          cluster: dev-fss
         - application: historisk-pensjon
           namespace: historisk
         - application: paw-arbeidssoekerregisteret-api-oppslag-v2
@@ -104,15 +99,20 @@ spec:
           namespace: team-rocket
         - application: logging
           namespace: nais-system
+        - application: sigrun-q2
+          namespace: team-inntekt
+          cluster: dev-fss
       external:
         - host: api-gw-q1.oera.no
         - host: familie-oppdrag.dev-fss-pub.nais.io
         - host: familie-integrasjoner.dev-fss-pub.nais.io
         - host: familie-ef-infotrygd.dev-fss-pub.nais.io
-        - host: familie-ef-proxy.dev-fss-pub.nais.io
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
         - host: ikomp-q2.dev-fss-pub.nais.io
         - host: aareg-services.dev-fss-pub.nais.io
+        - host: ereg-services.dev-fss-pub.nais.io
+        - host: sigrun-q2.dev-fss-pub.nais.io
+        - host: arbeid-og-inntekt-q2.dev-fss-pub.nais.io
   azure:
     application:
       enabled: true
