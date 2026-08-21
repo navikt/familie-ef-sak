@@ -8,24 +8,31 @@ import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
+/**
+ * Kaller ereg-services direkte istedenfor via familie-ef-proxy.
+ * Krever ingen Azure AD-token, kun nettverkstilgang (webproxy/access policy).
+ */
 @Component
 class EregClient(
-    @Value("\${FAMILIE_EF_PROXY_URL}")
-    private val familieEfProxyUri: URI,
-    @Qualifier("efProxyRestClient")
+    @Value("\${EREG_URL}")
+    private val eregUri: URI,
+    @Qualifier("utenAuthRestClient")
     private val restClient: RestClient,
 ) {
-    fun hentOrganisasjoner(organisasjonsnumre: List<String>): List<OrganisasjonDto> {
-        val uriBuilder =
+    fun hentOrganisasjoner(organisasjonsnumre: List<String>): List<OrganisasjonDto> = organisasjonsnumre.map(::hentOrganisasjon)
+
+    private fun hentOrganisasjon(organisasjonsnummer: String): OrganisasjonDto {
+        val uri =
             UriComponentsBuilder
-                .fromUri(familieEfProxyUri)
-                .pathSegment("api/ereg")
-                .queryParam("organisasjonsnumre", organisasjonsnumre)
+                .fromUri(eregUri)
+                .pathSegment("v1", "organisasjon", organisasjonsnummer)
+                .build()
+                .toUri()
 
         return restClient
             .get()
-            .uri(uriBuilder.build().toUri())
+            .uri(uri)
             .retrieve()
-            .body<List<OrganisasjonDto>>()!!
+            .body<OrganisasjonDto>()!!
     }
 }

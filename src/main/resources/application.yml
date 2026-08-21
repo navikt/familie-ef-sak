@@ -12,7 +12,7 @@ REPR_API_SCOPE: api://${DEPLOY_ENV}-gcp.repr.repr-api/.default
 EF_IVERKSETT_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ef-iverksett/.default
 FAMILIE_TILBAKE_SCOPE: api://${DEPLOY_ENV}-gcp.tilbake.tilbakekreving-backend/.default
 FAMILIE_KLAGE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-klage/.default
-FAMILIE_EF_PROXY_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-proxy/.default
+SIGRUN_SCOPE: api://${DEPLOY_ENV}-fss.team-inntekt.sigrun/.default
 INFOTRYGD_REPLIKA_SCOPE: api://${DEPLOY_ENV}-fss.teamfamilie.familie-ef-infotrygd/.default
 INFOTRYGD_REPLIKA_GCP_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-ef-infotrygd-replika/.default
 ARBEIDSSOKER_SCOPE: api://${DEPLOY_ENV}-gcp.paw.paw-arbeidssoekerregisteret-api-oppslag-v2/.default
@@ -96,7 +96,9 @@ INFOTRYGD_REPLIKA_API_URL: https://familie-ef-infotrygd.${ON_PREM_URL_ENV}-fss-p
 INFOTRYGD_REPLIKA_GCP_API_URL: http://familie-ef-infotrygd-replika
 PDL_URL: https://pdl-api.${ON_PREM_URL_ENV}-fss-pub.nais.io
 REPR_API_URL: http://repr-api.repr
-FAMILIE_EF_PROXY_URL: https://familie-ef-proxy.${ON_PREM_URL_ENV}-fss-pub.nais.io
+EREG_URL: https://ereg-services.${ON_PREM_URL_ENV}-fss-pub.nais.io
+ARBEID_OG_INNTEKT_URL: https://arbeid-og-inntekt.${ON_PREM_URL_ENV}-fss-pub.nais.io
+SIGRUN_URL: https://sigrun.${ON_PREM_URL_ENV}-fss-pub.nais.io
 ARBEIDSSOKER_URL: http://paw-arbeidssoekerregisteret-api-oppslag-v2.paw
 HISTORISK_PENSJON_URL: http://historisk-pensjon.historisk
 FAMILIE_KS_SAK_URL: http://familie-ks-sak
