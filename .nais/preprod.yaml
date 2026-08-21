@@ -72,6 +72,9 @@ spec:
           namespace: tilleggsstonader
         - application: etterlatte-prosessering
           namespace: etterlatte
+        - application: familie-ef-proxy
+          namespace: teamfamilie
+          cluster: dev-fss
     outbound:
       rules:
         - application: api-intern
