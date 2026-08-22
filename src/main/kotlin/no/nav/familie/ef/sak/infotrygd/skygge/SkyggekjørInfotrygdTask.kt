@@ -174,17 +174,21 @@ private fun InfotrygdSakResponse.trim(): InfotrygdSakResponse = copy(saker = sak
  * Enkelte String-felter fra Infotrygd er fastbredde CHAR-kolonner i DB2. On-prem og GCP-replikaen kan derfor
  * returnere disse med ulik whitespace-padding selv om verdien reelt sett er lik (eller tom). Trimmes bort her
  * for at slike rene formateringsforskjeller ikke skal trigge falske avvik i skyggekjøringen.
+ *
+ * I tillegg kan on-prem og GCP-replikaen være uenige om hvorvidt en blank CHAR-kolonne skal representeres som
+ * `null` eller som en tom streng. Slikt vises ikke i toString() (både `null` og `""` skrives som `felt=`), men gir
+ * likevel reelt avvik i equals(). Blanke strenger normaliseres derfor også til `null` her.
  */
 private fun InfotrygdSak.trim(): InfotrygdSak =
     copy(
-        saksnr = saksnr?.trim(),
-        saksblokk = saksblokk?.trim(),
-        kapittelnr = kapittelnr?.trim(),
-        årsakskode = årsakskode?.trim(),
-        behandlendeEnhet = behandlendeEnhet?.trim(),
-        registrertAvEnhet = registrertAvEnhet?.trim(),
-        tkNr = tkNr?.trim(),
-        region = region?.trim(),
+        saksnr = saksnr?.trim()?.ifBlank { null },
+        saksblokk = saksblokk?.trim()?.ifBlank { null },
+        kapittelnr = kapittelnr?.trim()?.ifBlank { null },
+        årsakskode = årsakskode?.trim()?.ifBlank { null },
+        behandlendeEnhet = behandlendeEnhet?.trim()?.ifBlank { null },
+        registrertAvEnhet = registrertAvEnhet?.trim()?.ifBlank { null },
+        tkNr = tkNr?.trim()?.ifBlank { null },
+        region = region?.trim()?.ifBlank { null },
     )
 
 private fun InfotrygdFinnesResponse.trim(): InfotrygdFinnesResponse =
