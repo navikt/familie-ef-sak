@@ -106,7 +106,6 @@ spec:
         - host: api-gw.oera.no
         - host: familie-oppdrag.prod-fss-pub.nais.io
         - host: familie-integrasjoner.prod-fss-pub.nais.io
-        - host: familie-ef-infotrygd.prod-fss-pub.nais.io
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
         - host: ikomp.prod-fss-pub.nais.io
         - host: ereg-services.prod-fss-pub.nais.io

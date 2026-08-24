@@ -27,7 +27,6 @@ class FeatureToggleController(
             Toggle.VIS_ANDRE_YTELSER,
             Toggle.MIGRERING_BARNETILSYN,
             Toggle.MULIGHET_LEGG_TIL_FORELDREANSVARSBARN_BARNETILSYN,
-            Toggle.SKYGGEKJØR_INFOTRYGD,
         )
 
     @GetMapping
