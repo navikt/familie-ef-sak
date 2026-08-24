@@ -13,11 +13,6 @@ import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
-/**
- * Klient mot familie-ef-infotrygd-replika i GCP.
- *
- * familie-ef-infotrygd (on-prem) er avviklet, og all trafikk går nå mot GCP-replikaen.
- */
 @Service
 class InfotrygdReplikaClient(
     @Value("\${INFOTRYGD_REPLIKA_API_URL}")
