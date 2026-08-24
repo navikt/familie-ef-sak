@@ -58,9 +58,6 @@ spec:
         - application: familie-ef-mottak
         - application: familie-ef-soknad-api
         - application: familie-klage
-        - application: familie-ef-proxy
-          namespace: teamfamilie
-          cluster: dev-fss
         - application: familie-ba-sak
         - application: bidrag-grunnlag
           namespace: bidrag
@@ -75,6 +72,9 @@ spec:
           namespace: tilleggsstonader
         - application: etterlatte-prosessering
           namespace: etterlatte
+        - application: familie-ef-proxy
+          namespace: teamfamilie
+          cluster: dev-fss
     outbound:
       rules:
         - application: api-intern

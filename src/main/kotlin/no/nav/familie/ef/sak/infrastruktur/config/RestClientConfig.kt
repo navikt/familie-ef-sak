@@ -54,9 +54,6 @@ class RestClientConfig(
             .configureMessageConverters { converters ->
                 converters
                     .registerDefaults()
-                    // withJsonConverter overstyrer JSON-converteren som ellers auto-detekteres,
-                    // uavhengig av hvor i listen den defaultmessig havner (f.eks. foran YAML-converteren
-                    // som også er på classpath via springdoc/swagger-core)
                     .withJsonConverter(JacksonJsonHttpMessageConverter(jsonMapper))
             }.build()
 
