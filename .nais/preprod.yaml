@@ -106,7 +106,6 @@ spec:
         - host: api-gw-q1.oera.no
         - host: familie-oppdrag.dev-fss-pub.nais.io
         - host: familie-integrasjoner.dev-fss-pub.nais.io
-        - host: familie-ef-infotrygd.dev-fss-pub.nais.io
         - host: teamfamilie-unleash-api.nav.cloud.nais.io
         - host: ikomp-q2.dev-fss-pub.nais.io
         - host: aareg-services.dev-fss-pub.nais.io

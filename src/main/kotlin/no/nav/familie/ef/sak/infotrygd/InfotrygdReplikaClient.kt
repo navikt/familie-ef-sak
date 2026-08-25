@@ -1,16 +1,10 @@
 package no.nav.familie.ef.sak.infotrygd
 
-import no.nav.familie.ef.sak.infotrygd.skygge.SkyggeInfotrygdOperasjon
-import no.nav.familie.ef.sak.infotrygd.skygge.SkyggekjørInfotrygdTask
-import no.nav.familie.ef.sak.infotrygd.skygge.SkyggekjøringTaskLagrer
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -25,10 +19,7 @@ class InfotrygdReplikaClient(
     private val infotrygdReplikaUri: URI,
     @Qualifier("infotrygdReplikaRestClient")
     private val restClient: RestClient,
-    private val skyggekjøringTaskLagrer: SkyggekjøringTaskLagrer,
-    private val featureToggleService: FeatureToggleService,
 ) {
-    private val logger = LoggerFactory.getLogger(javaClass)
     private val perioderUri: URI =
         UriComponentsBuilder
             .fromUri(infotrygdReplikaUri)
@@ -65,41 +56,29 @@ class InfotrygdReplikaClient(
             .build()
             .toUri()
 
-    fun hentPerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
-        val response =
-            restClient
-                .post()
-                .uri(perioderUri)
-                .body(request)
-                .retrieve()
-                .body<InfotrygdPeriodeResponse>()!!
-        skyggekjør(SkyggeInfotrygdOperasjon.HENT_PERIODER, request.personIdenter, request, response)
-        return response
-    }
+    fun hentPerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse =
+        restClient
+            .post()
+            .uri(perioderUri)
+            .body(request)
+            .retrieve()
+            .body<InfotrygdPeriodeResponse>()!!
 
-    fun hentSammenslåttePerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse {
-        val response =
-            restClient
-                .post()
-                .uri(sammenslåttePerioderUri)
-                .body(request)
-                .retrieve()
-                .body<InfotrygdPeriodeResponse>()!!
-        skyggekjør(SkyggeInfotrygdOperasjon.HENT_SAMMENSLÅTTE_PERIODER, request.personIdenter, request, response)
-        return response
-    }
+    fun hentSammenslåttePerioder(request: InfotrygdPeriodeRequest): InfotrygdPeriodeResponse =
+        restClient
+            .post()
+            .uri(sammenslåttePerioderUri)
+            .body(request)
+            .retrieve()
+            .body<InfotrygdPeriodeResponse>()!!
 
-    fun hentSaker(request: InfotrygdSøkRequest): InfotrygdSakResponse {
-        val response =
-            restClient
-                .post()
-                .uri(finnSakerUri)
-                .body(request)
-                .retrieve()
-                .body<InfotrygdSakResponse>()!!
-        skyggekjør(SkyggeInfotrygdOperasjon.HENT_SAKER, request.personIdenter, request, response)
-        return response
-    }
+    fun hentSaker(request: InfotrygdSøkRequest): InfotrygdSakResponse =
+        restClient
+            .post()
+            .uri(finnSakerUri)
+            .body(request)
+            .retrieve()
+            .body<InfotrygdSakResponse>()!!
 
     fun hentPersonerForMigrering(antall: Int): Set<String> {
         val response =
@@ -117,43 +96,11 @@ class InfotrygdReplikaClient(
      */
     fun hentInslagHosInfotrygd(request: InfotrygdSøkRequest): InfotrygdFinnesResponse {
         require(request.personIdenter.isNotEmpty()) { "Identer har ingen verdier" }
-        val response =
-            restClient
-                .post()
-                .uri(eksistererUri)
-                .body(request)
-                .retrieve()
-                .body<InfotrygdFinnesResponse>()!!
-        skyggekjør(SkyggeInfotrygdOperasjon.HENT_INNSLAG_HOS_INFOTRYGD, request.personIdenter, request, response)
-        return response
-    }
-
-    /**
-     * Oppretter en asynkron task som gjør det samme kallet mot familie-ef-infotrygd-replika (GCP) og sammenligner
-     * responsen med [forventetRespons] (svaret vi nettopp fikk fra familie-ef-infotrygd on-prem). Brukes til å
-     * verifisere at migreringen til GCP-replikaen gir identiske svar, se [SkyggekjørInfotrygdTask].
-     *
-     * [SkyggekjøringTaskLagrer] oppretter kun tasken dersom en identisk (samme payload/type) ikke allerede finnes -
-     * se den for hvorfor dette er trygt og effektivt på tvers av transaksjonskontekster.
-     *
-     * Skal aldri kunne påvirke det ordinære kallet mot on-prem, så eventuelle feil ved oppretting av skyggetasken logges her
-     */
-    private fun skyggekjør(
-        operasjon: SkyggeInfotrygdOperasjon,
-        personIdenter: Set<String>,
-        request: Any,
-        forventetRespons: Any,
-    ) {
-        if (featureToggleService.isEnabled(Toggle.SKYGGEKJØR_INFOTRYGD)) {
-            try {
-                skyggekjøringTaskLagrer.lagreHvisIkkeFinnesFraFør(
-                    type = SkyggekjørInfotrygdTask.TYPE,
-                    payload = SkyggekjørInfotrygdTask.opprettPayload(operasjon, personIdenter),
-                    metadata = SkyggekjørInfotrygdTask.opprettMetadata(request, forventetRespons),
-                )
-            } catch (e: Exception) {
-                logger.error("Klarte ikke å opprette skyggetask for $operasjon mot familie-ef-infotrygd-replika", e)
-            }
-        }
+        return restClient
+            .post()
+            .uri(eksistererUri)
+            .body(request)
+            .retrieve()
+            .body<InfotrygdFinnesResponse>()!!
     }
 }
