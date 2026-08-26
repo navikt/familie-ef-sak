@@ -75,7 +75,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 
 internal class JournalføringServiceTest {

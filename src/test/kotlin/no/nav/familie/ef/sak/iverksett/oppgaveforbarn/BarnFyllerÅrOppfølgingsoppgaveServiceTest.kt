@@ -149,9 +149,6 @@ internal class BarnFyllerÅrOppfølgingsoppgaveServiceTest {
             oppfølgingOppgaveBarnFyllerÅrRepository.finnBarnIBehandlingerMedGammeltRegelverkForOppfølgingsoppgave(StønadType.OVERGANGSSTØNAD, any())
         } returns opprettBarnForFødselsdatoer
 
-        val opprettBarnTilOppgave =
-            opprettBarnForFødselsdatoer.map { BarnTilOppgave(it.fødselsnummerBarn!!, it.behandlingId, 1, 1) }.toSet()
-
         opprettOppgaveForBarnService.opprettTasksForAlleBarnSomHarFyltÅr()
         verify(exactly = 7) { taskService.save(any()) }
     }
