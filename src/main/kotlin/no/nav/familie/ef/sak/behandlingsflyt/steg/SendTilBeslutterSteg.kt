@@ -263,6 +263,6 @@ class SendTilBeslutterSteg(
             "En annen saksbehandler har signert vedtaksbrevet"
         }
     }
-test
+
     override fun stegType(): StegType = StegType.SEND_TIL_BESLUTTER
 }
