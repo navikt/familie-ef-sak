@@ -41,7 +41,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.http.HttpStatus.BAD_REQUEST
-import tools.jackson.databind.node.StringNode
 
 internal class VedtaksbrevServiceTest {
     private val fagsak = fagsak(setOf(PersonIdent("12345678910")))

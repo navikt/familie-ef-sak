@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.infrastruktur.config
 import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
-import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.iverksett.IverksettClient
 import no.nav.familie.kontrakter.ef.iverksett.IverksettStatus
 import no.nav.familie.kontrakter.felles.jsonMapper

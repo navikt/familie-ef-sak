@@ -34,7 +34,6 @@ import no.nav.familie.ef.sak.repository.behandling
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.folkeregisteridentifikator
 import no.nav.familie.kontrakter.ef.søknad.TestsøknadBuilder
-import no.nav.familie.kontrakter.felles.medlemskap.Medlemskapsinfo
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.BeforeEach

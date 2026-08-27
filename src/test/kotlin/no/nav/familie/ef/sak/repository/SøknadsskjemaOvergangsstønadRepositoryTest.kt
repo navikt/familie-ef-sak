@@ -6,10 +6,8 @@ import no.nav.familie.ef.sak.opplysninger.søknad.SøknadOvergangsstønadReposit
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadSkolepengerRepository
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Adresseopplysninger
 import no.nav.familie.ef.sak.opplysninger.søknad.domain.Sivilstandsplaner
-import no.nav.familie.ef.sak.opplysninger.søknad.domain.StringListeWrapper
 import no.nav.familie.ef.sak.opplysninger.søknad.mapper.SøknadsskjemaMapper
 import no.nav.familie.kontrakter.ef.søknad.Barnepass
-import no.nav.familie.kontrakter.ef.søknad.Selvstendig
 import no.nav.familie.kontrakter.ef.søknad.SøknadOvergangsstønadRegelendring2026
 import no.nav.familie.kontrakter.ef.søknad.Søknadsfelt
 import no.nav.familie.kontrakter.ef.søknad.Testsøknad

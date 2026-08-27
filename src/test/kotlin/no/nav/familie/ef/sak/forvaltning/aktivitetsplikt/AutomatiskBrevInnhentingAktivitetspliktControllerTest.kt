@@ -45,7 +45,7 @@ internal class AutomatiskBrevInnhentingAktivitetspliktControllerTest : OppslagSp
         assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(taskService.findAll().any { it.type == StartUtsendingAvAktivitetspliktBrevTask.TYPE }).isTrue
         val responsAndreRunde = opprettTasks(liveRun = true, taskLimit = 10)
-        assertThat(respons.statusCode).isEqualTo(HttpStatus.OK)
+        assertThat(responsAndreRunde.statusCode).isEqualTo(HttpStatus.OK)
         assertThat(taskService.findAll().count { it.type == StartUtsendingAvAktivitetspliktBrevTask.TYPE }).isEqualTo(2)
     }
 

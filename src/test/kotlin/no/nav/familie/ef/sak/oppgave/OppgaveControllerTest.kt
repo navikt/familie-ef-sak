@@ -85,7 +85,6 @@ internal class OppgaveControllerTest {
         mockkObject(SikkerhetContext)
         every { SikkerhetContext.hentSaksbehandler() } returns ""
 
-        val versjonSlot = slot<Int>()
         val oppgaveIdSlot = slot<Long>()
         tilgangOgRolleJustRuns()
         every { oppgaveService.fordelOppgave(capture(oppgaveIdSlot), any(), endretAvSaksbehandler = any()) } returns 123
