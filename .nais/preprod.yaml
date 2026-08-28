@@ -75,6 +75,9 @@ spec:
         - application: familie-ef-proxy
           namespace: teamfamilie
           cluster: dev-fss
+        - application: arena
+          namespace: teamarenanais
+          cluster: dev-fss
     outbound:
       rules:
         - application: api-intern
