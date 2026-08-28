@@ -78,7 +78,7 @@ spec:
           cluster: prod-fss
         - application: arena
           namespace: teamarenanais
-          cluster: dev-fss
+          cluster: prod-fss
     outbound:
       rules:
         - application: api-intern
