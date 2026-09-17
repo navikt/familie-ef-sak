@@ -37,6 +37,7 @@
         <kotlin.version>2.4.20</kotlin.version>
         <springdoc.version>3.1.1</springdoc.version>
         <mockk.version>1.14.11</mockk.version>
+        <bytebuddy-agent.version>1.18.11</bytebuddy-agent.version>
         <felles.version>4.20260818093920_16ad74a</felles.version>
         <prosessering.version>2.20260817115650_f13f507</prosessering.version>
         <efterlatte-prosessering.version>1.20260907124211_7fefc88</efterlatte-prosessering.version>
@@ -280,6 +281,14 @@
             <version>${mockk.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- Pinnet så vi kan peke -javaagent direkte på jar-en og unngå ByteBuddy sin runtime self-attach,
+             som feiler med en native JPLISAgent-race ("!errorOutstanding") på enkelte JDK-builds. -->
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy-agent</artifactId>
+            <version>${bytebuddy-agent.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-test-junit5</artifactId>
@@ -390,6 +399,7 @@
                 <configuration>
                     <forkCount>${surefire.forkCount}</forkCount>
                     <reuseForks>true</reuseForks>
+                    <argLine>-Djdk.attach.allowAttachSelf=true -javaagent:${settings.localRepository}/net/bytebuddy/byte-buddy-agent/${bytebuddy-agent.version}/byte-buddy-agent-${bytebuddy-agent.version}.jar</argLine>
                 </configuration>
             </plugin>
             <plugin>
