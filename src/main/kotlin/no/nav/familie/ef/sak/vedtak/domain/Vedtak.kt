@@ -281,6 +281,7 @@ enum class AktivitetType {
 
 enum class SamordningsfradragType {
     GJENLEVENDEPENSJON,
+    OMSTILLINGSSTØNAD,
     UFØRETRYGD,
     EØS_FAMILIEYTELSE,
 }
