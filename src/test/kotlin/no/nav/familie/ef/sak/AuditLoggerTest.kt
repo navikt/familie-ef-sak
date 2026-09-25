@@ -77,6 +77,18 @@ internal class AuditLoggerTest {
             .isEqualTo("${expectedBaseLog("Permit")}cs3Label=k cs3=v cs5Label=k2 cs5=v2 cs6Label=k3 cs6=v3")
     }
 
+    @Test
+    internal fun `skal ikke logge filnavn i dokument-pdf-uri`() {
+        val servletRequest = MockHttpServletRequest("GET", "/api/journalpost/1/dokument-pdf/2/Husleiekontrakt%20(barnefar)")
+        BrukerContextUtil.mockBrukerContext(navIdent, servletRequest = servletRequest)
+
+        auditLogger.log(Sporingsdata(AuditLoggerEvent.ACCESS, "12345678901", Tilgang(true)))
+
+        assertThat(getMessage())
+            .contains("request=/api/journalpost/1/dokument-pdf/2/*** ")
+            .doesNotContain("Husleiekontrakt")
+    }
+
     private fun getMessage() = listAppender.list[0].message.replace("""end=\d+""".toRegex(), "end=123")
 
     private fun expectedBaseLog(harTilgang: String) =
