@@ -9,8 +9,7 @@ import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 /**
- * Kaller ereg-services direkte istedenfor via familie-ef-proxy.
- * Krever ingen Azure AD-token, kun nettverkstilgang (webproxy/access policy).
+ * Kaller ereg-services og krever ingen Azure AD-token, kun nettverkstilgang (webproxy/access policy).
  */
 @Component
 class EregClient(

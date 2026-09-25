@@ -10,8 +10,7 @@ import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
 /**
- * Kaller arbeid-og-inntekt direkte istedenfor via familie-ef-proxy.
- * Krever ingen Azure AD-token, kun nettverkstilgang (webproxy/access policy) og Nav-Personident-header.
+ * Kall mot arbeid og inntekt krever ingen Azure AD-token, kun nettverkstilgang (webproxy/access policy) og Nav-Personident-header.
  */
 @Component
 class ArbeidOgInntektClient(
