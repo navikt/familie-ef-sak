@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak
 
 import jakarta.servlet.http.HttpServletRequest
 import no.nav.familie.ef.sak.felles.integration.dto.Tilgang
+import no.nav.familie.ef.sak.infrastruktur.config.MaskertRequestTimeFilter
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
@@ -76,7 +77,7 @@ class AuditLogger(
             "duid=${data.personIdent} " +
             "sproc=${getCallId()} " +
             "requestMethod=${request.method} " +
-            "request=${request.requestURI} " +
+            "request=${MaskertRequestTimeFilter.maskerFilnavn(request.requestURI)} " +
             "flexString1Label=Decision flexString1=${formatHarTilgang(data.tilgang)} " +
             formatDenyPolicy(data.tilgang) +
             createCustomString(data)
