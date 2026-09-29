@@ -3,7 +3,6 @@ package no.nav.familie.ef.sak.infrastruktur.config
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext.harRolle
 import no.nav.familie.log.NavSystemtype
 import no.nav.familie.log.filter.LogFilter
-import no.nav.familie.log.filter.RequestTimeFilter
 import no.nav.familie.prosessering.config.ProsesseringInfoProvider
 import no.nav.familie.sikkerhet.context.FamilieFellesSpringSecurityKonfigurasjon
 import org.slf4j.LoggerFactory
@@ -49,8 +48,8 @@ class ApplicationConfig {
         }
 
     @Bean
-    fun requestTimeFilter(): FilterRegistrationBean<RequestTimeFilter> =
-        FilterRegistrationBean(RequestTimeFilter()).apply {
+    fun requestTimeFilter(): FilterRegistrationBean<MaskertRequestTimeFilter> =
+        FilterRegistrationBean(MaskertRequestTimeFilter()).apply {
             logger.info("Registering RequestTimeFilter filter")
             order = 2
         }

@@ -9,10 +9,6 @@ import org.springframework.web.client.body
 import org.springframework.web.util.UriComponentsBuilder
 import java.net.URI
 
-/**
- * Kaller Sigrun (Skatteetaten) direkte istedenfor via familie-ef-proxy.
- * Krever maskin-til-maskin Azure AD-token (SIGRUN_SCOPE).
- */
 @Component
 class SigrunClient(
     @Value("\${SIGRUN_URL}") private val uri: URI,
