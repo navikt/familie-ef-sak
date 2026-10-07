@@ -39,8 +39,6 @@ import java.util.UUID
 /**
  * Tester andelshistorikken fra vedtak til ferdig historikk
  * vedtak -> BeregnYtelseSteg (lagrer vedtak + tilkjent ytelse) -> AndelsHistorikkService.hentHistorikk
- *
- * Se README_andelshistorikkberegner.md for forklaring av scenarioene.
  */
 internal class AndelHistorikkBarnetilsynIntegrationTest : OppslagSpringRunnerTest() {
     @Autowired
@@ -66,7 +64,7 @@ internal class AndelHistorikkBarnetilsynIntegrationTest : OppslagSpringRunnerTes
     }
 
     @Test
-    internal fun `scenario A - revurdering fra samme dato med samme innhold gir FJERNET og ny rad`() {
+    internal fun `Revurdering fra samme dato med samme innhold gir FJERNET og ny rad`() {
         vedta(periode(januar(2024), mars(2024), utgifter = 2000))
         vedta(periode(januar(2024), mars(2024), utgifter = 2000))
 
@@ -77,7 +75,7 @@ internal class AndelHistorikkBarnetilsynIntegrationTest : OppslagSpringRunnerTes
     }
 
     @Test
-    internal fun `scenario G - endret aktivitet i første måned av revurderingen gir ERSTATTET`() {
+    internal fun `Endret aktivitet i første måned av revurderingen gir ERSTATTET`() {
         vedta(
             periode(februar(2024), februar(2024), utgifter = 2001),
             periode(mars(2024), desember(2024), utgifter = 2000),
@@ -96,7 +94,7 @@ internal class AndelHistorikkBarnetilsynIntegrationTest : OppslagSpringRunnerTes
     }
 
     @Test
-    internal fun `scenario G - kun aktiv periode for måneden med endret aktivitet er den nye`() {
+    internal fun `Kun aktiv periode for måneden med endret aktivitet er den nye`() {
         vedta(
             periode(februar(2024), februar(2024), utgifter = 2001),
             periode(mars(2024), desember(2024), utgifter = 2000),
@@ -117,7 +115,7 @@ internal class AndelHistorikkBarnetilsynIntegrationTest : OppslagSpringRunnerTes
     }
 
     @Test
-    internal fun `scenario H - endret aktivitet senere i revurderingen gir SPLITTET, FJERNET og nye rader`() {
+    internal fun `Endret aktivitet senere i revurderingen gir SPLITTET, FJERNET og nye rader`() {
         vedta(periode(januar(2024), desember(2024), utgifter = 2000))
         vedta(
             periode(mars(2024), mars(2024), utgifter = 2000, aktivitet = FORBIGÅENDE_SYKDOM),
@@ -133,7 +131,7 @@ internal class AndelHistorikkBarnetilsynIntegrationTest : OppslagSpringRunnerTes
     }
 
     @Test
-    internal fun `endret aktivitet og kortere periode fra samme dato gir ERSTATTET på hele den gamle perioden`() {
+    internal fun `Endret aktivitet og kortere periode fra samme dato gir ERSTATTET på hele den gamle perioden`() {
         vedta(periode(januar(2024), desember(2024), utgifter = 2000))
         vedta(periode(januar(2024), mars(2024), utgifter = 2000, aktivitet = FORBIGÅENDE_SYKDOM))
 
@@ -144,7 +142,7 @@ internal class AndelHistorikkBarnetilsynIntegrationTest : OppslagSpringRunnerTes
     }
 
     @Test
-    internal fun `samme aktivitet og kortere periode fra samme dato gir SPLITTET og FJERNET`() {
+    internal fun `Samme aktivitet og kortere periode fra samme dato gir SPLITTET og FJERNET`() {
         vedta(periode(januar(2024), desember(2024), utgifter = 2000))
         vedta(periode(januar(2024), mars(2024), utgifter = 2000))
 
