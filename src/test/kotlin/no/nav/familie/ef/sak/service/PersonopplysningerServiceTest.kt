@@ -144,6 +144,23 @@ internal class PersonopplysningerServiceTest {
     }
 
     @Test
+    internal fun `skal ikke hente nav-kontor når identen er merket som falsk`() {
+        every { pdlClient.hentFalskIdentitet(any()) } returns FalskIdentitet(erFalsk = true, rettIdentitetErUkjent = true)
+
+        assertThat(personopplysningerService.hentNavKontor("1")).isNull()
+        verify(exactly = 0) { personopplysningerIntegrasjonerClient.hentNavKontor(any()) }
+    }
+
+    @Test
+    internal fun `skal hente nav-kontor når identen ikke er merket som falsk`() {
+        every { pdlClient.hentFalskIdentitet(any()) } returns null
+
+        personopplysningerService.hentNavKontor("1")
+
+        verify(exactly = 1) { personopplysningerIntegrasjonerClient.hentNavKontor("1") }
+    }
+
+    @Test
     internal fun `skal ikke sette falskIdentitet når erFalsk er false`() {
         every { pdlClient.hentFalskIdentitet(any()) } returns FalskIdentitet(erFalsk = false, rettIdentitetErUkjent = null)
 

@@ -14,6 +14,7 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockV
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.FalskIdentitetDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Kjønn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
@@ -63,6 +64,7 @@ internal class SøkServiceTest {
     @BeforeEach
     internal fun setUp() {
         every { behandlingService.hentAktivIdent(any()) } returns "ident"
+        every { personopplysningerService.hentFalskIdentitet(any()) } returns null
         every { vurderingService.hentGrunnlagOgMetadata(any()) } returns
             Pair(
                 mockVilkårGrunnlagDto(),
@@ -160,6 +162,18 @@ internal class SøkServiceTest {
 
         assertThat(søkeresultat.visningsnavn).isEqualTo(NAVN_MANGLER)
         assertThat(søkeresultat.kjønn).isEqualTo(Kjønn.UKJENT)
+    }
+
+    @Test
+    internal fun `skal returnere falsk identitet i søkeresultatet`() {
+        every { fagsakService.finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(any(), any()) } returns emptyList()
+        every { fagsakPersonService.finnPerson(any()) } returns null
+        every { personService.hentSøker("ident") } returns pdlSøker(navn = emptyList(), kjønn = null)
+        every { personopplysningerService.hentFalskIdentitet("ident") } returns FalskIdentitetDto(rettIdentitetErUkjent = true)
+
+        val søkeresultat = søkService.søkPerson(PdlIdenter(listOf(PdlIdent("ident", false))))
+
+        assertThat(søkeresultat.falskIdentitet).isEqualTo(FalskIdentitetDto(rettIdentitetErUkjent = true))
     }
 
     @Test

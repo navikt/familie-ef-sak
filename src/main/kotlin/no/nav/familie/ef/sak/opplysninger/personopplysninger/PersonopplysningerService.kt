@@ -47,7 +47,7 @@ class PersonopplysningerService(
                 grunnlagsdata,
                 egenAnsatt,
                 søkerIdenter,
-            ).copy(falskIdentitet = falskIdentitet(personIdent))
+            ).copy(falskIdentitet = hentFalskIdentitet(personIdent))
     }
 
     fun finnEndringerIPersonopplysningerForBehandling(
@@ -87,7 +87,7 @@ class PersonopplysningerService(
                 grunnlagsdataOpprettet = LocalDateTime.now(),
                 egenAnsatt = egenAnsatt,
                 søkerIdenter = identerFraPdl,
-            ).copy(falskIdentitet = falskIdentitet(personIdent))
+            ).copy(falskIdentitet = hentFalskIdentitet(personIdent))
     }
 
     /**
@@ -95,7 +95,7 @@ class PersonopplysningerService(
      * er merket som falsk etter at behandlingen ble opprettet.
      * Et feilet oppslag skal ikke stoppe visning av personopplysninger, og blir ikke cachet.
      */
-    private fun falskIdentitet(personIdent: String): FalskIdentitetDto? =
+    fun hentFalskIdentitet(personIdent: String): FalskIdentitetDto? =
         try {
             cacheManager.getNullable("falskIdentitet", personIdent) {
                 personService
@@ -128,7 +128,11 @@ class PersonopplysningerService(
     }
 
     @Cacheable("navKontor")
-    fun hentNavKontor(ident: String): NavKontorEnhet? = personopplysningerIntegrasjonerClient.hentNavKontor(ident)
+    fun hentNavKontor(ident: String): NavKontorEnhet? {
+        // En falsk ident har ikke geografisk tilknytning, og oppslaget mot arbeidsfordeling feiler
+        if (hentFalskIdentitet(ident) != null) return null
+        return personopplysningerIntegrasjonerClient.hentNavKontor(ident)
+    }
 
     fun hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent: String): ADRESSEBESKYTTELSEGRADERING = personopplysningerIntegrasjonerClient.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent)
 }

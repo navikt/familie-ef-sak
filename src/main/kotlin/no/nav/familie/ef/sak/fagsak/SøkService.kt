@@ -92,6 +92,7 @@ class SøkService(
                             erMigrert = it.migrert,
                         )
                     },
+                falskIdentitet = personopplysningerService.hentFalskIdentitet(gjeldendePersonIdent),
             )
         } catch (e: Exception) {
             secureLogger.warn("Klarte ikke å mappe person fra pdl i søkeresultat. Kjønn:${person.kjønn} Navn: ${person.navn} Gjeldende: $gjeldendePersonIdent FagsakpersonId: ${fagsakPerson?.id}")
