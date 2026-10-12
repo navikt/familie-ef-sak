@@ -335,7 +335,8 @@ object AndelHistorikkBeregner {
         return first.antallBarn != second.antallBarn ||
             first.utgifter != second.utgifter ||
             first.kontantstøtte != second.kontantstøtte ||
-            first.tilleggsstønad != second.tilleggsstønad
+            first.tilleggsstønad != second.tilleggsstønad ||
+            first.aktivitetstype != second.aktivitetstype
     }
 
     private fun AndelHistorikkHolder.erSanksjonMedSammePeriode(

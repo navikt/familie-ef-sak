@@ -17,7 +17,7 @@ import org.springframework.http.ResponseEntity
 internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest() {
     @Test
     internal fun `perioder - kaller med access_as_application`() {
-        headers.setBearerAuth(clientToken("familie-ef-proxy", true))
+        headers.setBearerAuth(clientToken("arena", true))
         utførKallOgVerifiser<EksternePerioderResponse>("/api/ekstern/perioder") { response ->
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
@@ -26,7 +26,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
 
     @Test
     internal fun `perioder - skal feile når man savner access_as_application`() {
-        headers.setBearerAuth(clientToken("familie-ef-proxy", false))
+        headers.setBearerAuth(clientToken("arena", false))
 
         utførKallOgVerifiser<EksternePerioderResponse>("/api/ekstern/perioder") { response ->
             assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
@@ -36,7 +36,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
 
     @Test
     internal fun `perioder - alle stønader - kaller med access_as_application`() {
-        headers.setBearerAuth(clientToken("familie-ef-proxy", true))
+        headers.setBearerAuth(clientToken("arena", true))
 
         utførKallOgVerifiser<EksternePerioderResponse>("/api/ekstern/perioder/alle-stonader") { response ->
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
@@ -46,7 +46,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
 
     @Test
     internal fun `perioder - alle stønader - skal feile når man savner access_as_application`() {
-        headers.setBearerAuth(clientToken("familie-ef-proxy", false))
+        headers.setBearerAuth(clientToken("arena", false))
 
         utførKallOgVerifiser<EksternePerioderResponse>("/api/ekstern/perioder/alle-stonader") { response ->
             assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
@@ -92,7 +92,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
 
     @Test
     internal fun `perioder overgangsstønad - kaller med access_as_application`() {
-        headers.setBearerAuth(clientToken("familie-ef-proxy", true))
+        headers.setBearerAuth(clientToken("arena", true))
         utførKallOgVerifiser<EksternePerioderResponse>("/api/ekstern/perioder/overgangsstonad") { response ->
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
@@ -101,7 +101,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
 
     @Test
     internal fun `perioder overgangsstønad - skal feile når man savner access_as_application`() {
-        headers.setBearerAuth(clientToken("familie-ef-proxy", false))
+        headers.setBearerAuth(clientToken("arena", false))
 
         utførKallOgVerifiser<EksternePerioderResponse>("/api/ekstern/perioder/overgangsstonad") { response ->
             assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
@@ -111,7 +111,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
 
     @Test
     internal fun `perioder overgangsstønad med beløp - kaller med access_as_application`() {
-        headers.setBearerAuth(clientToken("familie-ef-proxy", true))
+        headers.setBearerAuth(clientToken("arena", true))
         utførKallOgVerifiser<EksternePerioderMedBeløpResponse>("/api/ekstern/perioder/overgangsstonad/med-belop") { response ->
             assertThat(response.statusCode).isEqualTo(HttpStatus.OK)
             assertThat(response.body?.status).isEqualTo(Ressurs.Status.SUKSESS)
@@ -120,7 +120,7 @@ internal class EksternStønadsperioderControllerTest : OppslagSpringRunnerTest()
 
     @Test
     internal fun `perioder overganggstønad med beløp - skal feile når man savner access_as_application`() {
-        headers.setBearerAuth(clientToken("familie-ef-proxy", false))
+        headers.setBearerAuth(clientToken("arena", false))
 
         utførKallOgVerifiser<EksternePerioderMedBeløpResponse>("/api/ekstern/perioder/overgangsstonad/med-belop") { response ->
             assertThat(response.statusCode).isEqualTo(HttpStatus.FORBIDDEN)
