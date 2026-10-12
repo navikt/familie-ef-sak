@@ -14,12 +14,16 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockV
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Kjønn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FolkeregisteridentifikatorFraSøk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.NAVN_MANGLER
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonFraSøk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkResultat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkTreff
@@ -144,6 +148,18 @@ internal class SøkServiceTest {
 
         val person = SøkeresultatPerson(listOf(forventetResultat))
         assertThat(søkService.søkEtterPersonerMedSammeAdressePåBehandling(UUID.randomUUID())).isEqualTo(person)
+    }
+
+    @Test
+    internal fun `skal ikke feile når navn og kjønn er annullert, f eks ved falsk identitet`() {
+        every { fagsakService.finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(any(), any()) } returns emptyList()
+        every { fagsakPersonService.finnPerson(any()) } returns null
+        every { personService.hentSøker("ident") } returns pdlSøker(navn = emptyList(), kjønn = null)
+
+        val søkeresultat = søkService.søkPerson(PdlIdenter(listOf(PdlIdent("ident", false))))
+
+        assertThat(søkeresultat.visningsnavn).isEqualTo(NAVN_MANGLER)
+        assertThat(søkeresultat.kjønn).isEqualTo(Kjønn.UKJENT)
     }
 
     @Test

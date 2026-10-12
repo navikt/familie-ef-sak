@@ -20,10 +20,11 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.NavnDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.KjønnMapper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavnEllerMangler
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
 import org.slf4j.LoggerFactory
@@ -79,8 +80,8 @@ class SøkService(
         try {
             return Søkeresultat(
                 personIdent = gjeldendePersonIdent,
-                kjønn = KjønnMapper.tilKjønn(person.kjønn.first().kjønn),
-                visningsnavn = NavnDto.fraNavn(person.navn.gjeldende()).visningsnavn,
+                kjønn = KjønnMapper.tilKjønn(person.kjønn.firstOrNull()?.kjønn ?: KjønnType.UKJENT),
+                visningsnavn = person.navn.visningsnavnEllerMangler(),
                 fagsakPersonId = fagsakPerson?.id,
                 fagsaker =
                     fagsaker.map {
@@ -93,7 +94,7 @@ class SøkService(
                     },
             )
         } catch (e: Exception) {
-            secureLogger.warn("Klarte ikke å mappe person fra pdl i søkeresultat. Kjønn:${person.kjønn} Visningsnavn: ${person.navn.gjeldende()} Gjeldende: $gjeldendePersonIdent FagsakpersonId: ${fagsakPerson?.id}")
+            secureLogger.warn("Klarte ikke å mappe person fra pdl i søkeresultat. Kjønn:${person.kjønn} Navn: ${person.navn} Gjeldende: $gjeldendePersonIdent FagsakpersonId: ${fagsakPerson?.id}")
             throw e
         }
     }
@@ -180,7 +181,7 @@ class SøkService(
         personService.hentPersonKortBolk(listOf(personIdent))[personIdent]?.let {
             SøkeresultatUtenFagsak(
                 personIdent = personIdent,
-                navn = it.navn.gjeldende().visningsnavn(),
+                navn = it.navn.visningsnavnEllerMangler(),
             )
         }
             ?: throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
