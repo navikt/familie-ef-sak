@@ -2,6 +2,7 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.infrastruktur.config.getCachedOrLoad
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.SøkerMedBarn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FalskIdentitet
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
@@ -48,4 +49,6 @@ class PersonService(
         }
 
     fun hentAktørIder(ident: String): PdlIdenter = pdlClient.hentAktørIder(ident)
+
+    fun hentFalskIdentitet(ident: String): FalskIdentitet? = pdlClient.hentFalskIdentitet(ident)
 }

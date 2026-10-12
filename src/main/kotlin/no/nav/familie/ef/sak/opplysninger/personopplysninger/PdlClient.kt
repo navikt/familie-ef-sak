@@ -2,8 +2,10 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.infrastruktur.config.PdlConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FalskIdentitet
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlBolkResponse
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlFalskIdentitetData
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlHentIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdentBolkRequest
@@ -51,6 +53,23 @@ class PdlClient(
                 .retrieve()
                 .body<PdlResponse<PdlSøkerData>>()!!
         return feilsjekkOgReturnerData(personIdent, pdlResponse) { it.person }
+    }
+
+    fun hentFalskIdentitet(personIdent: String): FalskIdentitet? {
+        val pdlPersonRequest =
+            PdlPersonRequest(
+                variables = PdlPersonRequestVariables(personIdent),
+                query = PdlConfig.falskIdentitetQuery,
+            )
+        val pdlResponse: PdlResponse<PdlFalskIdentitetData> =
+            restClient
+                .post()
+                .uri(pdlConfig.pdlUri)
+                .headers { it.addAll(httpHeaders()) }
+                .body(pdlPersonRequest)
+                .retrieve()
+                .body<PdlResponse<PdlFalskIdentitetData>>()!!
+        return feilsjekkOgReturnerData(personIdent, pdlResponse) { it.person }.falskIdentitet
     }
 
     fun hentPersonForelderBarnRelasjon(personIdenter: List<String>): Map<String, PdlPersonForelderBarn> {

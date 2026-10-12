@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.dto
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.NAVN_MANGLER
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.vilkår.dto.StatsborgerskapDto
@@ -30,6 +31,14 @@ data class PersonopplysningerDto(
     val utflyttingFraNorge: List<UtflyttingDto>,
     val oppholdstillatelse: List<OppholdstillatelseDto>,
     val vergemål: List<VergemålDto>,
+    val falskIdentitet: FalskIdentitetDto? = null, // null = identen er ikke merket som falsk, eller oppslaget feilet
+)
+
+/**
+ * Folkeregisteret har merket identen som falsk. Rett identitet (fnr/dnr) eksponeres ikke til frontend.
+ */
+data class FalskIdentitetDto(
+    val rettIdentitetErUkjent: Boolean,
 )
 
 data class DeltBostedDto(
@@ -173,6 +182,8 @@ data class NavnDto(
 ) {
     companion object {
         fun fraNavn(navn: Navn): NavnDto = NavnDto(navn.fornavn, navn.mellomnavn, navn.etternavn, navn.visningsnavn())
+
+        fun fraNavnEllerMangler(navn: Navn?): NavnDto = navn?.let { fraNavn(it) } ?: NavnDto("", null, "", NAVN_MANGLER)
     }
 }
 

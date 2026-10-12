@@ -100,7 +100,7 @@ data class Søker(
     val fullmakt: List<FullmaktMedNavn>?, // null = ukjent, f.eks. pga. manglende geografisk tilgang i tilgangsmaskinen
     val kjønn: KjønnType,
     val kontaktadresse: List<Kontaktadresse>,
-    val navn: Navn,
+    val navn: Navn?, // null = annullert i Folkeregisteret, f.eks. ved falsk identitet
     val opphold: List<Opphold>,
     val oppholdsadresse: List<Oppholdsadresse>,
     val sivilstand: List<SivilstandMedNavn>,

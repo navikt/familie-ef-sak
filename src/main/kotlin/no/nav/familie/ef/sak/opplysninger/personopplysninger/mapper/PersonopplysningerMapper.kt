@@ -54,7 +54,7 @@ class PersonopplysningerMapper(
                     ?.let { Folkeregisterpersonstatus.fraPdl(it) },
             fødselsdato = søker.fødsel.first().fødselsdato,
             dødsdato = søker.dødsfall?.dødsdato,
-            navn = NavnDto.fraNavn(søker.navn),
+            navn = NavnDto.fraNavnEllerMangler(søker.navn),
             kjønn = KjønnMapper.tilKjønn(søker.kjønn),
             personIdent = gjeldendePersonIdent,
             statsborgerskap = statsborgerskapMapper.map(søker.statsborgerskap),

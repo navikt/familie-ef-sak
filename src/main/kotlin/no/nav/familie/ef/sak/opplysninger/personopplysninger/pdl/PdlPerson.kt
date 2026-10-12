@@ -58,6 +58,19 @@ data class PdlSøkerData(
     val person: PdlSøker?,
 )
 
+data class PdlFalskIdentitetData(
+    val person: PdlPersonFalskIdentitet?,
+)
+
+data class PdlPersonFalskIdentitet(
+    val falskIdentitet: FalskIdentitet?,
+)
+
+data class FalskIdentitet(
+    val erFalsk: Boolean,
+    val rettIdentitetErUkjent: Boolean?,
+)
+
 data class PersonDataBolk<T>(
     val ident: String,
     val code: String,

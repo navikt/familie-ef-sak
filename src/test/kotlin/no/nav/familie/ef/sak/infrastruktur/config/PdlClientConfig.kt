@@ -89,6 +89,8 @@ class PdlClientConfig {
 
         every { pdlClient.hentSøker(any()) } returns opprettPdlSøker()
 
+        every { pdlClient.hentFalskIdentitet(any()) } returns null
+
         every { pdlClient.hentPersonForelderBarnRelasjon(any()) } returns barn()
 
         every { pdlClient.hentAndreForeldre(any()) } returns mapOf(ANNEN_FORELDER_FNR to annenForelder())
