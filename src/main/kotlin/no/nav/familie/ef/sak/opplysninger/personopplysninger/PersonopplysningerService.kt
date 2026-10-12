@@ -2,8 +2,10 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.infrastruktur.config.getNullable
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.FalskIdentitetDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.egenansatt.EgenAnsattClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonopplysningerDto
@@ -40,11 +42,12 @@ class PersonopplysningerService(
         val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
         val egenAnsatt = egenAnsatt(personIdent)
 
-        return personopplysningerMapper.tilPersonopplysninger(
-            grunnlagsdata,
-            egenAnsatt,
-            søkerIdenter,
-        )
+        return personopplysningerMapper
+            .tilPersonopplysninger(
+                grunnlagsdata,
+                egenAnsatt,
+                søkerIdenter,
+            ).copy(falskIdentitet = falskIdentitet(personIdent))
     }
 
     fun finnEndringerIPersonopplysningerForBehandling(
@@ -78,13 +81,33 @@ class PersonopplysningerService(
         val egenAnsatt = egenAnsatt(personIdent)
         val identerFraPdl = personService.hentPersonIdenter(personIdent)
 
-        return personopplysningerMapper.tilPersonopplysninger(
-            personopplysninger = personopplysningerGrunnlagsdataFraPdl,
-            grunnlagsdataOpprettet = LocalDateTime.now(),
-            egenAnsatt = egenAnsatt,
-            søkerIdenter = identerFraPdl,
-        )
+        return personopplysningerMapper
+            .tilPersonopplysninger(
+                personopplysninger = personopplysningerGrunnlagsdataFraPdl,
+                grunnlagsdataOpprettet = LocalDateTime.now(),
+                egenAnsatt = egenAnsatt,
+                søkerIdenter = identerFraPdl,
+            ).copy(falskIdentitet = falskIdentitet(personIdent))
     }
+
+    /**
+     * Hentes alltid fra PDL og lagres ikke i grunnlagsdata, slik at saksbehandler får varsel selv om identen
+     * er merket som falsk etter at behandlingen ble opprettet.
+     * Et feilet oppslag skal ikke stoppe visning av personopplysninger, og blir ikke cachet.
+     */
+    private fun falskIdentitet(personIdent: String): FalskIdentitetDto? =
+        try {
+            cacheManager.getNullable("falskIdentitet", personIdent) {
+                personService
+                    .hentFalskIdentitet(personIdent)
+                    ?.takeIf { it.erFalsk }
+                    ?.let { FalskIdentitetDto(rettIdentitetErUkjent = it.rettIdentitetErUkjent == true) }
+            }
+        } catch (e: Exception) {
+            logger.warn("Klarte ikke å hente falsk identitet fra PDL: ${e::class.simpleName}")
+            secureLogger.warn("Klarte ikke å hente falsk identitet fra PDL for personIdent=$personIdent", e)
+            null
+        }
 
     private fun egenAnsatt(personIdent: String) =
         cacheManager.getValue("egenAnsatt", personIdent) {

@@ -30,6 +30,14 @@ data class PersonopplysningerDto(
     val utflyttingFraNorge: List<UtflyttingDto>,
     val oppholdstillatelse: List<OppholdstillatelseDto>,
     val vergemål: List<VergemålDto>,
+    val falskIdentitet: FalskIdentitetDto? = null, // null = identen er ikke merket som falsk, eller oppslaget feilet
+)
+
+/**
+ * Folkeregisteret har merket identen som falsk. Rett identitet (fnr/dnr) eksponeres ikke til frontend.
+ */
+data class FalskIdentitetDto(
+    val rettIdentitetErUkjent: Boolean,
 )
 
 data class DeltBostedDto(
