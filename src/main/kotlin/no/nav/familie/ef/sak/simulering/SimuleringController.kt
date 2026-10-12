@@ -6,6 +6,7 @@ import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.simulering.Simuleringsoppsummering
 import org.springframework.http.MediaType
+import org.springframework.resilience.annotation.Retryable
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -18,6 +19,7 @@ import java.util.UUID
 @RestController
 @RequestMapping(path = ["/api/simulering"], produces = [MediaType.APPLICATION_JSON_VALUE])
 @Validated
+@Retryable
 class SimuleringController(
     private val tilgangService: TilgangService,
     private val behandlingService: BehandlingService,
