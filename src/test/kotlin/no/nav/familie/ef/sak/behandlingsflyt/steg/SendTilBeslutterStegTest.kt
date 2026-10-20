@@ -220,6 +220,24 @@ internal class SendTilBeslutterStegTest {
     }
 
     @Test
+    internal fun `Skal kunne sende sanksjonsbehandling til beslutter uten begrunnelse for regelverk`() {
+        every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.SANKSJONERE
+        every { regelendring2026Repository.findByBehandlingId(any()) } returns null
+
+        listOf(StønadType.OVERGANGSSTØNAD, StønadType.BARNETILSYN).forEach { stønadstype ->
+            val sanksjonsbehandling =
+                revurdering.copy(
+                    årsak = BehandlingÅrsak.SANKSJON_1_MND,
+                    stønadstype = stønadstype,
+                )
+
+            beslutteVedtakSteg.validerSteg(sanksjonsbehandling)
+        }
+
+        verify(exactly = 0) { regelendring2026Repository.findByBehandlingId(any()) }
+    }
+
+    @Test
     internal fun `Skal ikke kaste feil hvis SKOLEPENGER`() {
         val innvilgetBehandling = behandling.copy(resultat = INNVILGET, stønadstype = StønadType.SKOLEPENGER)
         every { vedtakService.hentVedtaksresultat(any()) } returns ResultatType.INNVILGE

@@ -75,7 +75,11 @@ class SendTilBeslutterSteg(
     }
 
     private fun validerBegrunnelseForRegelveksvalgErSatt(saksbehandling: Saksbehandling) {
-        if (saksbehandling.årsak == BehandlingÅrsak.G_OMREGNING) return
+        if (saksbehandling.årsak == BehandlingÅrsak.G_OMREGNING ||
+            saksbehandling.årsak == BehandlingÅrsak.SANKSJON_1_MND
+        ) {
+            return
+        }
         val begrunnelse: String? = regelendring2026Repository.findByBehandlingId(saksbehandling.id)?.begrunnelse
         when (saksbehandling.stønadstype) {
             StønadType.OVERGANGSSTØNAD, StønadType.BARNETILSYN -> brukerfeilHvis(begrunnelse.isNullOrBlank()) { "Begrunnelse for valg av regelverk er påkrevd. Behandling: ${saksbehandling.id}" }
