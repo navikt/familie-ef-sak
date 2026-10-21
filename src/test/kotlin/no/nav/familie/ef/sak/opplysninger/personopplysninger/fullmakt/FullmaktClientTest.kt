@@ -100,7 +100,7 @@ class FullmaktClientTest {
         assertThat(resultat.ikkeTilgangÅrsak).isEqualTo("tilgangsmaskinen avviste kallet med feilkode EN_ANNEN_FEILKODE")
     }
 
-    private val queryMappingForHentFullmakt: MappingBuilder = WireMock.post(WireMock.urlPathEqualTo("/api/v2/internbruker/fullmakt/bruker-som-fullmektig/alle-fullmakter"))
+    private val queryMappingForHentFullmakt: MappingBuilder = WireMock.post(WireMock.urlPathEqualTo("/api/v2/internbruker/fullmakt/bruker-som-fullmaktsgiver/alle-fullmakter"))
 
     private val hentFullmaktResponse =
         """
