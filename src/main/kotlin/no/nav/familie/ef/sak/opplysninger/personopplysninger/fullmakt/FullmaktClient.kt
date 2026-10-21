@@ -31,7 +31,7 @@ class FullmaktClient(
      * håndteres/vises videre (se [FullmaktService.hentFullmakt]).
      */
     fun hentFullmakt(ident: String): FullmaktOppslagResultat {
-        val url = URI.create("$fullmaktUrl/api/internbruker/fullmakt/fullmaktsgiver")
+        val url = URI.create("$fullmaktUrl/api/v2/internbruker/fullmakt/bruker-som-fullmektig/alle-fullmakter")
         return try {
             val fullmakter =
                 restClient
@@ -82,13 +82,6 @@ data class FullmaktResponse(
     val gyldigFraOgMed: LocalDate,
     val gyldigTilOgMed: LocalDate?,
     val fullmektig: String,
-    val fullmektigsNavn: String?,
-    val omraade: List<Område>,
+    val leserettigheter: List<String>,
+    val skriverettigheter: List<String>,
 )
-
-data class Område(
-    val tema: String,
-    val handling: List<Handling>,
-)
-
-enum class Handling { LES, KOMMUNISER, SKRIV }
