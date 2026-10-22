@@ -23,7 +23,7 @@ class FullmaktService(
                     it.gyldigTilOgMed,
                     it.fullmektig,
                     MotpartsRolle.FULLMEKTIG,
-                    it.omraade.map { it.tema },
+                    it.leserettigheter.plus(it.skriverettigheter).distinct(),
                 )
             }
         return FullmaktResultat(fullmakter, resultat.ikkeTilgangÅrsak)

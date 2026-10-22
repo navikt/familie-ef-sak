@@ -57,18 +57,11 @@ class FullmaktClientTest {
         assertThat(resultat.fullmakter).isNotNull
         val fullmakter = resultat.fullmakter!!
         assertThat(fullmakter.size).isEqualTo(1)
-        assertThat(fullmakter.first().fullmektigsNavn).isEqualTo("fullmektigsNavn")
         assertThat(fullmakter.first().fullmektig).isEqualTo("fullmektigIdent")
         assertThat(fullmakter.first().gyldigFraOgMed).isEqualTo(LocalDate.of(2024, 7, 8))
         assertThat(fullmakter.first().gyldigTilOgMed).isEqualTo(LocalDate.of(2024, 7, 9))
-        assertThat(fullmakter.first().omraade.size).isEqualTo(1)
-        assertThat(
-            fullmakter
-                .first()
-                .omraade
-                .first()
-                .tema,
-        ).isEqualTo("ENF")
+        assertThat(fullmakter.first().leserettigheter).containsExactly("ENF")
+        assertThat(fullmakter.first().skriverettigheter).isEmpty()
     }
 
     @Test
@@ -107,37 +100,36 @@ class FullmaktClientTest {
         assertThat(resultat.ikkeTilgangÅrsak).isEqualTo("tilgangsmaskinen avviste kallet med feilkode EN_ANNEN_FEILKODE")
     }
 
-    private val queryMappingForHentFullmakt: MappingBuilder = WireMock.post(WireMock.urlPathEqualTo("/api/internbruker/fullmakt/fullmaktsgiver"))
+    private val queryMappingForHentFullmakt: MappingBuilder = WireMock.post(WireMock.urlPathEqualTo("/api/v2/internbruker/fullmakt/bruker-som-fullmaktsgiver/alle-fullmakter"))
 
     private val hentFullmaktResponse =
         """
         [
           {
-            "fullmaktId": 1,
-            "registrert": "2024-07-09T09:28:46.897Z",
-            "registrertAv": "registrertAv",
-            "endret": "2024-07-09T09:28:46.897Z",
-            "endretAv": "endretAv",
-            "opphoert": true,
+            "fullmaktId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
             "fullmaktsgiver": "fullmaktsgiverIdent",
             "fullmektig": "fullmektigIdent",
-            "omraade": [
-              {
-                "tema": "ENF",
-                "handling": [
-                  "LES"
-                ]
-              }
-            ],
             "gyldigFraOgMed": "2024-07-08",
             "gyldigTilOgMed": "2024-07-09",
-            "fullmaktUuid": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            "opplysningsId": "3fa85f64-5717-4562-b3fc-2c963f66afa7",
-            "endringsId": 2,
-            "status": "status",
-            "kilde": "kilde",
-            "fullmaktsgiverNavn": "fullmaktsgiverNavn",
-            "fullmektigsNavn": "fullmektigsNavn"
+            "leserettigheter": [
+              "ENF"
+            ],
+            "skriverettigheter": [],
+            "endringslogg": [
+              {
+                "endringId": 2,
+                "registrert": "2024-07-09T09:28:46.897Z",
+                "registrertAv": "registrertAv",
+                "kilde": "kilde",
+                "hendelse": "status",
+                "gyldigFraOgMed": "2024-07-08",
+                "gyldigTilOgMed": "2024-07-09",
+                "leserettigheter": [
+                  "ENF"
+                ],
+                "skriverettigheter": []
+              }
+            ]
           }
         ]
         """.trimIndent()
