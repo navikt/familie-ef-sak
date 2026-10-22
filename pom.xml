@@ -47,7 +47,7 @@
         <kontrakter.version>4.0_20261014103049_c61507f</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
         <eksterne.kontrakter.bisys.version>2.0_20260918153401_c082792</eksterne.kontrakter.bisys.version>
-        <cucumber.version>8.0.4</cucumber.version>
+        <cucumber.version>7.34.8</cucumber.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -298,7 +298,7 @@
         <dependency>
             <groupId>no.nav.security</groupId>
             <artifactId>mock-oauth2-server</artifactId>
-            <version>6.0.7</version>
+            <version>6.0.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
