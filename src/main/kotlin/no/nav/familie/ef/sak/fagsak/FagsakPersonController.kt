@@ -4,8 +4,10 @@ import no.nav.familie.ef.sak.AuditLoggerEvent
 import no.nav.familie.ef.sak.fagsak.dto.FagsakPersonDto
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
 import no.nav.familie.ef.sak.felles.util.FnrUtil.validerIdent
+import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.validation.annotation.Validated
@@ -25,6 +27,7 @@ class FagsakPersonController(
     private val fagsakPersonService: FagsakPersonService,
     private val fagsakService: FagsakService,
     private val personService: PersonService,
+    private val personopplysningerService: PersonopplysningerService,
 ) {
     @GetMapping("{fagsakPersonId}")
     fun hentFagsakPerson(
@@ -50,11 +53,18 @@ class FagsakPersonController(
         validerIdent(personIdentRequest.personIdent)
         val personIdenter = personService.hentPersonIdenter(personIdentRequest.personIdent)
         tilgangService.validerTilgangTilPersonMedBarn(personIdentRequest.personIdent, AuditLoggerEvent.ACCESS)
+        val gjeldendeIdent = personIdenter.gjeldende().ident
+        brukerfeilHvis(
+            fagsakPersonService.finnPerson(personIdenter.identer()) == null &&
+                personopplysningerService.hentFalskIdentitet(gjeldendeIdent) != null,
+        ) {
+            "Kan ikke opprette person fordi Folkeregisteret har merket identen som falsk"
+        }
         val fagsakPersonId =
             fagsakPersonService
                 .hentEllerOpprettPerson(
                     personIdenter.identer(),
-                    personIdenter.gjeldende().ident,
+                    gjeldendeIdent,
                 ).id
         return Ressurs.success(
             fagsakPersonId,

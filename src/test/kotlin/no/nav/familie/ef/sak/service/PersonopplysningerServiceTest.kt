@@ -7,6 +7,7 @@ import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
+import no.nav.familie.ef.sak.infrastruktur.exception.PdlRequestException
 import no.nav.familie.ef.sak.kontantstøtte.HentUtbetalingsinfoKontantstøtteDto
 import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
@@ -15,6 +16,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerIntegrasjonerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.TidligereVedtaksperioderService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.FalskIdentitetDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.egenansatt.EgenAnsattClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktResultat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.fullmakt.FullmaktService
@@ -22,6 +24,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMappe
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.InnflyttingUtflyttingMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.PersonopplysningerMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.StatsborgerskapMapper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FalskIdentitet
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fullmakt
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.MotpartsRolle
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
@@ -47,6 +50,7 @@ internal class PersonopplysningerServiceTest {
     private lateinit var fullmaktService: FullmaktService
 
     private val tidligereVedtaksperioderService = mockk<TidligereVedtaksperioderService>(relaxed = true)
+    private val pdlClient = PdlClientConfig().pdlClient()
 
     @BeforeEach
     internal fun setUp() {
@@ -59,7 +63,7 @@ internal class PersonopplysningerServiceTest {
         kontantstøtteService = mockk()
         fullmaktService = mockk()
 
-        val personService = PersonService(PdlClientConfig().pdlClient(), ConcurrentMapCacheManager())
+        val personService = PersonService(pdlClient, ConcurrentMapCacheManager())
         every { egenAnsattClient.egenAnsatt(any()) } returns true
         every { kontantstøtteService.hentUtbetalingsinfoKontantstøtte(any()) } returns
             HentUtbetalingsinfoKontantstøtteDto(
@@ -119,6 +123,62 @@ internal class PersonopplysningerServiceTest {
 
         personopplysningerService.hentPersonopplysningerFraRegister("2")
         verify(exactly = 2) { egenAnsattClient.egenAnsatt(any()) }
+    }
+
+    @Test
+    internal fun `skal sette falskIdentitet når PDL har merket identen som falsk`() {
+        every { pdlClient.hentFalskIdentitet(any()) } returns FalskIdentitet(erFalsk = true, rettIdentitetErUkjent = true)
+
+        val personopplysninger = personopplysningerService.hentPersonopplysningerFraRegister("1")
+
+        assertThat(personopplysninger.falskIdentitet).isEqualTo(FalskIdentitetDto(rettIdentitetErUkjent = true))
+    }
+
+    @Test
+    internal fun `skal sette rettIdentitetErUkjent til false når PDL ikke har satt feltet`() {
+        every { pdlClient.hentFalskIdentitet(any()) } returns FalskIdentitet(erFalsk = true, rettIdentitetErUkjent = null)
+
+        val personopplysninger = personopplysningerService.hentPersonopplysningerFraRegister("1")
+
+        assertThat(personopplysninger.falskIdentitet).isEqualTo(FalskIdentitetDto(rettIdentitetErUkjent = false))
+    }
+
+    @Test
+    internal fun `skal ikke hente nav-kontor når identen er merket som falsk`() {
+        every { pdlClient.hentFalskIdentitet(any()) } returns FalskIdentitet(erFalsk = true, rettIdentitetErUkjent = true)
+
+        assertThat(personopplysningerService.hentNavKontor("1")).isNull()
+        verify(exactly = 0) { personopplysningerIntegrasjonerClient.hentNavKontor(any()) }
+    }
+
+    @Test
+    internal fun `skal hente nav-kontor når identen ikke er merket som falsk`() {
+        every { pdlClient.hentFalskIdentitet(any()) } returns null
+
+        personopplysningerService.hentNavKontor("1")
+
+        verify(exactly = 1) { personopplysningerIntegrasjonerClient.hentNavKontor("1") }
+    }
+
+    @Test
+    internal fun `skal ikke sette falskIdentitet når erFalsk er false`() {
+        every { pdlClient.hentFalskIdentitet(any()) } returns FalskIdentitet(erFalsk = false, rettIdentitetErUkjent = null)
+
+        val personopplysninger = personopplysningerService.hentPersonopplysningerFraRegister("1")
+
+        assertThat(personopplysninger.falskIdentitet).isNull()
+    }
+
+    @Test
+    internal fun `feil ved henting av falsk identitet skal ikke stoppe personopplysninger og skal ikke caches`() {
+        every { pdlClient.hentFalskIdentitet(any()) } throws PdlRequestException("Feil fra PDL")
+
+        assertThat(personopplysningerService.hentPersonopplysningerFraRegister("1").falskIdentitet).isNull()
+
+        every { pdlClient.hentFalskIdentitet(any()) } returns FalskIdentitet(erFalsk = true, rettIdentitetErUkjent = false)
+
+        assertThat(personopplysningerService.hentPersonopplysningerFraRegister("1").falskIdentitet)
+            .isEqualTo(FalskIdentitetDto(rettIdentitetErUkjent = false))
     }
 
     private fun readFile(filnavn: String): String = this::class.java.getResource(filnavn)!!.readText()
