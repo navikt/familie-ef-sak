@@ -67,6 +67,7 @@ internal class GrunnlagsdataServiceTest {
             kontantstøtteService,
             fullmaktService,
             medlService,
+            featureToggleService,
         )
 
     private val søknad =

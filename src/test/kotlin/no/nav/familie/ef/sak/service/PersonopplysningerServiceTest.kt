@@ -8,6 +8,8 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.PdlRequestException
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.kontantstøtte.HentUtbetalingsinfoKontantstøtteDto
 import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
@@ -29,11 +31,16 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Fullmakt
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.MotpartsRolle
 import no.nav.familie.ef.sak.opplysninger.søknad.SøknadService
 import no.nav.familie.kontrakter.felles.jsonMapper
+import no.nav.familie.kontrakter.felles.navkontor.NavKontorEnhet
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.cache.annotation.EnableCaching
 import org.springframework.cache.concurrent.ConcurrentMapCacheManager
+import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import java.time.LocalDate
+import java.util.function.Supplier
 
 internal class PersonopplysningerServiceTest {
     private val kodeverkService = KodeverkServiceMock().kodeverkService()
@@ -51,6 +58,7 @@ internal class PersonopplysningerServiceTest {
 
     private val tidligereVedtaksperioderService = mockk<TidligereVedtaksperioderService>(relaxed = true)
     private val pdlClient = PdlClientConfig().pdlClient()
+    private val featureToggleService = mockk<FeatureToggleService>()
 
     @BeforeEach
     internal fun setUp() {
@@ -62,6 +70,7 @@ internal class PersonopplysningerServiceTest {
         arbeidsforholdService = mockk(relaxed = true)
         kontantstøtteService = mockk()
         fullmaktService = mockk()
+        every { featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) } returns true
 
         val personService = PersonService(pdlClient, ConcurrentMapCacheManager())
         every { egenAnsattClient.egenAnsatt(any()) } returns true
@@ -79,6 +88,7 @@ internal class PersonopplysningerServiceTest {
                 kontantstøtteService,
                 fullmaktService,
                 mockk(relaxed = true),
+                featureToggleService,
             )
 
         grunnlagsdataService =
@@ -105,6 +115,7 @@ internal class PersonopplysningerServiceTest {
                 personopplysningerMapper,
                 egenAnsattClient,
                 ConcurrentMapCacheManager(),
+                featureToggleService,
             )
     }
 
@@ -123,6 +134,69 @@ internal class PersonopplysningerServiceTest {
 
         personopplysningerService.hentPersonopplysningerFraRegister("2")
         verify(exactly = 2) { egenAnsattClient.egenAnsatt(any()) }
+    }
+
+    @Test
+    internal fun `cachede personopplysninger skal følge toggle når den slås av og på`() {
+        every { pdlClient.hentFalskIdentitet("1") } returns FalskIdentitet(erFalsk = true, rettIdentitetErUkjent = true)
+
+        medCache { service ->
+            assertThat(service.hentPersonopplysningerFraRegister("1").falskIdentitet).isNotNull()
+
+            every { featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) } returns false
+            assertThat(service.hentPersonopplysningerFraRegister("1").falskIdentitet).isNull()
+
+            every { featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) } returns true
+            assertThat(service.hentPersonopplysningerFraRegister("1").falskIdentitet).isNotNull()
+        }
+    }
+
+    @Test
+    internal fun `cachet nav-kontor skal følge toggle når den slås av og på`() {
+        val navKontor = mockk<NavKontorEnhet>()
+        every { personopplysningerIntegrasjonerClient.hentNavKontor("1") } returns navKontor
+        every { pdlClient.hentFalskIdentitet("1") } returns FalskIdentitet(erFalsk = true, rettIdentitetErUkjent = true)
+
+        medCache { service ->
+            every { featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) } returns false
+            assertThat(service.hentNavKontor("1")).isEqualTo(navKontor)
+
+            every { featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) } returns true
+            assertThat(service.hentNavKontor("1")).isNull()
+
+            every { featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) } returns false
+            assertThat(service.hentNavKontor("1")).isEqualTo(navKontor)
+        }
+    }
+
+    @Test
+    internal fun `skal ikke hente falsk identitet fra PDL når toggle er av`() {
+        every { featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) } returns false
+
+        assertThat(personopplysningerService.hentPersonopplysningerFraRegister("toggle-av").falskIdentitet).isNull()
+        verify(exactly = 0) { pdlClient.hentFalskIdentitet(any()) }
+    }
+
+    @Test
+    internal fun `skal ignorere cachet falsk identitet når toggle slås av`() {
+        every { pdlClient.hentFalskIdentitet("1") } returns FalskIdentitet(erFalsk = true, rettIdentitetErUkjent = true)
+        assertThat(personopplysningerService.hentFalskIdentitet("1")).isNotNull()
+
+        every { featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) } returns false
+
+        assertThat(personopplysningerService.hentFalskIdentitet("1")).isNull()
+        verify(exactly = 1) { pdlClient.hentFalskIdentitet("1") }
+    }
+
+    @Test
+    internal fun `skal hente nav-kontor uten oppslag på falsk identitet når toggle er av`() {
+        every { featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) } returns false
+        every { pdlClient.hentFalskIdentitet("1") } returns FalskIdentitet(erFalsk = true, rettIdentitetErUkjent = true)
+
+        personopplysningerService.hentNavKontor("1")
+
+        verify(exactly = 1) { personopplysningerIntegrasjonerClient.hentNavKontor("1") }
+        verify(exactly = 0) { pdlClient.hentFalskIdentitet(any()) }
     }
 
     @Test
@@ -180,6 +254,21 @@ internal class PersonopplysningerServiceTest {
         assertThat(personopplysningerService.hentPersonopplysningerFraRegister("1").falskIdentitet)
             .isEqualTo(FalskIdentitetDto(rettIdentitetErUkjent = false))
     }
+
+    private fun medCache(test: (PersonopplysningerService) -> Unit) {
+        AnnotationConfigApplicationContext().use { context ->
+            context.register(CacheConfig::class.java)
+            context.beanFactory.registerSingleton("featureToggleService", featureToggleService)
+            context.beanFactory.registerSingleton("shortCache", ConcurrentMapCacheManager())
+            context.registerBean("personopplysningerService", PersonopplysningerService::class.java, Supplier { personopplysningerService })
+            context.refresh()
+            test(context.getBean(PersonopplysningerService::class.java))
+        }
+    }
+
+    @TestConfiguration
+    @EnableCaching
+    class CacheConfig
 
     private fun readFile(filnavn: String): String = this::class.java.getResource(filnavn)!!.readText()
 }

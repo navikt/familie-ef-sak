@@ -5,6 +5,8 @@ import no.nav.familie.ef.sak.fagsak.dto.FagsakPersonDto
 import no.nav.familie.ef.sak.felles.dto.PersonIdentDto
 import no.nav.familie.ef.sak.felles.util.FnrUtil.validerIdent
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.TilgangService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
@@ -28,6 +30,7 @@ class FagsakPersonController(
     private val fagsakService: FagsakService,
     private val personService: PersonService,
     private val personopplysningerService: PersonopplysningerService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     @GetMapping("{fagsakPersonId}")
     fun hentFagsakPerson(
@@ -55,7 +58,8 @@ class FagsakPersonController(
         tilgangService.validerTilgangTilPersonMedBarn(personIdentRequest.personIdent, AuditLoggerEvent.ACCESS)
         val gjeldendeIdent = personIdenter.gjeldende().ident
         brukerfeilHvis(
-            fagsakPersonService.finnPerson(personIdenter.identer()) == null &&
+            featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) &&
+                fagsakPersonService.finnPerson(personIdenter.identer()) == null &&
                 personopplysningerService.hentFalskIdentitet(gjeldendeIdent) != null,
         ) {
             "Kan ikke opprette person fordi Folkeregisteret har merket identen som falsk"

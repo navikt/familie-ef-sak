@@ -3,6 +3,8 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 import no.nav.familie.ef.sak.arbeidsforhold.ekstern.ArbeidsforholdService
 import no.nav.familie.ef.sak.felles.util.Timer.loggTid
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.kontantstøtte.HentUtbetalingsinfoKontantstøtteDto
 import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataDomene
@@ -31,6 +33,7 @@ class GrunnlagsdataRegisterService(
     private val kontantstøtteService: KontantstøtteService,
     private val fullmaktService: FullmaktService,
     private val medlService: MedlService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun hentGrunnlagsdataFraRegister(
         personIdent: String,
@@ -54,7 +57,12 @@ class GrunnlagsdataRegisterService(
             utledKontantstøtteperioder(utbetalingsinfoKontantstøtteDto)
 
         return GrunnlagsdataDomene(
-            søker = mapSøker(grunnlagsdataFraPdl.søker, grunnlagsdataFraPdl.andrePersoner),
+            søker =
+                mapSøker(
+                    grunnlagsdataFraPdl.søker,
+                    grunnlagsdataFraPdl.andrePersoner,
+                    håndterFalskIdentitet = featureToggleService.isEnabled(Toggle.FALSK_IDENTITET),
+                ),
             annenForelder = mapAnnenForelder(grunnlagsdataFraPdl.barneForeldre, tidligereVedtaksperioderAnnenForelder),
             medlUnntak = medlUnntak,
             barn = mapBarn(grunnlagsdataFraPdl.barn),
@@ -75,7 +83,12 @@ class GrunnlagsdataRegisterService(
     fun hentPersonopplysninger(personIdent: String): Personopplysninger {
         val grunnlagsdataFraPdl = hentGrunnlagsdataFraPdl(personIdent, emptyList())
         return Personopplysninger(
-            søker = mapSøker(grunnlagsdataFraPdl.søker, grunnlagsdataFraPdl.andrePersoner),
+            søker =
+                mapSøker(
+                    grunnlagsdataFraPdl.søker,
+                    grunnlagsdataFraPdl.andrePersoner,
+                    håndterFalskIdentitet = featureToggleService.isEnabled(Toggle.FALSK_IDENTITET),
+                ),
             annenForelder = mapAnnenForelder(grunnlagsdataFraPdl.barneForeldre, emptyMap()),
             barn = mapBarn(grunnlagsdataFraPdl.barn),
             fullmaktIkkeTilgangÅrsak = grunnlagsdataFraPdl.fullmaktIkkeTilgangÅrsak,

@@ -12,6 +12,8 @@ import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.brukerfeilHvis
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlPersonSøkHjelper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -24,6 +26,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavnEllerMangler
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.ef.sak.vilkår.dto.VilkårGrunnlagDto
@@ -43,6 +46,7 @@ class SøkService(
     private val fagsakService: FagsakService,
     private val vurderingService: VurderingService,
     private val personopplysningerService: PersonopplysningerService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
@@ -76,12 +80,16 @@ class SøkService(
         fagsaker: List<Fagsak>,
     ): Søkeresultat {
         val person = personService.hentSøker(gjeldendePersonIdent)
+        val håndterFalskIdentitet = featureToggleService.isEnabled(Toggle.FALSK_IDENTITET)
 
         try {
             return Søkeresultat(
                 personIdent = gjeldendePersonIdent,
-                kjønn = KjønnMapper.tilKjønn(person.kjønn.firstOrNull()?.kjønn ?: KjønnType.UKJENT),
-                visningsnavn = person.navn.visningsnavnEllerMangler(),
+                kjønn =
+                    KjønnMapper.tilKjønn(
+                        if (håndterFalskIdentitet) person.kjønn.firstOrNull()?.kjønn ?: KjønnType.UKJENT else person.kjønn.first().kjønn,
+                    ),
+                visningsnavn = if (håndterFalskIdentitet) person.navn.visningsnavnEllerMangler() else person.navn.gjeldende().visningsnavn(),
                 fagsakPersonId = fagsakPerson?.id,
                 fagsaker =
                     fagsaker.map {
@@ -182,7 +190,12 @@ class SøkService(
         personService.hentPersonKortBolk(listOf(personIdent))[personIdent]?.let {
             SøkeresultatUtenFagsak(
                 personIdent = personIdent,
-                navn = it.navn.visningsnavnEllerMangler(),
+                navn =
+                    if (featureToggleService.isEnabled(Toggle.FALSK_IDENTITET)) {
+                        it.navn.visningsnavnEllerMangler()
+                    } else {
+                        it.navn.gjeldende().visningsnavn()
+                    },
             )
         }
             ?: throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)

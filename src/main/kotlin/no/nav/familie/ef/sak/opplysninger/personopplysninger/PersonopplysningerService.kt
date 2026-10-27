@@ -4,6 +4,8 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
 import no.nav.familie.ef.sak.infrastruktur.config.getNullable
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.FalskIdentitetDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
@@ -33,6 +35,7 @@ class PersonopplysningerService(
     private val egenAnsattClient: EgenAnsattClient,
     @Qualifier("shortCache")
     private val cacheManager: CacheManager,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -75,7 +78,11 @@ class PersonopplysningerService(
         return EndringerIPersonopplysningerDto(LocalDateTime.now(), alleEndringer)
     }
 
-    @Cacheable("personopplysninger", cacheManager = "shortCache")
+    @Cacheable(
+        "personopplysninger",
+        cacheManager = "shortCache",
+        key = "{#root.args[0], @featureToggleService.isEnabled(T(no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle).FALSK_IDENTITET)}",
+    )
     fun hentPersonopplysningerFraRegister(personIdent: String): PersonopplysningerDto {
         val personopplysningerGrunnlagsdataFraPdl = grunnlagsdataService.hentPersonopplysninger(personIdent)
         val egenAnsatt = egenAnsatt(personIdent)
@@ -95,8 +102,10 @@ class PersonopplysningerService(
      * er merket som falsk etter at behandlingen ble opprettet.
      * Et feilet oppslag skal ikke stoppe visning av personopplysninger, og blir ikke cachet.
      */
-    fun hentFalskIdentitet(personIdent: String): FalskIdentitetDto? =
-        try {
+    fun hentFalskIdentitet(personIdent: String): FalskIdentitetDto? {
+        if (!featureToggleService.isEnabled(Toggle.FALSK_IDENTITET)) return null
+
+        return try {
             cacheManager.getNullable("falskIdentitet", personIdent) {
                 personService
                     .hentFalskIdentitet(personIdent)
@@ -108,6 +117,7 @@ class PersonopplysningerService(
             secureLogger.warn("Klarte ikke å hente falsk identitet fra PDL for personIdent=$personIdent", e)
             null
         }
+    }
 
     private fun egenAnsatt(personIdent: String) =
         cacheManager.getValue("egenAnsatt", personIdent) {
@@ -127,7 +137,10 @@ class PersonopplysningerService(
             }.toMap()
     }
 
-    @Cacheable("navKontor")
+    @Cacheable(
+        "navKontor",
+        key = "{#root.args[0], @featureToggleService.isEnabled(T(no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle).FALSK_IDENTITET)}",
+    )
     fun hentNavKontor(ident: String): NavKontorEnhet? {
         // En falsk ident har ikke geografisk tilknytning, og oppslaget mot arbeidsfordeling feiler
         if (hentFalskIdentitet(ident) != null) return null

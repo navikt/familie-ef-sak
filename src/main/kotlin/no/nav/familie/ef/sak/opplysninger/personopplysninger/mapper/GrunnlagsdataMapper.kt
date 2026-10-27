@@ -69,6 +69,7 @@ object GrunnlagsdataMapper {
     fun mapSøker(
         pdlSøker: PdlSøker,
         andrePersoner: Map<String, PdlPersonKort>,
+        håndterFalskIdentitet: Boolean = false,
     ) = Søker(
         sivilstand = mapSivivilstand(pdlSøker, andrePersoner),
         adressebeskyttelse = pdlSøker.adressebeskyttelse.gjeldende(),
@@ -81,7 +82,7 @@ object GrunnlagsdataMapper {
         innflyttingTilNorge = pdlSøker.innflyttingTilNorge,
         kjønn = pdlSøker.kjønn.firstOrNull()?.kjønn ?: KjønnType.UKJENT,
         kontaktadresse = pdlSøker.kontaktadresse,
-        navn = pdlSøker.navn.gjeldendeEllerNull(),
+        navn = if (håndterFalskIdentitet) pdlSøker.navn.gjeldendeEllerNull() else pdlSøker.navn.gjeldende(),
         opphold = pdlSøker.opphold,
         oppholdsadresse = pdlSøker.oppholdsadresse,
         statsborgerskap = pdlSøker.statsborgerskap,
