@@ -42,8 +42,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
 import java.time.LocalDate
 import java.util.UUID
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Kjønn as PdlKjønn
@@ -177,18 +175,20 @@ internal class SøkServiceTest {
         assertThat(søkeresultat.falskIdentitet).isNull()
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = [false, true])
-    internal fun `skal bare tillate manglende navn ved søk uten fagsak når toggle er på`(togglePå: Boolean) {
-        every { featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) } returns togglePå
+    @Test
+    internal fun `skal vise at navn mangler ved søk uten fagsak når toggle er på`() {
         every { personService.hentPersonKortBolk(listOf("ident")) } returns mapOf("ident" to PdlPersonKort(emptyList(), emptyList(), emptyList()))
 
-        if (togglePå) {
-            assertThat(søkService.søkPersonUtenFagsak("ident").navn).isEqualTo(NAVN_MANGLER)
-        } else {
-            assertThatThrownBy { søkService.søkPersonUtenFagsak("ident") }
-                .isInstanceOf(NoSuchElementException::class.java)
-        }
+        assertThat(søkService.søkPersonUtenFagsak("ident").navn).isEqualTo(NAVN_MANGLER)
+    }
+
+    @Test
+    internal fun `skal feile på manglende navn ved søk uten fagsak når toggle er av`() {
+        every { featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) } returns false
+        every { personService.hentPersonKortBolk(listOf("ident")) } returns mapOf("ident" to PdlPersonKort(emptyList(), emptyList(), emptyList()))
+
+        assertThatThrownBy { søkService.søkPersonUtenFagsak("ident") }
+            .isInstanceOf(NoSuchElementException::class.java)
     }
 
     @Test

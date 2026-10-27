@@ -69,7 +69,7 @@ object GrunnlagsdataMapper {
     fun mapSøker(
         pdlSøker: PdlSøker,
         andrePersoner: Map<String, PdlPersonKort>,
-        håndterFalskIdentitet: Boolean = false,
+        håndterFalskIdentitet: Boolean,
     ) = Søker(
         sivilstand = mapSivivilstand(pdlSøker, andrePersoner),
         adressebeskyttelse = pdlSøker.adressebeskyttelse.gjeldende(),

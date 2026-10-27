@@ -25,6 +25,10 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
 
+// Svaret avhenger av togglen, så den må være med i cache-nøkkelen
+private const val IDENT_OG_FALSK_IDENTITET_TOGGLE =
+    "{#root.args[0], @featureToggleService.isEnabled(T(no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle).FALSK_IDENTITET)}"
+
 @Service
 class PersonopplysningerService(
     private val personService: PersonService,
@@ -81,7 +85,7 @@ class PersonopplysningerService(
     @Cacheable(
         "personopplysninger",
         cacheManager = "shortCache",
-        key = "{#root.args[0], @featureToggleService.isEnabled(T(no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle).FALSK_IDENTITET)}",
+        key = IDENT_OG_FALSK_IDENTITET_TOGGLE,
     )
     fun hentPersonopplysningerFraRegister(personIdent: String): PersonopplysningerDto {
         val personopplysningerGrunnlagsdataFraPdl = grunnlagsdataService.hentPersonopplysninger(personIdent)
@@ -139,7 +143,7 @@ class PersonopplysningerService(
 
     @Cacheable(
         "navKontor",
-        key = "{#root.args[0], @featureToggleService.isEnabled(T(no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle).FALSK_IDENTITET)}",
+        key = IDENT_OG_FALSK_IDENTITET_TOGGLE,
     )
     fun hentNavKontor(ident: String): NavKontorEnhet? {
         // En falsk ident har ikke geografisk tilknytning, og oppslaget mot arbeidsfordeling feiler

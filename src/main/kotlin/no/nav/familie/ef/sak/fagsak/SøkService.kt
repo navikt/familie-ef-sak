@@ -22,7 +22,9 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.BarnDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.NavnDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.KjønnMapper
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Kjønn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.identer
@@ -85,11 +87,8 @@ class SøkService(
         try {
             return Søkeresultat(
                 personIdent = gjeldendePersonIdent,
-                kjønn =
-                    KjønnMapper.tilKjønn(
-                        if (håndterFalskIdentitet) person.kjønn.firstOrNull()?.kjønn ?: KjønnType.UKJENT else person.kjønn.first().kjønn,
-                    ),
-                visningsnavn = if (håndterFalskIdentitet) person.navn.visningsnavnEllerMangler() else person.navn.gjeldende().visningsnavn(),
+                kjønn = KjønnMapper.tilKjønn(kjønnType(person.kjønn, håndterFalskIdentitet)),
+                visningsnavn = visningsnavn(person.navn, håndterFalskIdentitet),
                 fagsakPersonId = fagsakPerson?.id,
                 fagsaker =
                     fagsaker.map {
@@ -190,15 +189,31 @@ class SøkService(
         personService.hentPersonKortBolk(listOf(personIdent))[personIdent]?.let {
             SøkeresultatUtenFagsak(
                 personIdent = personIdent,
-                navn =
-                    if (featureToggleService.isEnabled(Toggle.FALSK_IDENTITET)) {
-                        it.navn.visningsnavnEllerMangler()
-                    } else {
-                        it.navn.gjeldende().visningsnavn()
-                    },
+                navn = visningsnavn(it.navn, featureToggleService.isEnabled(Toggle.FALSK_IDENTITET)),
             )
         }
             ?: throw ApiFeil("Finner ingen personer for søket", HttpStatus.BAD_REQUEST)
+
+    // Folkeregisteret annullerer navn og kjønn på falske identiteter
+    private fun visningsnavn(
+        navn: List<Navn>,
+        håndterFalskIdentitet: Boolean,
+    ): String =
+        if (håndterFalskIdentitet) {
+            navn.visningsnavnEllerMangler()
+        } else {
+            navn.gjeldende().visningsnavn()
+        }
+
+    private fun kjønnType(
+        kjønn: List<Kjønn>,
+        håndterFalskIdentitet: Boolean,
+    ): KjønnType =
+        if (håndterFalskIdentitet) {
+            kjønn.firstOrNull()?.kjønn ?: KjønnType.UKJENT
+        } else {
+            kjønn.first().kjønn
+        }
 }
 
 private fun List<BarnDto>.tilBarnAvBruker(): List<BarnAvBrukerDto> = this.map { BarnAvBrukerDto(it.personIdent, it.fødselsdato) }
