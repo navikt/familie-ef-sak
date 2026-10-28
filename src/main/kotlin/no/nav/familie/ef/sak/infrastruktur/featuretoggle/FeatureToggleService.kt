@@ -14,6 +14,7 @@ enum class Toggle(
     val beskrivelse: String? = null,
 ) {
     // Release
+    FALSK_IDENTITET("familie.ef.sak.falsk-identitet", "Release"),
     FRONTEND_KOPIER_KNAPP_ERROR_ALERT("familie.ef.sak.frontend-alert-error-med-copy-button", "Release"),
     FRONTEND_VIS_BEREGNINGSSKJEMA("familie.ef.sak.frontend-vis-beregningsskjema", "Release"),
     VIS_ANDRE_YTELSER("familie.ef.sak.vis-andre-ytelser", "Release"),

@@ -39,4 +39,13 @@ class PdlDtoTest {
 
         Assertions.assertThat(dtoFelter).isEqualTo(spørringsfelter["data"])
     }
+
+    @Test
+    fun `pdlFalskIdentitetData inneholder samme felter som blir spurt om i query`() {
+        val spørringsfelter = PdlTestUtil.parseSpørring("/pdl/falsk_identitet.graphql")
+
+        val dtoFelter = PdlTestUtil.finnFeltStruktur(PdlTestdata.pdlFalskIdentitetData)!!
+
+        Assertions.assertThat(dtoFelter).isEqualTo(spørringsfelter["data"])
+    }
 }

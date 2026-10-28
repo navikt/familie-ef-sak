@@ -2,8 +2,12 @@ package no.nav.familie.ef.sak.opplysninger.personopplysninger
 
 import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.infrastruktur.config.getNullable
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.domene.GrunnlagsdataMedMetadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.FalskIdentitetDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.PersonopplysningerDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.egenansatt.EgenAnsattClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.endringer.EndringerIPersonopplysningerDto
@@ -21,6 +25,10 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.util.UUID
 
+// Svaret avhenger av togglen, så den må være med i cache-nøkkelen
+private const val IDENT_OG_FALSK_IDENTITET_TOGGLE =
+    "{#root.args[0], @featureToggleService.isEnabled(T(no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle).FALSK_IDENTITET)}"
+
 @Service
 class PersonopplysningerService(
     private val personService: PersonService,
@@ -31,6 +39,7 @@ class PersonopplysningerService(
     private val egenAnsattClient: EgenAnsattClient,
     @Qualifier("shortCache")
     private val cacheManager: CacheManager,
+    private val featureToggleService: FeatureToggleService,
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -40,11 +49,12 @@ class PersonopplysningerService(
         val grunnlagsdata = grunnlagsdataService.hentGrunnlagsdata(behandlingId)
         val egenAnsatt = egenAnsatt(personIdent)
 
-        return personopplysningerMapper.tilPersonopplysninger(
-            grunnlagsdata,
-            egenAnsatt,
-            søkerIdenter,
-        )
+        return personopplysningerMapper
+            .tilPersonopplysninger(
+                grunnlagsdata,
+                egenAnsatt,
+                søkerIdenter,
+            ).copy(falskIdentitet = hentFalskIdentitet(personIdent))
     }
 
     fun finnEndringerIPersonopplysningerForBehandling(
@@ -72,18 +82,45 @@ class PersonopplysningerService(
         return EndringerIPersonopplysningerDto(LocalDateTime.now(), alleEndringer)
     }
 
-    @Cacheable("personopplysninger", cacheManager = "shortCache")
+    @Cacheable(
+        "personopplysninger",
+        cacheManager = "shortCache",
+        key = IDENT_OG_FALSK_IDENTITET_TOGGLE,
+    )
     fun hentPersonopplysningerFraRegister(personIdent: String): PersonopplysningerDto {
         val personopplysningerGrunnlagsdataFraPdl = grunnlagsdataService.hentPersonopplysninger(personIdent)
         val egenAnsatt = egenAnsatt(personIdent)
         val identerFraPdl = personService.hentPersonIdenter(personIdent)
 
-        return personopplysningerMapper.tilPersonopplysninger(
-            personopplysninger = personopplysningerGrunnlagsdataFraPdl,
-            grunnlagsdataOpprettet = LocalDateTime.now(),
-            egenAnsatt = egenAnsatt,
-            søkerIdenter = identerFraPdl,
-        )
+        return personopplysningerMapper
+            .tilPersonopplysninger(
+                personopplysninger = personopplysningerGrunnlagsdataFraPdl,
+                grunnlagsdataOpprettet = LocalDateTime.now(),
+                egenAnsatt = egenAnsatt,
+                søkerIdenter = identerFraPdl,
+            ).copy(falskIdentitet = hentFalskIdentitet(personIdent))
+    }
+
+    /**
+     * Hentes alltid fra PDL og lagres ikke i grunnlagsdata, slik at saksbehandler får varsel selv om identen
+     * er merket som falsk etter at behandlingen ble opprettet.
+     * Et feilet oppslag skal ikke stoppe visning av personopplysninger, og blir ikke cachet.
+     */
+    fun hentFalskIdentitet(personIdent: String): FalskIdentitetDto? {
+        if (!featureToggleService.isEnabled(Toggle.FALSK_IDENTITET)) return null
+
+        return try {
+            cacheManager.getNullable("falskIdentitet", personIdent) {
+                personService
+                    .hentFalskIdentitet(personIdent)
+                    ?.takeIf { it.erFalsk }
+                    ?.let { FalskIdentitetDto(rettIdentitetErUkjent = it.rettIdentitetErUkjent == true) }
+            }
+        } catch (e: Exception) {
+            logger.warn("Klarte ikke å hente falsk identitet fra PDL: ${e::class.simpleName}")
+            secureLogger.warn("Klarte ikke å hente falsk identitet fra PDL for personIdent=$personIdent", e)
+            null
+        }
     }
 
     private fun egenAnsatt(personIdent: String) =
@@ -104,8 +141,15 @@ class PersonopplysningerService(
             }.toMap()
     }
 
-    @Cacheable("navKontor")
-    fun hentNavKontor(ident: String): NavKontorEnhet? = personopplysningerIntegrasjonerClient.hentNavKontor(ident)
+    @Cacheable(
+        "navKontor",
+        key = IDENT_OG_FALSK_IDENTITET_TOGGLE,
+    )
+    fun hentNavKontor(ident: String): NavKontorEnhet? {
+        // En falsk ident har ikke geografisk tilknytning, og oppslaget mot arbeidsfordeling feiler
+        if (hentFalskIdentitet(ident) != null) return null
+        return personopplysningerIntegrasjonerClient.hentNavKontor(ident)
+    }
 
     fun hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent: String): ADRESSEBESKYTTELSEGRADERING = personopplysningerIntegrasjonerClient.hentStrengesteAdressebeskyttelseForPersonMedRelasjoner(personIdent)
 }

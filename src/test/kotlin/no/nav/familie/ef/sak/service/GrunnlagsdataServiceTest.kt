@@ -10,6 +10,7 @@ import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig.Companion.ANNEN_FORELDER_FNR
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
+import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.kontantstøtte.KontantstøtteService
 import no.nav.familie.ef.sak.oppgave.TilordnetRessursService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.GrunnlagsdataRegisterService
@@ -67,6 +68,7 @@ internal class GrunnlagsdataServiceTest {
             kontantstøtteService,
             fullmaktService,
             medlService,
+            featureToggleService,
         )
 
     private val søknad =
@@ -98,6 +100,7 @@ internal class GrunnlagsdataServiceTest {
 
     @BeforeEach
     internal fun setUp() {
+        every { featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) } returns false
         every { søknadService.hentOvergangsstønad(any()) } returns søknad
         every { fullmaktService.hentFullmakt(any()) } returns
             FullmaktResultat(

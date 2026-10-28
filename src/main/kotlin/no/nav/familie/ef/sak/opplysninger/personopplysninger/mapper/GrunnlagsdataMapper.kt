@@ -19,6 +19,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Personnavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldendeEllerNull
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Folkeregisteridentifikator as FolkeregisteridentifikatorPdl
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.ForelderBarnRelasjon as ForelderBarnRelasjonPdl
@@ -68,6 +69,7 @@ object GrunnlagsdataMapper {
     fun mapSøker(
         pdlSøker: PdlSøker,
         andrePersoner: Map<String, PdlPersonKort>,
+        håndterFalskIdentitet: Boolean,
     ) = Søker(
         sivilstand = mapSivivilstand(pdlSøker, andrePersoner),
         adressebeskyttelse = pdlSøker.adressebeskyttelse.gjeldende(),
@@ -80,7 +82,7 @@ object GrunnlagsdataMapper {
         innflyttingTilNorge = pdlSøker.innflyttingTilNorge,
         kjønn = pdlSøker.kjønn.firstOrNull()?.kjønn ?: KjønnType.UKJENT,
         kontaktadresse = pdlSøker.kontaktadresse,
-        navn = pdlSøker.navn.gjeldende(),
+        navn = if (håndterFalskIdentitet) pdlSøker.navn.gjeldendeEllerNull() else pdlSøker.navn.gjeldende(),
         opphold = pdlSøker.opphold,
         oppholdsadresse = pdlSøker.oppholdsadresse,
         statsborgerskap = pdlSøker.statsborgerskap,
