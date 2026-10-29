@@ -12,6 +12,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.web.client.HttpClientErrorException
 
 class MedlemskapServiceTest {
     private lateinit var medlemskapService: MedlService
@@ -75,8 +78,29 @@ class MedlemskapServiceTest {
         assertThrows<Exception> { medlemskapService.hentMedlemskapsunntak(TEST_IDENT) }
     }
 
+    @Test
+    fun `skal gi tomt objekt når MEDL ikke finner person med NPID`() {
+        every { medlClient.hentMedlemskapsUnntak(any()) } throws personIkkeFunnet()
+
+        val respons = medlemskapService.hentMedlemskapsunntak(TEST_NPID)
+
+        assertThat(respons.gyldigePerioder).isEmpty()
+        assertThat(respons.avvistePerioder).isEmpty()
+        assertThat(respons.uavklartePerioder).isEmpty()
+    }
+
+    @Test
+    fun `skal kaste feil når MEDL ikke finner person med folkeregisterident`() {
+        every { medlClient.hentMedlemskapsUnntak(any()) } throws personIkkeFunnet()
+
+        assertThrows<HttpClientErrorException.NotFound> { medlemskapService.hentMedlemskapsunntak(TEST_IDENT) }
+    }
+
+    private fun personIkkeFunnet() = HttpClientErrorException.create(HttpStatus.NOT_FOUND, "Not Found", HttpHeaders.EMPTY, ByteArray(0), null)
+
     companion object {
         private const val TEST_IDENT = "01010199999"
+        private const val TEST_NPID = "01610199999"
     }
 }
 
