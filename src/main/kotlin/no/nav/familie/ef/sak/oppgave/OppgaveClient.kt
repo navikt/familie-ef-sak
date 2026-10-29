@@ -13,7 +13,7 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
-import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.v2.OpprettOppgaveV2Request
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpHeaders
@@ -34,8 +34,8 @@ class OppgaveClient(
     private val oppgaveUri: URI = integrasjonerConfig.oppgaveUri
     private val saksbehandlerUri: URI = integrasjonerConfig.saksbehandlerUri
 
-    fun opprettOppgave(opprettOppgave: OpprettOppgaveRequest): Long {
-        val uri = URI.create("$oppgaveUri/opprett")
+    fun opprettOppgave(opprettOppgave: OpprettOppgaveV2Request): Long {
+        val uri = URI.create("$oppgaveUri/v2/opprett")
 
         val respons =
             restClient

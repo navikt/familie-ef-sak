@@ -14,8 +14,9 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
-import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
+import no.nav.familie.kontrakter.felles.oppgave.v2.OpprettOppgaveV2Request
+import no.nav.familie.kontrakter.felles.oppgave.v2.Prioritet
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -128,24 +129,30 @@ class OppgaveClientMock {
         }
 
         every { oppgaveClient.opprettOppgave(any()) } answers {
-            val arg = firstArg<OpprettOppgaveRequest>()
+            val arg = firstArg<OpprettOppgaveV2Request>()
             val nyOppgaveId = ++maxId
             val oppgave =
                 Oppgave(
                     id = nyOppgaveId,
-                    identer = arg.ident?.let { listOf(it) },
-                    saksreferanse = arg.saksId,
-                    tema = arg.tema,
-                    oppgavetype = arg.oppgavetype.value,
-                    fristFerdigstillelse = arg.fristFerdigstillelse.format(DateTimeFormatter.ISO_DATE),
+                    identer = arg.bruker?.let { listOf(OppgaveIdentV2(ident = it.ident, gruppe = IdentGruppe.FOLKEREGISTERIDENT)) },
+                    saksreferanse = arg.arkivreferanse?.saksnr,
+                    tema = Tema.valueOf(arg.kategorisering.tema.kode),
+                    oppgavetype = arg.kategorisering.oppgavetype.kode,
+                    fristFerdigstillelse = arg.fristDato?.format(DateTimeFormatter.ISO_DATE),
                     beskrivelse = arg.beskrivelse,
-                    tildeltEnhetsnr = arg.enhetsnummer,
-                    behandlingstema = arg.behandlingstema,
-                    journalpostId = arg.journalpostId,
-                    tilordnetRessurs = arg.tilordnetRessurs,
+                    tildeltEnhetsnr = arg.fordeling?.enhet?.nr,
+                    behandlingstema = arg.kategorisering.behandlingstema?.kode,
+                    journalpostId = arg.arkivreferanse?.journalpostId,
+                    tilordnetRessurs = arg.fordeling?.medarbeider?.navident,
                     status = StatusEnum.OPPRETTET,
                     opprettetTidspunkt = LocalDate.now().toString(),
-                    prioritet = OppgavePrioritet.NORM,
+                    prioritet =
+                        when (arg.prioritet) {
+                            Prioritet.LAV -> OppgavePrioritet.LAV
+                            Prioritet.NORMAL, null -> OppgavePrioritet.NORM
+                            Prioritet.HOY -> OppgavePrioritet.HOY
+                            Prioritet.KRITISK -> OppgavePrioritet.KRITISK
+                        },
                 )
             oppgaver[nyOppgaveId] = oppgave
             nyOppgaveId

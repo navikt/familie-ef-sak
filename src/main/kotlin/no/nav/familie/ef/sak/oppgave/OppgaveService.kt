@@ -19,7 +19,6 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
-import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
@@ -28,7 +27,16 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.Fremlegg
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.GodkjenneVedtak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.InnhentDokumentasjon
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.VurderHenvendelse
-import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.v2.Arkivreferanse
+import no.nav.familie.kontrakter.felles.oppgave.v2.Bruker
+import no.nav.familie.kontrakter.felles.oppgave.v2.Brukertype
+import no.nav.familie.kontrakter.felles.oppgave.v2.Enhet
+import no.nav.familie.kontrakter.felles.oppgave.v2.Kategorisering
+import no.nav.familie.kontrakter.felles.oppgave.v2.Kodeverk
+import no.nav.familie.kontrakter.felles.oppgave.v2.Mappe
+import no.nav.familie.kontrakter.felles.oppgave.v2.Medarbeider
+import no.nav.familie.kontrakter.felles.oppgave.v2.OpprettOppgaveV2Request
+import no.nav.familie.kontrakter.felles.oppgave.v2.Prioritet
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
 import org.slf4j.LoggerFactory
 import org.springframework.cache.CacheManager
@@ -61,6 +69,7 @@ class OppgaveService(
         mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
         prioritet: OppgavePrioritet = OppgavePrioritet.NORM,
         fristFerdigstillelse: LocalDate? = null,
+        nokkelord: Set<String> = emptySet(),
     ): Long {
         val oppgaveFinnesFraFør = getOppgaveFinnesFraFør(oppgavetype, vurderHenvendelseOppgaveSubtype, behandlingId)
         return if (oppgaveFinnesFraFør !== null) {
@@ -75,6 +84,7 @@ class OppgaveService(
                     tilordnetNavIdent = tilordnetNavIdent,
                     mappeId = mappeId,
                     prioritet = prioritet,
+                    nokkelord = nokkelord,
                 )
             val oppgave =
                 EfOppgave(
@@ -119,34 +129,50 @@ class OppgaveService(
         tilordnetNavIdent: String?,
         mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
         prioritet: OppgavePrioritet = OppgavePrioritet.NORM,
+        nokkelord: Set<String> = emptySet(),
     ): Long {
         val settBehandlesAvApplikasjon = utledSettBehandlesAvApplikasjon(oppgavetype)
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
         val personIdent = fagsak.hentAktivIdent()
         val enhetsnummer = arbeidsfordelingService.hentNavEnhetId(personIdent, oppgavetype)
+        val fordeling =
+            OpprettOppgaveV2Request.Fordeling(
+                enhet = enhetsnummer?.let(::Enhet),
+                mappe = (mappeId ?: finnAktuellMappe(enhetsnummer, oppgavetype))?.let(::Mappe),
+                medarbeider = tilordnetNavIdent?.let(::Medarbeider),
+            )
         val opprettOppgave =
-            OpprettOppgaveRequest(
-                ident = OppgaveIdentV2(ident = personIdent, gruppe = IdentGruppe.FOLKEREGISTERIDENT),
-                saksId = fagsak.eksternId.toString(),
-                tema = Tema.ENF,
-                oppgavetype = oppgavetype,
-                fristFerdigstillelse = fristFerdigstillelse ?: lagFristForOppgave(LocalDateTime.now()),
+            OpprettOppgaveV2Request(
+                kategorisering =
+                    Kategorisering(
+                        tema = Kodeverk(Tema.ENF.name),
+                        oppgavetype = Kodeverk(oppgavetype.value),
+                        behandlingstema = Kodeverk(finnBehandlingstema(fagsak.stønadstype).value),
+                    ),
+                fordeling = fordeling,
                 beskrivelse = beskrivelse,
-                enhetsnummer = enhetsnummer,
-                behandlingstema = finnBehandlingstema(fagsak.stønadstype).value,
-                tilordnetRessurs = tilordnetNavIdent,
-                behandlesAvApplikasjon = if (settBehandlesAvApplikasjon) "familie-ef-sak" else null,
-                mappeId = mappeId ?: finnAktuellMappe(enhetsnummer, oppgavetype),
-                prioritet = prioritet,
+                prioritet =
+                    when (prioritet) {
+                        OppgavePrioritet.LAV -> Prioritet.LAV
+                        OppgavePrioritet.NORM -> Prioritet.NORMAL
+                        OppgavePrioritet.HOY -> Prioritet.HOY
+                        OppgavePrioritet.KRITISK -> Prioritet.KRITISK
+                    },
+                fristDato = fristFerdigstillelse ?: lagFristForOppgave(LocalDateTime.now()),
+                aktivDato = LocalDate.now(),
+                nokkelord = nokkelord,
+                bruker = Bruker(ident = personIdent, type = Brukertype.PERSON),
+                arkivreferanse = Arkivreferanse(saksnr = fagsak.eksternId.toString()),
+                tilknyttetSystem = if (settBehandlesAvApplikasjon) "familie-ef-sak" else null,
             )
 
         return try {
             oppgaveClient.opprettOppgave(opprettOppgave)
         } catch (e: Exception) {
             if (finnerIkkeGyldigArbeidsfordeling(e)) {
-                oppgaveClient.opprettOppgave(opprettOppgave.copy(enhetsnummer = ENHET_NR_NAY))
+                oppgaveClient.opprettOppgave(opprettOppgave.copy(fordeling = fordeling.copy(enhet = Enhet(ENHET_NR_NAY))))
             } else if (navIdentHarIkkeTilgangTilEnheten(e)) {
-                oppgaveClient.opprettOppgave(opprettOppgave.copy(tilordnetRessurs = null))
+                oppgaveClient.opprettOppgave(opprettOppgave.copy(fordeling = fordeling.copy(medarbeider = null)))
             } else {
                 throw e
             }

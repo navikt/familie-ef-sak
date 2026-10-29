@@ -38,6 +38,7 @@ class OpprettOppgaveTask(
         val beskrivelse: String? = null,
         val unik: LocalDateTime? = LocalDateTime.now(),
         val erHøyPrioritet: Boolean? = null,
+        val nokkelord: Set<String> = emptySet(),
     )
 
     override fun doTask(task: Task) {
@@ -65,6 +66,7 @@ class OpprettOppgaveTask(
                 tilordnetNavIdent = data.tilordnetNavIdent,
                 beskrivelse = data.beskrivelse,
                 prioritet = prioritet,
+                nokkelord = data.nokkelord,
             )
 
         task.metadata.setProperty("oppgaveId", oppgaveId.toString())
