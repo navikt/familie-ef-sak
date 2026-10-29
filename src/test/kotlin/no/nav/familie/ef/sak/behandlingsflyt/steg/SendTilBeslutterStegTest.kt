@@ -44,6 +44,7 @@ import no.nav.familie.ef.sak.simulering.SimuleringService
 import no.nav.familie.ef.sak.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ef.sak.vedtak.VedtakService
 import no.nav.familie.ef.sak.vedtak.dto.ResultatType
+import no.nav.familie.ef.sak.vedtak.dto.SendTilBeslutterDto
 import no.nav.familie.ef.sak.vilkår.VurderingService
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
 import no.nav.familie.kontrakter.ef.iverksett.BehandlingKategori
@@ -435,6 +436,37 @@ internal class SendTilBeslutterStegTest {
         val beskrivelseMarkeringer = emptyList<String>()
         val result = beslutteVedtakSteg.lagBeskrivelseMedMerker(beskrivelseMarkeringer)
         assertThat(result).isEqualTo("Sendt til godkjenning av saksbehandlernavn.")
+    }
+
+    @Test
+    internal fun `skal lagre valgte markeringer som nokkelord og beholde beskrivelsen`() {
+        every { vedtakService.oppdaterSaksbehandler(any(), any()) } just Runs
+        val markeringer = listOf("EØS", "Selvstendig næringsdrivende", "EØS")
+
+        beslutteVedtakSteg.utførSteg(
+            behandling,
+            SendTilBeslutterDto(
+                oppgavetyperSomSkalOpprettes = emptyList(),
+                beskrivelseMarkeringer = markeringer,
+                erHøyPrioritet = true,
+            ),
+        )
+
+        val data = jsonMapper.readValue<OpprettOppgaveTaskData>(taskSlot.first().payload)
+        assertThat(data.nokkelord).containsExactlyInAnyOrder("EØS", "Selvstendig næringsdrivende")
+        assertThat(data.beskrivelse).isEqualTo("EØS, Selvstendig næringsdrivende, EØS. Sendt til godkjenning av saksbehandlernavn.")
+        assertThat(data.erHøyPrioritet).isTrue()
+    }
+
+    @Test
+    internal fun `skal opprette godkjenningsoppgave uten nokkelord når ingen markeringer er valgt`() {
+        every { vedtakService.oppdaterSaksbehandler(any(), any()) } just Runs
+
+        utførSteg()
+
+        val data = jsonMapper.readValue<OpprettOppgaveTaskData>(taskSlot.first().payload)
+        assertThat(data.nokkelord).isEmpty()
+        assertThat(data.beskrivelse).isEqualTo("Sendt til godkjenning av saksbehandlernavn.")
     }
 
     private fun verifiserVedtattBehandlingsstatistikkTask() {

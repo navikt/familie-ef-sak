@@ -32,6 +32,7 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleUnderkjentVedtak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.GodkjenneVedtak
@@ -140,9 +141,13 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
         assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = FNR, gruppe = IdentGruppe.FOLKEREGISTERIDENT))
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
+        assertThat(slot.captured.oppgavetype).isEqualTo(BehandleSak)
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
+        assertThat(slot.captured.behandlesAvApplikasjon).isEqualTo("familie-ef-sak")
+        assertThat(slot.captured.prioritet).isEqualTo(OppgavePrioritet.NORM)
+        assertThat(slot.captured.nokkelord).isEmpty()
         val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} (familie-ef-sak) --- \nOppgave opprettet"
         assertThat(slot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
     }
@@ -152,9 +157,13 @@ internal class OppgaveServiceTest {
         val slot = slot<OpprettOppgaveRequest>()
         mockOpprettOppgave(slot)
         every { arbeidsfordelingService.hentNavEnhetId(any(), any()) } returns null
-        oppgaveService.opprettOppgave(BEHANDLING_ID, BehandleSak)
+        val nokkelord = setOf("EØS", "Kontrollsak")
+        oppgaveService.opprettOppgave(BEHANDLING_ID, BehandleSak, nokkelord = nokkelord)
 
         verify(exactly = 2) { oppgaveClient.opprettOppgave(any()) }
+        assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
+        assertThat(slot.captured.nokkelord).isEqualTo(nokkelord)
+        assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
     }
 
     @Test
@@ -168,21 +177,76 @@ internal class OppgaveServiceTest {
     }
 
     @Test
+    fun `Opprett oppgave skal beholde resten av forespørselen ved nytt forsøk uten saksbehandler`() {
+        mockOpprettOppgave(slot())
+        val forespørsler = mutableListOf<OpprettOppgaveRequest>()
+        every { oppgaveClient.opprettOppgave(capture(forespørsler)) } answers {
+            if (forespørsler.size == 1) {
+                throw IntegrasjonException("navIdent har ikke tilgang til enheten")
+            }
+            GSAK_OPPGAVE_ID
+        }
+
+        oppgaveService.opprettOppgave(
+            behandlingId = BEHANDLING_ID,
+            oppgavetype = GodkjenneVedtak,
+            tilordnetNavIdent = "Z123456",
+            beskrivelse = "Sendt til godkjenning",
+            nokkelord = setOf("EØS"),
+        )
+
+        assertThat(forespørsler).hasSize(2)
+        val førsteForespørsel = forespørsler.first()
+        assertThat(førsteForespørsel.tilordnetRessurs).isEqualTo("Z123456")
+        assertThat(forespørsler.last()).isEqualTo(førsteForespørsel.copy(tilordnetRessurs = null))
+    }
+
+    @Test
+    fun `Opprett oppgave skal beholde valgt prioritet, frist og mappe`() {
+        OppgavePrioritet.entries.forEach { prioritet ->
+            val slot = slot<OpprettOppgaveRequest>()
+            mockOpprettOppgave(slot)
+            val frist = LocalDate.now().plusDays(10)
+
+            oppgaveService.opprettOppgave(
+                behandlingId = BEHANDLING_ID,
+                oppgavetype = BehandleSak,
+                prioritet = prioritet,
+                fristFerdigstillelse = frist,
+                mappeId = 123L,
+            )
+
+            assertThat(slot.captured.prioritet).isEqualTo(prioritet)
+            assertThat(slot.captured.fristFerdigstillelse).isEqualTo(frist)
+            assertThat(slot.captured.mappeId).isEqualTo(123L)
+        }
+    }
+
+    @Test
     fun `Skal legge i mappe når vi oppretter godkjenne vedtak-oppgave for 4489`() {
         val slot = slot<OpprettOppgaveRequest>()
         mockOpprettOppgave(slot)
 
         val beskrivelse = "Oppgave tekst her"
-        oppgaveService.opprettOppgave(behandlingId = BEHANDLING_ID, oppgavetype = GodkjenneVedtak, beskrivelse = beskrivelse)
+        val nokkelord = setOf("EØS", "Selvstendig næringsdrivende")
+        oppgaveService.opprettOppgave(
+            behandlingId = BEHANDLING_ID,
+            oppgavetype = GodkjenneVedtak,
+            beskrivelse = beskrivelse,
+            tilordnetNavIdent = "Z123456",
+            nokkelord = nokkelord,
+        )
 
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
-        assertThat(slot.captured.mappeId).isNotNull
+        assertThat(slot.captured.mappeId).isEqualTo(102L)
+        assertThat(slot.captured.tilordnetRessurs).isEqualTo("Z123456")
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
         assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = FNR, gruppe = IdentGruppe.FOLKEREGISTERIDENT))
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
+        assertThat(slot.captured.nokkelord).isEqualTo(nokkelord)
         val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} (familie-ef-sak) --- \n$beskrivelse"
         assertThat(slot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
     }
@@ -416,6 +480,7 @@ internal class OppgaveServiceTest {
         )
 
         assertThat(opprettOppgaveRequestSlot.captured.mappeId).isEqualTo(105)
+        assertThat(opprettOppgaveRequestSlot.captured.behandlesAvApplikasjon).isNull()
     }
 
     @Nested

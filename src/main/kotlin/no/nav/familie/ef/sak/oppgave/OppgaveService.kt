@@ -61,6 +61,7 @@ class OppgaveService(
         mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
         prioritet: OppgavePrioritet = OppgavePrioritet.NORM,
         fristFerdigstillelse: LocalDate? = null,
+        nokkelord: Set<String> = emptySet(),
     ): Long {
         val oppgaveFinnesFraFør = getOppgaveFinnesFraFør(oppgavetype, vurderHenvendelseOppgaveSubtype, behandlingId)
         return if (oppgaveFinnesFraFør !== null) {
@@ -75,6 +76,7 @@ class OppgaveService(
                     tilordnetNavIdent = tilordnetNavIdent,
                     mappeId = mappeId,
                     prioritet = prioritet,
+                    nokkelord = nokkelord,
                 )
             val oppgave =
                 EfOppgave(
@@ -119,6 +121,7 @@ class OppgaveService(
         tilordnetNavIdent: String?,
         mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
         prioritet: OppgavePrioritet = OppgavePrioritet.NORM,
+        nokkelord: Set<String> = emptySet(),
     ): Long {
         val settBehandlesAvApplikasjon = utledSettBehandlesAvApplikasjon(oppgavetype)
         val fagsak = fagsakService.hentFagsakForBehandling(behandlingId)
@@ -138,6 +141,7 @@ class OppgaveService(
                 behandlesAvApplikasjon = if (settBehandlesAvApplikasjon) "familie-ef-sak" else null,
                 mappeId = mappeId ?: finnAktuellMappe(enhetsnummer, oppgavetype),
                 prioritet = prioritet,
+                nokkelord = nokkelord,
             )
 
         return try {

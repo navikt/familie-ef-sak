@@ -145,7 +145,7 @@ class OppgaveClientMock {
                     tilordnetRessurs = arg.tilordnetRessurs,
                     status = StatusEnum.OPPRETTET,
                     opprettetTidspunkt = LocalDate.now().toString(),
-                    prioritet = OppgavePrioritet.NORM,
+                    prioritet = arg.prioritet,
                 )
             oppgaver[nyOppgaveId] = oppgave
             nyOppgaveId
