@@ -199,4 +199,31 @@ internal class GrunnlagsdataServiceTest {
             tidligereVedtaksperioderService.hentTidligereVedtaksperioder(listOf(folkeregisteridentifikatorAnnenForelder))
         }
     }
+
+    @Test
+    internal fun `skal gå videre uten registerdata når søker kun har NPID og registrene feiler`() {
+        every { personService.hentSøker(any()) } returns PdlClientConfig.opprettPdlSøker().copy(folkeregisteridentifikator = emptyList())
+        every { medlService.hentMedlemskapsunntak(any()) } throws RuntimeException("Den angitte personen finnes ikke")
+        every { arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder(any()) } throws RuntimeException("Ukjent ident")
+        every { kontantstøtteService.hentUtbetalingsinfoKontantstøtte(any()) } throws RuntimeException("Ukjent ident")
+
+        val grunnlagsdata = service.hentFraRegisterForPersonOgAndreForeldre(NPID, emptyList())
+
+        assertThat(grunnlagsdata.medlUnntak.gyldigePerioder).isEmpty()
+        assertThat(grunnlagsdata.harAvsluttetArbeidsforhold).isFalse
+        assertThat(grunnlagsdata.harKontantstøttePerioder).isFalse
+        assertThat(grunnlagsdata.kontantstøttePerioder).isEmpty()
+    }
+
+    @Test
+    internal fun `skal kaste feil fra registrene når søker har folkeregisterident`() {
+        every { personService.hentSøker(any()) } returns PdlClientConfig.opprettPdlSøker()
+        every { arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder(any()) } throws RuntimeException("Ukjent ident")
+
+        assertThrows<RuntimeException> { service.hentFraRegisterForPersonOgAndreForeldre(PdlClientConfig.SØKER_FNR, emptyList()) }
+    }
+
+    companion object {
+        private const val NPID = "01610199999"
+    }
 }

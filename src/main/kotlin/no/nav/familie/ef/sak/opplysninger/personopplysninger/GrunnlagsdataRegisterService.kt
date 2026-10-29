@@ -14,12 +14,14 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.Grunnlagsdat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.GrunnlagsdataMapper.mapSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.medl.MedlService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.medl.MedlemskapsinfoMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Familierelasjonsrolle
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldendeEllerNull
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
@@ -32,6 +34,9 @@ class GrunnlagsdataRegisterService(
     private val fullmaktService: FullmaktService,
     private val medlService: MedlService,
 ) {
+    private val logger = LoggerFactory.getLogger(javaClass)
+    private val secureLogger = LoggerFactory.getLogger("secureLogger")
+
     fun hentGrunnlagsdataFraRegister(
         personIdent: String,
         barneforeldreFraSøknad: List<String>,
@@ -41,15 +46,24 @@ class GrunnlagsdataRegisterService(
             "Fullmakt er ukjent (${grunnlagsdataFraPdl.fullmaktIkkeTilgangÅrsak ?: "ukjent årsak"}). " +
                 "Kan derfor ikke opprette/lagre grunnlagsdata for denne personen."
         }
-        val medlUnntak = medlService.hentMedlemskapsunntak(personIdent)
+        val søkerHarKunNpid = grunnlagsdataFraPdl.gjeldendeIdentForSøker() == null
+        val medlUnntak =
+            hentMedReserveverdiForNpid(søkerHarKunNpid, "MEDL", MedlemskapsinfoMapper.tilMedlemskapsInfo(emptyList())) {
+                medlService.hentMedlemskapsunntak(personIdent)
+            }
         val tidligereVedtaksperioder =
             tidligereVedtaksperioderService.hentTidligereVedtaksperioder(grunnlagsdataFraPdl.søker.folkeregisteridentifikator)
         val tidligereVedtaksperioderAnnenForelder = hentTidligereVedtaksperioderAnnenForelder(grunnlagsdataFraPdl.barneForeldre)
         val harAvsluttetArbeidsforhold =
-            arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder(
-                grunnlagsdataFraPdl.gjeldendeIdentForSøker() ?: personIdent,
-            )
-        val utbetalingsinfoKontantstøtteDto = kontantstøtteService.hentUtbetalingsinfoKontantstøtte(personIdent)
+            hentMedReserveverdiForNpid(søkerHarKunNpid, "Aareg", false) {
+                arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder(
+                    grunnlagsdataFraPdl.gjeldendeIdentForSøker() ?: personIdent,
+                )
+            }
+        val utbetalingsinfoKontantstøtteDto =
+            hentMedReserveverdiForNpid(søkerHarKunNpid, "kontantstøtte", HentUtbetalingsinfoKontantstøtteDto(false, emptyList())) {
+                kontantstøtteService.hentUtbetalingsinfoKontantstøtte(personIdent)
+            }
         val kontantstøttePerioder =
             utledKontantstøtteperioder(utbetalingsinfoKontantstøtteDto)
 
@@ -63,6 +77,28 @@ class GrunnlagsdataRegisterService(
             harKontantstøttePerioder = utbetalingsinfoKontantstøtteDto.finnesUtbetaling,
             kontantstøttePerioder = kontantstøttePerioder,
         )
+    }
+
+    /**
+     * Midlertidig spor for søkere som kun har NPID: Flere registre (MEDL, Aareg, kontantstøtte) kjenner ikke NPID
+     * og svarer med feil. For disse går vi videre med en tom reserveverdi, så saksbehandler må vurdere manuelt.
+     * For alle andre søkere kastes feilen som før.
+     * TODO: Avklar med eierne av registrene om NPID kan støttes, og fjern sporet når det er på plass.
+     */
+    private fun <T> hentMedReserveverdiForNpid(
+        søkerHarKunNpid: Boolean,
+        kilde: String,
+        reserveverdi: T,
+        hent: () -> T,
+    ): T {
+        if (!søkerHarKunNpid) return hent()
+        return try {
+            hent()
+        } catch (e: Exception) {
+            logger.warn("Kunne ikke hente data fra $kilde for søker med kun NPID, går videre uten. Se securelogs for detaljer")
+            secureLogger.warn("Kunne ikke hente data fra $kilde for søker med kun NPID, går videre uten", e)
+            reserveverdi
+        }
     }
 
     private fun utledKontantstøtteperioder(
