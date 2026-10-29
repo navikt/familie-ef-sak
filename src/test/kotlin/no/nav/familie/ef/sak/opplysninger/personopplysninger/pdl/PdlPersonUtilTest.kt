@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl
 
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class PdlPersonUtilTest {
     @Test
@@ -98,4 +100,40 @@ internal class PdlPersonUtilTest {
             null,
             Metadata(historisk),
         )
+
+    @Nested
+    inner class GjeldendeIdent {
+        private val fnr = PdlIdent("12345678901", false, PdlIdentGruppe.FOLKEREGISTERIDENT)
+        private val npid = PdlIdent("01226512345", false, PdlIdentGruppe.NPID)
+
+        @Test
+        internal fun `skal bruke NPID som gjeldende når personen kun har NPID`() {
+            assertThat(PdlIdenter(listOf(npid)).gjeldende()).isEqualTo(npid)
+        }
+
+        @Test
+        internal fun `skal prioritere folkeregisterident foran NPID`() {
+            assertThat(PdlIdenter(listOf(npid, fnr)).gjeldende()).isEqualTo(fnr)
+        }
+
+        @Test
+        internal fun `skal bruke folkeregisterident når NPID er koblet og historisk`() {
+            val identer = PdlIdenter(listOf(npid.copy(historisk = true), fnr))
+
+            assertThat(identer.gjeldende()).isEqualTo(fnr)
+            assertThat(identer.identer()).containsExactlyInAnyOrder(fnr.ident, npid.ident)
+            assertThat(identer.folkeregisteridenter()).containsExactly(fnr.ident)
+        }
+
+        @Test
+        internal fun `skal feile når det ikke finnes noen gjeldende ident`() {
+            assertThrows<NoSuchElementException> { PdlIdenter(listOf(fnr.copy(historisk = true))).gjeldende() }
+        }
+
+        @Test
+        internal fun `bolk skal prioritere folkeregisterident foran NPID`() {
+            assertThat(PdlIdenterBolk("ok", npid.ident, listOf(npid.copy(historisk = true), fnr)).gjeldende()).isEqualTo(fnr)
+            assertThat(PdlIdenterBolk("ok", npid.ident, listOf(npid)).gjeldende()).isEqualTo(npid)
+        }
+    }
 }

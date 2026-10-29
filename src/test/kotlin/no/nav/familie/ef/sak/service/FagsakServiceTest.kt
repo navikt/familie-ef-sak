@@ -13,6 +13,7 @@ import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.domain.Sporbar
 import no.nav.familie.ef.sak.felles.domain.SporbarUtils
 import no.nav.familie.ef.sak.felles.util.BrukerContextUtil
+import no.nav.familie.ef.sak.infrastruktur.config.PdlClientConfig
 import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.repository.fagsak
 import no.nav.familie.kontrakter.ef.felles.BehandlingÅrsak
@@ -252,6 +253,15 @@ internal class FagsakServiceTest : OppslagSpringRunnerTest() {
 
             val fagsakEtterOppdatering = fagsakService.hentFagsak(fagsakMedHistoriskIdent.id)
             assertThat(fagsakEtterOppdatering.hentAktivIdent()).isEqualTo(gjeldendeIdent)
+        }
+
+        @Test
+        internal fun `skal opprette fagsak for person som kun har NPID`() {
+            val fagsak = fagsakService.hentEllerOpprettFagsak(PdlClientConfig.NPID, StønadType.OVERGANGSSTØNAD)
+
+            assertThat(fagsak.hentAktivIdent()).isEqualTo(PdlClientConfig.NPID)
+            assertThat(fagsakService.hentEllerOpprettFagsak(PdlClientConfig.NPID, StønadType.OVERGANGSSTØNAD).id)
+                .isEqualTo(fagsak.id)
         }
     }
 }

@@ -1,6 +1,7 @@
 package no.nav.familie.ef.sak.felles.integration
 
 import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock.containing
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
@@ -10,6 +11,7 @@ import no.nav.familie.ef.sak.infrastruktur.exception.Feil
 import no.nav.familie.ef.sak.infrastruktur.exception.PdlNotFoundException
 import no.nav.familie.ef.sak.infrastruktur.exception.PdlRequestException
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdentGruppe
 import no.nav.familie.kontrakter.felles.jsonMapper
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
@@ -114,6 +116,21 @@ class PdlClientTest {
         )
         val response = pdlClient.hentAktørIder("12345")
         assertThat(response.identer.first().ident).isEqualTo("12345678901")
+    }
+
+    @Test
+    fun `hentPersonidenter spør etter folkeregisteridenter og NPID og håndterer person som kun har NPID`() {
+        wiremockServerItem.stubFor(
+            post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                .withRequestBody(containing("\"gruppe\":[\"FOLKEREGISTERIDENT\",\"NPID\"]"))
+                .willReturn(okJson(readFile("hent_identer_npid.json"))),
+        )
+
+        val response = pdlClient.hentPersonidenter("01226512345")
+
+        assertThat(response.gjeldende().ident).isEqualTo("01226512345")
+        assertThat(response.gjeldende().gruppe).isEqualTo(PdlIdentGruppe.NPID)
+        assertThat(response.folkeregisteridenter()).isEmpty()
     }
 
     @Test

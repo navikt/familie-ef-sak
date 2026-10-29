@@ -114,7 +114,7 @@ class PdlClient(
     fun hentAktørIder(ident: String): PdlIdenter {
         val pdlPersonRequest =
             PdlIdentRequest(
-                variables = PdlIdentRequestVariables(ident, "AKTORID"),
+                variables = PdlIdentRequestVariables(ident, listOf("AKTORID")),
                 query = PdlConfig.hentIdentQuery,
             )
         val pdlResponse: PdlResponse<PdlHentIdenter> =
@@ -130,12 +130,12 @@ class PdlClient(
 
     /**
      * @param ident Ident til personen, samme hvilke type (Folkeregisterident, aktørid eller npid)
-     * @return liste med folkeregisteridenter
+     * @return liste med folkeregisteridenter og NPID
      */
     fun hentPersonidenter(ident: String): PdlIdenter {
         val pdlIdentRequest =
             PdlIdentRequest(
-                variables = PdlIdentRequestVariables(ident, "FOLKEREGISTERIDENT", historikk = true),
+                variables = PdlIdentRequestVariables(ident, PERSONIDENT_GRUPPER, historikk = true),
                 query = PdlConfig.hentIdentQuery,
             )
         val pdlResponse: PdlResponse<PdlHentIdenter> =
@@ -157,7 +157,7 @@ class PdlClient(
     /**
      * @param identer Identene til personene, samme hvilke type (Folkeregisterident, aktørid eller npid).
      * For tiden (2020-03-22) maks 100 identer lovlig i spørring.
-     * @return map med søkeident som nøkkel og liste av folkeregisteridenter
+     * @return map med søkeident som nøkkel og liste av folkeregisteridenter og NPID
      */
     fun hentIdenterBolk(identer: List<String>): Map<String, PdlIdent> {
         feilHvis(identer.size > MAKS_ANTALL_IDENTER) {
@@ -165,7 +165,7 @@ class PdlClient(
         }
         val pdlIdentBolkRequest =
             PdlIdentBolkRequest(
-                variables = PdlIdentBolkRequestVariables(identer, "FOLKEREGISTERIDENT"),
+                variables = PdlIdentBolkRequestVariables(identer, PERSONIDENT_GRUPPER),
                 query = PdlConfig.hentIdenterBolkQuery,
             )
         val pdlResponse: PdlIdentBolkResponse =
@@ -188,5 +188,6 @@ class PdlClient(
 
     companion object {
         const val MAKS_ANTALL_IDENTER = 100
+        private val PERSONIDENT_GRUPPER = listOf("FOLKEREGISTERIDENT", "NPID")
     }
 }

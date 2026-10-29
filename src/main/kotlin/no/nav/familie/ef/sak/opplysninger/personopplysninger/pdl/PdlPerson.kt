@@ -86,7 +86,7 @@ data class PdlIdenterBolk(
     val ident: String,
     val identer: List<PdlIdent>?,
 ) {
-    fun gjeldende(): PdlIdent = this.identer?.first { !it.historisk } ?: PdlIdent(ident, false)
+    fun gjeldende(): PdlIdent = this.identer?.gjeldendeEllerNull() ?: PdlIdent(ident, false)
 }
 
 data class IdentBolk(
@@ -96,13 +96,35 @@ data class IdentBolk(
 data class PdlIdent(
     val ident: String,
     val historisk: Boolean,
+    val gruppe: PdlIdentGruppe = PdlIdentGruppe.FOLKEREGISTERIDENT,
 )
+
+// Rekkefølgen brukes som prioritet når gjeldende ident skal velges
+enum class PdlIdentGruppe {
+    FOLKEREGISTERIDENT,
+    NPID,
+    AKTORID,
+}
 
 data class PdlIdenter(
     val identer: List<PdlIdent>,
 ) {
-    fun gjeldende(): PdlIdent = this.identer.first { !it.historisk }
+    fun gjeldende(): PdlIdent =
+        identer.gjeldendeEllerNull()
+            ?: throw NoSuchElementException("Finner ingen gjeldende ident blant identene fra PDL")
+
+    fun folkeregisteridenter(): Set<String> =
+        identer
+            .filter { it.gruppe == PdlIdentGruppe.FOLKEREGISTERIDENT }
+            .map { it.ident }
+            .toSet()
 }
+
+/**
+ * Personer med fødselsnummer/d-nummer skal alltid bruke folkeregisteridenten som gjeldende, også om de tidligere har hatt NPID.
+ * Personer som kun har NPID (Navs personidentifikator) får NPID som gjeldende ident.
+ */
+private fun List<PdlIdent>.gjeldendeEllerNull(): PdlIdent? = filterNot { it.historisk }.minByOrNull { it.gruppe.ordinal }
 
 data class PdlHentIdenter(
     val hentIdenter: PdlIdenter?,

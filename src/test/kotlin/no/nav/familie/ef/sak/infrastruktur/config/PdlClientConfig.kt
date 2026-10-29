@@ -31,6 +31,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Opphold
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Oppholdstillatelse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelder
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdentGruppe
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonFraSøk
@@ -106,6 +107,8 @@ class PdlClientConfig {
         every { pdlClient.hentPersonidenter(capture(personIdent)) } answers {
             if (personIdent.captured == "19117313797") {
                 throw PdlNotFoundException()
+            } else if (personIdent.captured == NPID) {
+                PdlIdenter(listOf(PdlIdent(NPID, false, PdlIdentGruppe.NPID)))
             } else {
                 PdlIdenter(listOf(PdlIdent(firstArg(), false), PdlIdent("98765432109", true)))
             }
@@ -147,6 +150,7 @@ class PdlClientConfig {
     }
 
     companion object {
+        const val NPID = "01226512345"
         private val startdato = LocalDate.of(2020, 1, 1)
         private val sluttdato = LocalDate.of(2021, 1, 1)
         const val BARN_FNR = "01012067050"

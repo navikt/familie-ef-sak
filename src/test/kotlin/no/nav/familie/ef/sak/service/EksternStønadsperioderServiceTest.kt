@@ -64,7 +64,7 @@ internal class EksternStønadsperioderServiceTest {
 
     private val service = EksternStønadsperioderService(periodeService = periodeService)
 
-    private val ident = "01234567890"
+    private val ident = "01018012345"
 
     private val fagsakOvergangsstønad = fagsak(stønadstype = StønadType.OVERGANGSSTØNAD)
     private val behandlingOvergangsstønad = behandling(fagsakOvergangsstønad)

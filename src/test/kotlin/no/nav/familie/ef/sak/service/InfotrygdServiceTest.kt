@@ -2,15 +2,21 @@ package no.nav.familie.ef.sak.service
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
 import no.nav.familie.ef.sak.infotrygd.InfotrygdReplikaClient
 import no.nav.familie.ef.sak.infotrygd.InfotrygdService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdentGruppe
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdFinnesResponse
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeRequest
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdPeriodeResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSak
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResponse
 import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSakResultat
+import no.nav.familie.kontrakter.ef.infotrygd.InfotrygdSøkRequest
 import no.nav.familie.kontrakter.ef.infotrygd.Saktreff
 import no.nav.familie.kontrakter.ef.infotrygd.Vedtakstreff
 import no.nav.familie.kontrakter.felles.ef.StønadType
@@ -101,6 +107,37 @@ internal class InfotrygdServiceTest {
         assertThat(perioder.overgangsstønad).isEmpty()
         assertThat(perioder.barnetilsyn).isEmpty()
         assertThat(perioder.skolepenger).isEmpty()
+    }
+
+    @Test
+    internal fun `skal ikke sende NPID til infotrygd`() {
+        val fnr = "12018012345"
+        val npid = "01226512345"
+        every { personService.hentPersonIdenter(fnr) } returns
+            PdlIdenter(listOf(PdlIdent(fnr, false), PdlIdent(npid, true, PdlIdentGruppe.NPID)))
+        val søkRequest = slot<InfotrygdSøkRequest>()
+        every { infotrygdReplikaClient.hentInslagHosInfotrygd(capture(søkRequest)) } returns InfotrygdFinnesResponse(emptyList(), emptyList())
+        val periodeRequest = slot<InfotrygdPeriodeRequest>()
+        every { infotrygdReplikaClient.hentSammenslåttePerioder(capture(periodeRequest)) } returns
+            InfotrygdPeriodeResponse(emptyList(), emptyList(), emptyList())
+
+        infotrygdService.eksisterer(fnr)
+        infotrygdService.hentSammenslåttePerioderSomInternPerioder(setOf(fnr, npid))
+
+        assertThat(søkRequest.captured.personIdenter).containsExactly(fnr)
+        assertThat(periodeRequest.captured.personIdenter).containsExactly(fnr)
+    }
+
+    @Test
+    internal fun `skal ikke kalle infotrygd for person som kun har NPID`() {
+        val npid = "01226512345"
+        every { personService.hentPersonIdenter(npid) } returns PdlIdenter(listOf(PdlIdent(npid, false, PdlIdentGruppe.NPID)))
+
+        assertThat(infotrygdService.eksisterer(npid)).isFalse()
+        assertThat(infotrygdService.hentSaker(npid).saker).isEmpty()
+        assertThat(infotrygdService.hentDtoPerioder(npid).overgangsstønad.perioder).isEmpty()
+        verify(exactly = 0) { infotrygdReplikaClient.hentInslagHosInfotrygd(any()) }
+        verify(exactly = 0) { infotrygdReplikaClient.hentSaker(any()) }
     }
 
     private fun mockPdl(historiskIdent: String? = null) {

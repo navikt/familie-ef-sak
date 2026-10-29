@@ -5,6 +5,7 @@ query($identer: [ID!]!, $gruppe: [IdentGruppe!]) {
         identer {
             ident
             historisk
+            gruppe
         }
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.infotrygd
 
+import no.nav.familie.ef.sak.felles.util.FnrUtil
 import no.nav.familie.ef.sak.infotrygd.InfotrygdUtils.KLAGETYPER
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -31,6 +32,7 @@ class InfotrygdService(
     ): Boolean {
         require(stønadTyper.isNotEmpty()) { "Forventer att stønadTyper ikke er empty" }
         val identer = hentPersonIdenter(personIdent)
+        if (identer.isEmpty()) return false
         val response = infotrygdReplikaClient.hentInslagHosInfotrygd(InfotrygdSøkRequest(identer))
 
         val harVedtak = response.vedtak.any { stønadTyper.contains(it.stønadType) }
@@ -49,7 +51,9 @@ class InfotrygdService(
     }
 
     fun hentSaker(personIdent: String): InfotrygdSakResponse {
-        val response = infotrygdReplikaClient.hentSaker(InfotrygdSøkRequest(hentPersonIdenter(personIdent)))
+        val identer = hentPersonIdenter(personIdent)
+        if (identer.isEmpty()) return InfotrygdSakResponse(emptyList())
+        val response = infotrygdReplikaClient.hentSaker(InfotrygdSøkRequest(identer))
         return response.copy(
             saker =
                 response.saker
@@ -74,7 +78,7 @@ class InfotrygdService(
     }
 
     private fun hentSammenslåttePerioderFraReplika(personIdent: String): InfotrygdPeriodeResponse {
-        val personIdenter = hentPersonIdenter(personIdent)
+        val personIdenter = personService.hentPersonIdenter(personIdent).identer()
         feilHvis(personIdenter.isEmpty()) {
             secureLogger.warn("Finner ikke $personIdent i pdl, kan følgelig ikke hente perioder fra replika")
             "Det finnes ingen identer i pdl for oppslaget"
@@ -118,8 +122,9 @@ class InfotrygdService(
         stønadstyper: Set<StønadType> = StønadType.values().toSet(),
     ): InfotrygdPeriodeResponse {
         require(stønadstyper.isNotEmpty()) { "Må sende med stønadstype" }
-        if (identer.isEmpty()) return tomInfotrygdPeriodeResponseUtenIdenter()
-        val request = InfotrygdPeriodeRequest(identer, stønadstyper)
+        val folkeregisteridenter = identer.utenNpid()
+        if (folkeregisteridenter.isEmpty()) return tomInfotrygdPeriodeResponseUtenIdenter()
+        val request = InfotrygdPeriodeRequest(folkeregisteridenter, stønadstyper)
         return infotrygdReplikaClient.hentPerioder(request)
     }
 
@@ -128,14 +133,15 @@ class InfotrygdService(
         stønadstyper: Set<StønadType> = StønadType.values().toSet(),
     ): InfotrygdPeriodeResponse {
         require(stønadstyper.isNotEmpty()) { "Må sende med stønadstype" }
-        if (identer.isEmpty()) return tomInfotrygdPeriodeResponseUtenIdenter()
-        val request = InfotrygdPeriodeRequest(identer, stønadstyper)
+        val folkeregisteridenter = identer.utenNpid()
+        if (folkeregisteridenter.isEmpty()) return tomInfotrygdPeriodeResponseUtenIdenter()
+        val request = InfotrygdPeriodeRequest(folkeregisteridenter, stønadstyper)
         return infotrygdReplikaClient.hentSammenslåttePerioder(request)
     }
 
     /**
      * familie-ef-infotrygd svarer med 400 (uten body) dersom identer er tom. En tom identer-liste betyr at PDL ikke
-     * har noen identer å slå opp perioder på (bl.a. dersom PDL ikke finner noen FOLKEREGISTERIDENT for personen,
+     * har noen folkeregisteridenter å slå opp perioder på (bl.a. dersom personen kun har NPID,
      * se [no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlClient.hentPersonidenter]), og da finnes det
      * heller ingen perioder å hente i Infotrygd. Vi returnerer derfor et tomt resultat i stedet for å kaste en feil,
      * som ellers ville ført til gjentatt ERROR-logging og feilende kall for f.eks. Arena/Barnetrygd/Bidrag/Tilleggstønader
@@ -146,5 +152,10 @@ class InfotrygdService(
         return InfotrygdPeriodeResponse(emptyList(), emptyList(), emptyList())
     }
 
-    private fun hentPersonIdenter(personIdent: String): Set<String> = personService.hentPersonIdenter(personIdent).identer()
+    /**
+     * Infotrygd kjenner kun til folkeregisteridenter, så NPID sendes ikke med
+     */
+    private fun hentPersonIdenter(personIdent: String): Set<String> = personService.hentPersonIdenter(personIdent).folkeregisteridenter()
+
+    private fun Set<String>.utenNpid(): Set<String> = filterNot { FnrUtil.erNpid(it) }.toSet()
 }

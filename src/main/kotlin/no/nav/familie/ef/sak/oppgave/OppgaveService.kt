@@ -16,7 +16,6 @@ import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
-import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.MappeDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
@@ -126,7 +125,7 @@ class OppgaveService(
         val enhetsnummer = arbeidsfordelingService.hentNavEnhetId(personIdent, oppgavetype)
         val opprettOppgave =
             OpprettOppgaveRequest(
-                ident = OppgaveIdentV2(ident = personIdent, gruppe = IdentGruppe.FOLKEREGISTERIDENT),
+                ident = OppgaveIdentV2(ident = personIdent, gruppe = OppgaveUtil.identGruppe(personIdent)),
                 saksId = fagsak.eksternId.toString(),
                 tema = Tema.ENF,
                 oppgavetype = oppgavetype,
@@ -420,7 +419,7 @@ class OppgaveService(
 
         return oppgaver.map { oppgave ->
             UtdanningOppgaveDto(
-                oppgave.identer?.first { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident,
+                OppgaveUtil.finnPersonidentForOppgave(oppgave),
                 oppgave.behandlingstema?.let { Behandlingstema.fromValue(it) },
                 oppgave.oppgavetype,
                 oppgave.beskrivelse,

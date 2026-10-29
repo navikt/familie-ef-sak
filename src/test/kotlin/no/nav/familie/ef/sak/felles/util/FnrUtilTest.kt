@@ -22,4 +22,10 @@ internal class FnrUtilTest {
     internal fun `fnr med 11 siffer er gyldig`() {
         FnrUtil.validerIdent("12345678901")
     }
+
+    @Test
+    internal fun `NPID er en gyldig ident`() {
+        FnrUtil.validerIdent("01226512345")
+        FnrUtil.validerIdent("01626512345")
+    }
 }

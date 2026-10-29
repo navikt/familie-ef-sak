@@ -19,7 +19,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlAnnenForelde
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonForelderBarn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlSøker
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldende
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.gjeldendeEllerNull
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 
@@ -47,7 +47,7 @@ class GrunnlagsdataRegisterService(
         val tidligereVedtaksperioderAnnenForelder = hentTidligereVedtaksperioderAnnenForelder(grunnlagsdataFraPdl.barneForeldre)
         val harAvsluttetArbeidsforhold =
             arbeidsforholdService.finnesAvsluttetArbeidsforholdSisteAntallMåneder(
-                grunnlagsdataFraPdl.gjeldendeIdentForSøker(),
+                grunnlagsdataFraPdl.gjeldendeIdentForSøker() ?: personIdent,
             )
         val utbetalingsinfoKontantstøtteDto = kontantstøtteService.hentUtbetalingsinfoKontantstøtte(personIdent)
         val kontantstøttePerioder =
@@ -149,7 +149,10 @@ data class GrunnlagsdataFraPdl(
     val fullmaktIkkeTilgangÅrsak: String? = null, // satt dersom søker.fullmakt er null pga. manglende tilgang i tilgangsmaskinen
 )
 
-fun GrunnlagsdataFraPdl.gjeldendeIdentForSøker() =
+/**
+ * Er null for personer uten folkeregisteridentifikator, f.eks. personer som kun har NPID
+ */
+fun GrunnlagsdataFraPdl.gjeldendeIdentForSøker(): String? =
     this.søker.folkeregisteridentifikator
-        .gjeldende()
-        .ident
+        .gjeldendeEllerNull()
+        ?.ident

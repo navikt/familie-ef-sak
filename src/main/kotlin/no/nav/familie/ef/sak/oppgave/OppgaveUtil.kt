@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.oppgave
 
+import no.nav.familie.ef.sak.felles.util.FnrUtil
 import no.nav.familie.ef.sak.felles.util.dagensDatoMedTidNorskFormat
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
@@ -27,7 +28,14 @@ object OppgaveUtil {
         }
     }
 
-    fun finnPersonidentForOppgave(oppgave: Oppgave): String? = oppgave.identer?.first { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }?.ident
+    fun finnPersonidentForOppgave(oppgave: Oppgave): String? =
+        oppgave.identer
+            ?.let { identer ->
+                identer.firstOrNull { it.gruppe == IdentGruppe.FOLKEREGISTERIDENT }
+                    ?: identer.firstOrNull { it.gruppe == IdentGruppe.NPID }
+            }?.ident
+
+    fun identGruppe(personIdent: String): IdentGruppe = if (FnrUtil.erNpid(personIdent)) IdentGruppe.NPID else IdentGruppe.FOLKEREGISTERIDENT
 
     fun lagOpprettOppgavebeskrivelse(beskrivelse: String?): String {
         val beskrivelseEllerDefault = beskrivelse ?: "Oppgave opprettet"
