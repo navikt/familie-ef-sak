@@ -30,18 +30,17 @@ import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
+import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleUnderkjentVedtak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.GodkjenneVedtak
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.InnhentDokumentasjon
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.VurderHenvendelse
+import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FEILREGISTRERT
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FERDIGSTILT
-import no.nav.familie.kontrakter.felles.oppgave.v2.Bruker
-import no.nav.familie.kontrakter.felles.oppgave.v2.Brukertype
-import no.nav.familie.kontrakter.felles.oppgave.v2.OpprettOppgaveV2Request
-import no.nav.familie.kontrakter.felles.oppgave.v2.Prioritet
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -133,28 +132,21 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `Opprett oppgave skal samle data og opprette en ny oppgave basert på fagsak, behandling, fnr og enhet`() {
-        val slot = slot<OpprettOppgaveV2Request>()
+        val slot = slot<OpprettOppgaveRequest>()
         mockOpprettOppgave(slot)
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, BehandleSak)
 
-        assertThat(
-            slot.captured.fordeling
-                ?.enhet
-                ?.nr,
-        ).isEqualTo(ENHETSNUMMER)
-        assertThat(slot.captured.arkivreferanse?.saksnr).isEqualTo(FAGSAK_EKSTERN_ID.toString())
-        assertThat(slot.captured.bruker).isEqualTo(Bruker(ident = FNR, type = Brukertype.PERSON))
-        assertThat(
-            slot.captured.kategorisering.behandlingstema
-                ?.kode,
-        ).isEqualTo(Behandlingstema.Overgangsstønad.value)
-        assertThat(slot.captured.kategorisering.oppgavetype.kode).isEqualTo(BehandleSak.value)
-        assertThat(slot.captured.fristDato).isAfterOrEqualTo(LocalDate.now().plusDays(1))
-        assertThat(slot.captured.aktivDato).isEqualTo(LocalDate.now())
-        assertThat(slot.captured.kategorisering.tema.kode).isEqualTo(Tema.ENF.name)
-        assertThat(slot.captured.tilknyttetSystem).isEqualTo("familie-ef-sak")
-        assertThat(slot.captured.prioritet).isEqualTo(Prioritet.NORMAL)
+        assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
+        assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
+        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = FNR, gruppe = IdentGruppe.FOLKEREGISTERIDENT))
+        assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
+        assertThat(slot.captured.oppgavetype).isEqualTo(BehandleSak)
+        assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
+        assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
+        assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
+        assertThat(slot.captured.behandlesAvApplikasjon).isEqualTo("familie-ef-sak")
+        assertThat(slot.captured.prioritet).isEqualTo(OppgavePrioritet.NORM)
         assertThat(slot.captured.nokkelord).isEmpty()
         val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} (familie-ef-sak) --- \nOppgave opprettet"
         assertThat(slot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
@@ -162,25 +154,21 @@ internal class OppgaveServiceTest {
 
     @Test
     fun `Opprett oppgave som feiler med fordeling skal prøve på nytt med 4489`() {
-        val slot = slot<OpprettOppgaveV2Request>()
+        val slot = slot<OpprettOppgaveRequest>()
         mockOpprettOppgave(slot)
         every { arbeidsfordelingService.hentNavEnhetId(any(), any()) } returns null
         val nokkelord = setOf("EØS", "Kontrollsak")
         oppgaveService.opprettOppgave(BEHANDLING_ID, BehandleSak, nokkelord = nokkelord)
 
         verify(exactly = 2) { oppgaveClient.opprettOppgave(any()) }
-        assertThat(
-            slot.captured.fordeling
-                ?.enhet
-                ?.nr,
-        ).isEqualTo(ENHETSNUMMER)
+        assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
         assertThat(slot.captured.nokkelord).isEqualTo(nokkelord)
-        assertThat(slot.captured.arkivreferanse?.saksnr).isEqualTo(FAGSAK_EKSTERN_ID.toString())
+        assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
     }
 
     @Test
     fun `Opprett oppgave som feiler på en ukjent måte skal bare kaste feil videre`() {
-        val slot = slot<OpprettOppgaveV2Request>()
+        val slot = slot<OpprettOppgaveRequest>()
         mockOpprettOppgave(slot)
         every { oppgaveClient.opprettOppgave(any()) } throws IntegrasjonException("En merkelig feil vi ikke kjenner til")
         assertThrows<IntegrasjonException> {
@@ -191,7 +179,7 @@ internal class OppgaveServiceTest {
     @Test
     fun `Opprett oppgave skal beholde resten av forespørselen ved nytt forsøk uten saksbehandler`() {
         mockOpprettOppgave(slot())
-        val forespørsler = mutableListOf<OpprettOppgaveV2Request>()
+        val forespørsler = mutableListOf<OpprettOppgaveRequest>()
         every { oppgaveClient.opprettOppgave(capture(forespørsler)) } answers {
             if (forespørsler.size == 1) {
                 throw IntegrasjonException("navIdent har ikke tilgang til enheten")
@@ -209,19 +197,14 @@ internal class OppgaveServiceTest {
 
         assertThat(forespørsler).hasSize(2)
         val førsteForespørsel = forespørsler.first()
-        assertThat(førsteForespørsel.fordeling?.medarbeider?.navident).isEqualTo("Z123456")
-        assertThat(forespørsler.last()).isEqualTo(førsteForespørsel.copy(fordeling = førsteForespørsel.fordeling?.copy(medarbeider = null)))
+        assertThat(førsteForespørsel.tilordnetRessurs).isEqualTo("Z123456")
+        assertThat(forespørsler.last()).isEqualTo(førsteForespørsel.copy(tilordnetRessurs = null))
     }
 
     @Test
-    fun `Opprett oppgave skal mappe prioritet til V2 og beholde valgt frist og mappe`() {
-        listOf(
-            OppgavePrioritet.LAV to Prioritet.LAV,
-            OppgavePrioritet.NORM to Prioritet.NORMAL,
-            OppgavePrioritet.HOY to Prioritet.HOY,
-            OppgavePrioritet.KRITISK to Prioritet.KRITISK,
-        ).forEach { (prioritet, forventetPrioritet) ->
-            val slot = slot<OpprettOppgaveV2Request>()
+    fun `Opprett oppgave skal beholde valgt prioritet, frist og mappe`() {
+        OppgavePrioritet.entries.forEach { prioritet ->
+            val slot = slot<OpprettOppgaveRequest>()
             mockOpprettOppgave(slot)
             val frist = LocalDate.now().plusDays(10)
 
@@ -233,19 +216,15 @@ internal class OppgaveServiceTest {
                 mappeId = 123L,
             )
 
-            assertThat(slot.captured.prioritet).isEqualTo(forventetPrioritet)
-            assertThat(slot.captured.fristDato).isEqualTo(frist)
-            assertThat(
-                slot.captured.fordeling
-                    ?.mappe
-                    ?.id,
-            ).isEqualTo(123L)
+            assertThat(slot.captured.prioritet).isEqualTo(prioritet)
+            assertThat(slot.captured.fristFerdigstillelse).isEqualTo(frist)
+            assertThat(slot.captured.mappeId).isEqualTo(123L)
         }
     }
 
     @Test
     fun `Skal legge i mappe når vi oppretter godkjenne vedtak-oppgave for 4489`() {
-        val slot = slot<OpprettOppgaveV2Request>()
+        val slot = slot<OpprettOppgaveRequest>()
         mockOpprettOppgave(slot)
 
         val beskrivelse = "Oppgave tekst her"
@@ -258,26 +237,15 @@ internal class OppgaveServiceTest {
             nokkelord = nokkelord,
         )
 
-        assertThat(
-            slot.captured.fordeling
-                ?.enhet
-                ?.nr,
-        ).isEqualTo(ENHETSNUMMER)
-        assertThat(slot.captured.fordeling?.mappe).isNotNull
-        assertThat(
-            slot.captured.fordeling
-                ?.medarbeider
-                ?.navident,
-        ).isEqualTo("Z123456")
-        assertThat(slot.captured.arkivreferanse?.saksnr).isEqualTo(FAGSAK_EKSTERN_ID.toString())
-        assertThat(slot.captured.bruker).isEqualTo(Bruker(ident = FNR, type = Brukertype.PERSON))
-        assertThat(
-            slot.captured.kategorisering.behandlingstema
-                ?.kode,
-        ).isEqualTo(Behandlingstema.Overgangsstønad.value)
-        assertThat(slot.captured.fristDato).isAfterOrEqualTo(LocalDate.now().plusDays(1))
-        assertThat(slot.captured.aktivDato).isEqualTo(LocalDate.now())
-        assertThat(slot.captured.kategorisering.tema.kode).isEqualTo(Tema.ENF.name)
+        assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
+        assertThat(slot.captured.mappeId).isEqualTo(102L)
+        assertThat(slot.captured.tilordnetRessurs).isEqualTo("Z123456")
+        assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
+        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = FNR, gruppe = IdentGruppe.FOLKEREGISTERIDENT))
+        assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
+        assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
+        assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
+        assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
         assertThat(slot.captured.nokkelord).isEqualTo(nokkelord)
         val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} (familie-ef-sak) --- \n$beskrivelse"
         assertThat(slot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
@@ -291,26 +259,19 @@ internal class OppgaveServiceTest {
             oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(any(), any())
         } returns null
         every { arbeidsfordelingService.hentNavEnhetId(any(), any()) } returns "1234"
-        val slot = slot<OpprettOppgaveV2Request>()
+        val slot = slot<OpprettOppgaveRequest>()
         every { oppgaveClient.opprettOppgave(capture(slot)) } returns GSAK_OPPGAVE_ID
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, GodkjenneVedtak, beskrivelse = "")
 
-        assertThat(
-            slot.captured.fordeling
-                ?.enhet
-                ?.nr,
-        ).isEqualTo("1234")
-        assertThat(slot.captured.fordeling?.mappe).isNull()
-        assertThat(slot.captured.arkivreferanse?.saksnr).isEqualTo(FAGSAK_EKSTERN_ID.toString())
-        assertThat(slot.captured.bruker).isEqualTo(Bruker(ident = FNR, type = Brukertype.PERSON))
-        assertThat(
-            slot.captured.kategorisering.behandlingstema
-                ?.kode,
-        ).isEqualTo(Behandlingstema.Overgangsstønad.value)
-        assertThat(slot.captured.fristDato).isAfterOrEqualTo(LocalDate.now().plusDays(1))
-        assertThat(slot.captured.aktivDato).isEqualTo(LocalDate.now())
-        assertThat(slot.captured.kategorisering.tema.kode).isEqualTo(Tema.ENF.name)
+        assertThat(slot.captured.enhetsnummer).isEqualTo("1234")
+        assertThat(slot.captured.mappeId).isNull()
+        assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
+        assertThat(slot.captured.ident).isEqualTo(OppgaveIdentV2(ident = FNR, gruppe = IdentGruppe.FOLKEREGISTERIDENT))
+        assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.Overgangsstønad.value)
+        assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
+        assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
+        assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
         val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} (familie-ef-sak) --- \n"
 
         assertThat(slot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
@@ -492,7 +453,7 @@ internal class OppgaveServiceTest {
 
     @Test
     internal fun `skal cache mapper når man kaller på den indirekte`() {
-        val slot = slot<OpprettOppgaveV2Request>()
+        val slot = slot<OpprettOppgaveRequest>()
         mockOpprettOppgave(slot)
 
         oppgaveService.opprettOppgave(BEHANDLING_ID, GodkjenneVedtak)
@@ -508,7 +469,7 @@ internal class OppgaveServiceTest {
         every { fagsakService.hentFagsakForBehandling(any()) } returns fagsak()
         every { arbeidsfordelingService.hentNavEnhetId(any(), any()) } returns "4489"
         every { oppgaveRepository.insert(any()) } answers { firstArg() }
-        val opprettOppgaveRequestSlot = slot<OpprettOppgaveV2Request>()
+        val opprettOppgaveRequestSlot = slot<OpprettOppgaveRequest>()
         every { oppgaveClient.opprettOppgave(capture(opprettOppgaveRequestSlot)) } returns 1
 
         oppgaveService.opprettOppgave(
@@ -518,12 +479,8 @@ internal class OppgaveServiceTest {
             AktivitetspliktigAlder.ETT_ÅR.oppgavebeskrivelse,
         )
 
-        assertThat(
-            opprettOppgaveRequestSlot.captured.fordeling
-                ?.mappe
-                ?.id,
-        ).isEqualTo(105)
-        assertThat(opprettOppgaveRequestSlot.captured.tilknyttetSystem).isNull()
+        assertThat(opprettOppgaveRequestSlot.captured.mappeId).isEqualTo(105)
+        assertThat(opprettOppgaveRequestSlot.captured.behandlesAvApplikasjon).isNull()
     }
 
     @Nested
@@ -613,7 +570,7 @@ internal class OppgaveServiceTest {
         }
     }
 
-    private fun mockOpprettOppgave(slot: CapturingSlot<OpprettOppgaveV2Request>) {
+    private fun mockOpprettOppgave(slot: CapturingSlot<OpprettOppgaveRequest>) {
         every { fagsakService.hentFagsakForBehandling(BEHANDLING_ID) } returns lagTestFagsak()
 
         every { oppgaveRepository.insert(any()) } returns lagTestOppgave()
@@ -623,8 +580,8 @@ internal class OppgaveServiceTest {
         } returns null
         every { arbeidsfordelingService.hentNavEnhetId(any(), any()) } returns ENHETSNUMMER
         every { oppgaveClient.opprettOppgave(capture(slot)) } answers {
-            val oppgaveRequest: OpprettOppgaveV2Request = firstArg()
-            if (oppgaveRequest.fordeling?.enhet == null) {
+            val oppgaveRequest: OpprettOppgaveRequest = firstArg()
+            if (oppgaveRequest.enhetsnummer == null) {
                 throw IntegrasjonException("Fant ingen gyldig arbeidsfordeling for oppgaven")
             } else {
                 GSAK_OPPGAVE_ID
