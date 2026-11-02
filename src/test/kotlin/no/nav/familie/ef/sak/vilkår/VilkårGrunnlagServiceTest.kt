@@ -60,7 +60,6 @@ internal class VilkårGrunnlagServiceTest {
             kontantstøtteService,
             fullmaktService,
             medlService,
-            featureToggleService,
         )
 
     private val fagsakService = mockk<FagsakService>()

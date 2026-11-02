@@ -23,9 +23,12 @@ fun List<Navn>.gjeldende(): Navn = this.find { !it.metadata.historisk } ?: this.
  */
 fun List<Navn>.gjeldendeEllerNull(): Navn? = this.find { !it.metadata.historisk } ?: this.firstOrNull()
 
-fun List<Navn>.visningsnavnEllerMangler(): String = gjeldendeEllerNull()?.visningsnavn() ?: NAVN_MANGLER
+fun List<Navn>.visningsnavnEllerMangler(): String = gjeldendeEllerNull()?.visningsnavn() ?: NAVN_MANGLER_FALSK_IDENTITET
 
-const val NAVN_MANGLER = "Navn mangler"
+/**
+ * Visningsnavn når Folkeregisteret har annullert navnet fordi identen er merket som falsk.
+ */
+const val NAVN_MANGLER_FALSK_IDENTITET = "Navn mangler"
 
 fun List<Bostedsadresse>.gjeldende(): Bostedsadresse? = this.find { !it.metadata.historisk }
 

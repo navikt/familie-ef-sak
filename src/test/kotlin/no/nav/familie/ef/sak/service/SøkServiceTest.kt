@@ -10,8 +10,6 @@ import no.nav.familie.ef.sak.fagsak.dto.PersonPåAdresse
 import no.nav.familie.ef.sak.fagsak.dto.SøkeresultatPerson
 import no.nav.familie.ef.sak.infrastruktur.config.KodeverkServiceMock
 import no.nav.familie.ef.sak.infrastruktur.exception.ApiFeil
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.FeatureToggleService
-import no.nav.familie.ef.sak.infrastruktur.featuretoggle.Toggle
 import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockVilkårGrunnlagDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
@@ -24,7 +22,7 @@ import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FolkeregisteridentifikatorFraSøk
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.NAVN_MANGLER
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.NAVN_MANGLER_FALSK_IDENTITET
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
@@ -55,7 +53,6 @@ internal class SøkServiceTest {
     private val fagsakPersonService = mockk<FagsakPersonService>()
     private val vurderingService = mockk<VurderingService>()
     private val personopplysningerService = mockk<PersonopplysningerService>()
-    private val featureToggleService = mockk<FeatureToggleService>()
     private val søkService =
         SøkService(
             fagsakPersonService,
@@ -66,13 +63,11 @@ internal class SøkServiceTest {
             fagsakService,
             vurderingService,
             personopplysningerService,
-            featureToggleService,
         )
 
     @BeforeEach
     internal fun setUp() {
         every { behandlingService.hentAktivIdent(any()) } returns "ident"
-        every { featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) } returns true
         every { personopplysningerService.hentFalskIdentitet(any()) } returns null
         every { vurderingService.hentGrunnlagOgMetadata(any()) } returns
             Pair(
@@ -162,55 +157,10 @@ internal class SøkServiceTest {
     }
 
     @Test
-    internal fun `skal vise vanlige personopplysninger når toggle er av`() {
-        every { featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) } returns false
-        every { fagsakService.finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(any(), any()) } returns emptyList()
-        every { fagsakPersonService.finnPerson(any()) } returns null
-        every { personService.hentSøker("ident") } returns pdlSøker(navn = listOf(lagNavn()), kjønn = PdlKjønn(KjønnType.KVINNE))
-
-        val søkeresultat = søkService.søkPerson(PdlIdenter(listOf(PdlIdent("ident", false))))
-
-        assertThat(søkeresultat.visningsnavn).isEqualTo("Fornavn mellomnavn Etternavn")
-        assertThat(søkeresultat.kjønn).isEqualTo(Kjønn.KVINNE)
-        assertThat(søkeresultat.falskIdentitet).isNull()
-    }
-
-    @Test
-    internal fun `skal vise at navn mangler ved søk uten fagsak når toggle er på`() {
+    internal fun `skal vise at navn mangler ved søk uten fagsak når navnet er annullert`() {
         every { personService.hentPersonKortBolk(listOf("ident")) } returns mapOf("ident" to PdlPersonKort(emptyList(), emptyList(), emptyList()))
 
-        assertThat(søkService.søkPersonUtenFagsak("ident").navn).isEqualTo(NAVN_MANGLER)
-    }
-
-    @Test
-    internal fun `skal feile på manglende navn ved søk uten fagsak når toggle er av`() {
-        every { featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) } returns false
-        every { personService.hentPersonKortBolk(listOf("ident")) } returns mapOf("ident" to PdlPersonKort(emptyList(), emptyList(), emptyList()))
-
-        assertThatThrownBy { søkService.søkPersonUtenFagsak("ident") }
-            .isInstanceOf(NoSuchElementException::class.java)
-    }
-
-    @Test
-    internal fun `skal beholde tidligere oppførsel for manglende navn når toggle er av`() {
-        every { featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) } returns false
-        every { fagsakService.finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(any(), any()) } returns emptyList()
-        every { fagsakPersonService.finnPerson(any()) } returns null
-        every { personService.hentSøker("ident") } returns pdlSøker(navn = emptyList(), kjønn = PdlKjønn(KjønnType.KVINNE))
-
-        assertThatThrownBy { søkService.søkPerson(PdlIdenter(listOf(PdlIdent("ident", false)))) }
-            .isInstanceOf(NoSuchElementException::class.java)
-    }
-
-    @Test
-    internal fun `skal beholde tidligere oppførsel for manglende kjønn når toggle er av`() {
-        every { featureToggleService.isEnabled(Toggle.FALSK_IDENTITET) } returns false
-        every { fagsakService.finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(any(), any()) } returns emptyList()
-        every { fagsakPersonService.finnPerson(any()) } returns null
-        every { personService.hentSøker("ident") } returns pdlSøker(navn = listOf(lagNavn()), kjønn = null)
-
-        assertThatThrownBy { søkService.søkPerson(PdlIdenter(listOf(PdlIdent("ident", false)))) }
-            .isInstanceOf(NoSuchElementException::class.java)
+        assertThat(søkService.søkPersonUtenFagsak("ident").navn).isEqualTo(NAVN_MANGLER_FALSK_IDENTITET)
     }
 
     @Test
@@ -221,7 +171,7 @@ internal class SøkServiceTest {
 
         val søkeresultat = søkService.søkPerson(PdlIdenter(listOf(PdlIdent("ident", false))))
 
-        assertThat(søkeresultat.visningsnavn).isEqualTo(NAVN_MANGLER)
+        assertThat(søkeresultat.visningsnavn).isEqualTo(NAVN_MANGLER_FALSK_IDENTITET)
         assertThat(søkeresultat.kjønn).isEqualTo(Kjønn.UKJENT)
     }
 

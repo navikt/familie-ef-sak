@@ -1,6 +1,6 @@
 package no.nav.familie.ef.sak.opplysninger.personopplysninger.dto
 
-import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.NAVN_MANGLER
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.NAVN_MANGLER_FALSK_IDENTITET
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.visningsnavn
 import no.nav.familie.ef.sak.vilkår.dto.StatsborgerskapDto
@@ -183,7 +183,7 @@ data class NavnDto(
     companion object {
         fun fraNavn(navn: Navn): NavnDto = NavnDto(navn.fornavn, navn.mellomnavn, navn.etternavn, navn.visningsnavn())
 
-        fun fraNavnEllerMangler(navn: Navn?): NavnDto = navn?.let { fraNavn(it) } ?: NavnDto("", null, "", NAVN_MANGLER)
+        fun fraNavnEllerMangler(navn: Navn?): NavnDto = navn?.let { fraNavn(it) } ?: NavnDto("", null, "", NAVN_MANGLER_FALSK_IDENTITET)
     }
 }
 
