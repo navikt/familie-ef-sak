@@ -7,14 +7,18 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
+import io.mockk.verifyOrder
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
+import no.nav.familie.ef.sak.behandlingsflyt.task.OppdaterOppgaveNokkelordTask
+import no.nav.familie.ef.sak.behandlingsflyt.task.OppdaterOppgaveNokkelordTask.OppdaterOppgaveNokkelordTaskData
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.fagsak.domain.Fagsak
 import no.nav.familie.ef.sak.fagsak.domain.PersonIdent
 import no.nav.familie.ef.sak.felles.domain.Endret
 import no.nav.familie.ef.sak.felles.util.dagensDatoMedTidNorskFormat
 import no.nav.familie.ef.sak.infrastruktur.config.OppgaveClientMock
+import no.nav.familie.ef.sak.infrastruktur.config.readValue
 import no.nav.familie.ef.sak.infrastruktur.exception.IntegrasjonException
 import no.nav.familie.ef.sak.iverksett.oppgaveforbarn.AktivitetspliktigAlder
 import no.nav.familie.ef.sak.oppgave.Oppgave
@@ -28,9 +32,11 @@ import no.nav.familie.ef.sak.repository.oppgave
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.ef.StønadType
+import no.nav.familie.kontrakter.felles.jsonMapper
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
+import no.nav.familie.kontrakter.felles.oppgave.OppdaterOppgaveNokkelordRequest
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
@@ -41,6 +47,8 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.VurderHenvendelse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FEILREGISTRERT
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FERDIGSTILT
+import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.internal.TaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -64,6 +72,7 @@ internal class OppgaveServiceTest {
     private val cacheManager = ConcurrentMapCacheManager()
     private val behandlingRepository = mockk<BehandlingRepository>()
     private val personService = mockk<PersonService>()
+    private val taskService = mockk<TaskService>()
 
     private val oppgaveService =
         OppgaveService(
@@ -74,12 +83,14 @@ internal class OppgaveServiceTest {
             cacheManager,
             behandlingRepository,
             personService,
+            taskService,
         )
 
     @BeforeEach
     internal fun setUp() {
         every { oppgaveClient.finnOppgaveMedId(any()) } returns lagEksternTestOppgave()
         every { oppgaveRepository.update(any()) } answers { firstArg() }
+        every { taskService.save(any()) } answers { firstArg() }
     }
 
     @Test
@@ -147,7 +158,7 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
         assertThat(slot.captured.behandlesAvApplikasjon).isEqualTo("familie-ef-sak")
         assertThat(slot.captured.prioritet).isEqualTo(OppgavePrioritet.NORM)
-        assertThat(slot.captured.nokkelord).isEmpty()
+        verify(exactly = 0) { taskService.save(any()) }
         val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} (familie-ef-sak) --- \nOppgave opprettet"
         assertThat(slot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
     }
@@ -162,8 +173,8 @@ internal class OppgaveServiceTest {
 
         verify(exactly = 2) { oppgaveClient.opprettOppgave(any()) }
         assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
-        assertThat(slot.captured.nokkelord).isEqualTo(nokkelord)
         assertThat(slot.captured.saksId).isEqualTo(FAGSAK_EKSTERN_ID.toString())
+        verify(exactly = 1) { taskService.save(any()) }
     }
 
     @Test
@@ -172,8 +183,10 @@ internal class OppgaveServiceTest {
         mockOpprettOppgave(slot)
         every { oppgaveClient.opprettOppgave(any()) } throws IntegrasjonException("En merkelig feil vi ikke kjenner til")
         assertThrows<IntegrasjonException> {
-            oppgaveService.opprettOppgave(BEHANDLING_ID, BehandleSak)
+            oppgaveService.opprettOppgave(BEHANDLING_ID, BehandleSak, nokkelord = setOf("EØS"))
         }
+        verify(exactly = 0) { taskService.save(any()) }
+        verify(exactly = 0) { oppgaveClient.oppdaterOppgaveNokkelord(any(), any()) }
     }
 
     @Test
@@ -225,7 +238,9 @@ internal class OppgaveServiceTest {
     @Test
     fun `Skal legge i mappe når vi oppretter godkjenne vedtak-oppgave for 4489`() {
         val slot = slot<OpprettOppgaveRequest>()
+        val taskSlot = slot<Task>()
         mockOpprettOppgave(slot)
+        every { taskService.save(capture(taskSlot)) } answers { firstArg() }
 
         val beskrivelse = "Oppgave tekst her"
         val nokkelord = setOf("EØS", "Selvstendig næringsdrivende")
@@ -246,9 +261,118 @@ internal class OppgaveServiceTest {
         assertThat(slot.captured.fristFerdigstillelse).isAfterOrEqualTo(LocalDate.now().plusDays(1))
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.ENF)
-        assertThat(slot.captured.nokkelord).isEqualTo(nokkelord)
         val forventetBeskrivelse = "--- ${dagensDatoMedTidNorskFormat()} (familie-ef-sak) --- \n$beskrivelse"
         assertThat(slot.captured.beskrivelse).isEqualTo(forventetBeskrivelse)
+        assertThat(taskSlot.captured.type).isEqualTo(OppdaterOppgaveNokkelordTask.TYPE)
+        val data = jsonMapper.readValue<OppdaterOppgaveNokkelordTaskData>(taskSlot.captured.payload)
+        assertThat(data.oppgaveId).isEqualTo(GSAK_OPPGAVE_ID)
+        assertThat(data.nokkelord).isEqualTo(nokkelord)
+        assertThat(taskSlot.captured.metadata["behandlingId"]).isEqualTo(BEHANDLING_ID.toString())
+        verifyOrder {
+            oppgaveClient.opprettOppgave(any())
+            oppgaveRepository.insert(any())
+            taskService.save(any())
+        }
+        verify(exactly = 0) { oppgaveClient.finnOppgaveMedId(any()) }
+        verify(exactly = 0) { oppgaveClient.oppdaterOppgaveNokkelord(any(), any()) }
+    }
+
+    @Test
+    fun `skal planlegge oppdatering av nokkelord på eksisterende oppgave uten å opprette en ny`() {
+        val oppgave = lagTestOppgave()
+        val taskSlot = slot<Task>()
+        every { oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(BEHANDLING_ID, BehandleSak) } returns oppgave
+        every { taskService.save(capture(taskSlot)) } answers { firstArg() }
+
+        val oppgaveId = oppgaveService.opprettOppgave(BEHANDLING_ID, BehandleSak, nokkelord = setOf("EØS"))
+
+        assertThat(oppgaveId).isEqualTo(oppgave.gsakOppgaveId)
+        val data = jsonMapper.readValue<OppdaterOppgaveNokkelordTaskData>(taskSlot.captured.payload)
+        assertThat(data.oppgaveId).isEqualTo(oppgave.gsakOppgaveId)
+        assertThat(data.nokkelord).containsExactly("EØS")
+        verify(exactly = 0) { oppgaveRepository.insert(any()) }
+        verify(exactly = 0) { oppgaveClient.opprettOppgave(any()) }
+    }
+
+    @Nested
+    inner class OppdateringAvNokkelord {
+        @Test
+        fun `skal hente versjon før oppdatering av nokkelord`() {
+            every { oppgaveClient.finnOppgaveMedId(GSAK_OPPGAVE_ID) } returns lagEksternTestOppgave().copy(versjon = 7)
+            val request = OppdaterOppgaveNokkelordRequest(setOf("EØS", "Kontrollsak"), OppdaterOppgaveNokkelordRequest.Meta(7))
+            every { oppgaveClient.oppdaterOppgaveNokkelord(GSAK_OPPGAVE_ID, request) } just runs
+
+            oppgaveService.oppdaterOppgaveNokkelord(GSAK_OPPGAVE_ID, request.nokkelord)
+
+            verifyOrder {
+                oppgaveClient.finnOppgaveMedId(GSAK_OPPGAVE_ID)
+                oppgaveClient.oppdaterOppgaveNokkelord(GSAK_OPPGAVE_ID, request)
+            }
+        }
+
+        @Test
+        fun `skal feile uten å patche hvis oppgaven mangler versjon`() {
+            assertThatThrownBy {
+                oppgaveService.oppdaterOppgaveNokkelord(GSAK_OPPGAVE_ID, setOf("EØS"))
+            }.isInstanceOf(IllegalStateException::class.java)
+                .hasMessage("Oppgave med id=$GSAK_OPPGAVE_ID mangler versjon")
+
+            verify(exactly = 0) { oppgaveClient.oppdaterOppgaveNokkelord(any(), any()) }
+        }
+
+        @Test
+        fun `skal sende feil ved henting videre uten å patche`() {
+            every { oppgaveClient.finnOppgaveMedId(GSAK_OPPGAVE_ID) } throws IntegrasjonException("Kunne ikke hente oppgave")
+
+            assertThrows<IntegrasjonException> {
+                oppgaveService.oppdaterOppgaveNokkelord(GSAK_OPPGAVE_ID, setOf("EØS"))
+            }
+
+            verify(exactly = 0) { oppgaveClient.oppdaterOppgaveNokkelord(any(), any()) }
+        }
+
+        @Test
+        fun `skal kunne fjerne nokkelord med et tomt sett`() {
+            every { oppgaveClient.finnOppgaveMedId(GSAK_OPPGAVE_ID) } returns lagEksternTestOppgave().copy(versjon = 7)
+            val request = OppdaterOppgaveNokkelordRequest(emptySet(), OppdaterOppgaveNokkelordRequest.Meta(7))
+            every { oppgaveClient.oppdaterOppgaveNokkelord(GSAK_OPPGAVE_ID, request) } just runs
+
+            val task = OppdaterOppgaveNokkelordTask.opprettTask(BEHANDLING_ID, GSAK_OPPGAVE_ID, emptySet())
+            OppdaterOppgaveNokkelordTask(oppgaveService).doTask(task)
+
+            verify(exactly = 1) { oppgaveClient.oppdaterOppgaveNokkelord(GSAK_OPPGAVE_ID, request) }
+        }
+
+        @Test
+        fun `skal bare rekjøre patch med ny versjon etter konflikt og ikke opprette oppgaven på nytt`() {
+            mockOpprettOppgave(slot())
+            val taskSlot = slot<Task>()
+            every { taskService.save(capture(taskSlot)) } answers { firstArg() }
+            val nokkelord = setOf("EØS", "Kontrollsak")
+
+            val oppgaveId = oppgaveService.opprettOppgave(BEHANDLING_ID, GodkjenneVedtak, nokkelord = nokkelord)
+            val task = taskSlot.captured
+            val oppdateringsTask = OppdaterOppgaveNokkelordTask(oppgaveService)
+            val førsteRequest = OppdaterOppgaveNokkelordRequest(nokkelord, OppdaterOppgaveNokkelordRequest.Meta(7))
+            val andreRequest = OppdaterOppgaveNokkelordRequest(nokkelord, OppdaterOppgaveNokkelordRequest.Meta(8))
+            every { oppgaveClient.finnOppgaveMedId(oppgaveId) } returnsMany
+                listOf(lagEksternTestOppgave().copy(versjon = 7), lagEksternTestOppgave().copy(versjon = 8))
+            every { oppgaveClient.oppdaterOppgaveNokkelord(oppgaveId, førsteRequest) } throws HttpClientErrorException(HttpStatus.CONFLICT)
+            every { oppgaveClient.oppdaterOppgaveNokkelord(oppgaveId, andreRequest) } just runs
+
+            assertThrows<HttpClientErrorException> { oppdateringsTask.doTask(task) }
+            oppdateringsTask.doTask(task)
+
+            verify(exactly = 1) { oppgaveClient.opprettOppgave(any()) }
+            verify(exactly = 1) { oppgaveRepository.insert(any()) }
+            verify(exactly = 1) { taskService.save(any()) }
+            verifyOrder {
+                oppgaveClient.finnOppgaveMedId(oppgaveId)
+                oppgaveClient.oppdaterOppgaveNokkelord(oppgaveId, førsteRequest)
+                oppgaveClient.finnOppgaveMedId(oppgaveId)
+                oppgaveClient.oppdaterOppgaveNokkelord(oppgaveId, andreRequest)
+            }
+        }
     }
 
     @Test
