@@ -22,8 +22,9 @@ spec:
     enabled: true
     path: /internal/prometheus
   replicas:
-    min: 2
-    max: 4
+    # Midlertidig stopp for databaseoppgradering. Gjenopprett min: 2 og max: 4 etter oppgraderingen.
+    min: 0
+    max: 0
   tokenx:
     enabled: true
   resources:
