@@ -107,6 +107,29 @@ class PdlClientTest {
     }
 
     @Test
+    fun `pdlClient håndterer response for falsk identitet`() {
+        wiremockServerItem.stubFor(
+            post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                .willReturn(okJson(readFile("falsk_identitet.json"))),
+        )
+
+        val response = pdlClient.hentFalskIdentitet("12345678901")
+
+        assertThat(response?.erFalsk).isTrue()
+        assertThat(response?.rettIdentitetErUkjent).isTrue()
+    }
+
+    @Test
+    fun `pdlClient returnerer null når person ikke har falsk identitet`() {
+        wiremockServerItem.stubFor(
+            post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))
+                .willReturn(okJson("""{"data": {"person": {"falskIdentitet": null}}}""")),
+        )
+
+        assertThat(pdlClient.hentFalskIdentitet("12345678901")).isNull()
+    }
+
+    @Test
     fun `pdlClient håndterer response for uthenting av identer`() {
         wiremockServerItem.stubFor(
             post(urlEqualTo("/${PdlConfig.PATH_GRAPHQL}"))

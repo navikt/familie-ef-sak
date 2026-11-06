@@ -257,4 +257,14 @@ object PdlTestdata {
                 totalPages = 1,
             ),
         )
+
+    val pdlFalskIdentitetData =
+        PdlFalskIdentitetData(
+            PdlPersonFalskIdentitet(
+                FalskIdentitet(
+                    erFalsk = true,
+                    rettIdentitetErUkjent = true,
+                ),
+            ),
+        )
 }

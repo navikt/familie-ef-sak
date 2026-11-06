@@ -1,0 +1,10 @@
+{
+  "data": {
+    "person": {
+      "falskIdentitet": {
+        "erFalsk": true,
+        "rettIdentitetErUkjent": true
+      }
+    }
+  }
+}

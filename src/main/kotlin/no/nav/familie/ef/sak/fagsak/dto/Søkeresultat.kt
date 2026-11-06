@@ -1,5 +1,6 @@
 package no.nav.familie.ef.sak.fagsak.dto
 
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.FalskIdentitetDto
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Kjønn
 import no.nav.familie.kontrakter.felles.ef.StønadType
 import java.time.LocalDate
@@ -11,6 +12,7 @@ data class Søkeresultat(
     val kjønn: Kjønn,
     val fagsakPersonId: UUID?,
     val fagsaker: List<FagsakForSøkeresultat>,
+    val falskIdentitet: FalskIdentitetDto? = null,
 )
 
 data class FagsakForSøkeresultat(

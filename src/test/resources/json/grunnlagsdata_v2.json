@@ -620,7 +620,7 @@
             "nullable" : false
           }
         },
-        "nullable" : false
+        "nullable" : true
       },
       "opphold" : {
         "name" : "opphold",

@@ -34,6 +34,8 @@ class PdlConfig(
 
         val søkPersonQuery = graphqlQuery("/pdl/søk_person.graphql")
 
+        val falskIdentitetQuery = graphqlQuery("/pdl/falsk_identitet.graphql")
+
         private fun graphqlQuery(path: String) =
             PdlConfig::class.java
                 .getResource(path)

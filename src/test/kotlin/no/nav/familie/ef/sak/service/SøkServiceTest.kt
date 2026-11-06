@@ -14,16 +14,24 @@ import no.nav.familie.ef.sak.no.nav.familie.ef.sak.vilkår.VilkårTestUtil.mockV
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PdlSaksbehandlerClient
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonService
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.PersonopplysningerService
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.FalskIdentitetDto
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Kjønn
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.dto.Sivilstandstype
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.mapper.AdresseMapper
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Bostedsadresse
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.FolkeregisteridentifikatorFraSøk
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.KjønnType
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Metadata
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.NAVN_MANGLER_FALSK_IDENTITET
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Navn
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdent
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlIdenter
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonFraSøk
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PdlPersonKort
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkResultat
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.PersonSøkTreff
 import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Vegadresse
+import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.lagNavn
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.pdlSøker
 import no.nav.familie.ef.sak.testutil.PdlTestdataHelper.ukjentBostedsadresse
 import no.nav.familie.ef.sak.vilkår.VurderingService
@@ -34,6 +42,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.util.UUID
+import no.nav.familie.ef.sak.opplysninger.personopplysninger.pdl.Kjønn as PdlKjønn
 
 internal class SøkServiceTest {
     private val pdlSaksbehandlerClient = mockk<PdlSaksbehandlerClient>()
@@ -59,6 +68,7 @@ internal class SøkServiceTest {
     @BeforeEach
     internal fun setUp() {
         every { behandlingService.hentAktivIdent(any()) } returns "ident"
+        every { personopplysningerService.hentFalskIdentitet(any()) } returns null
         every { vurderingService.hentGrunnlagOgMetadata(any()) } returns
             Pair(
                 mockVilkårGrunnlagDto(),
@@ -144,6 +154,37 @@ internal class SøkServiceTest {
 
         val person = SøkeresultatPerson(listOf(forventetResultat))
         assertThat(søkService.søkEtterPersonerMedSammeAdressePåBehandling(UUID.randomUUID())).isEqualTo(person)
+    }
+
+    @Test
+    internal fun `skal vise at navn mangler ved søk uten fagsak når navnet er annullert`() {
+        every { personService.hentPersonKortBolk(listOf("ident")) } returns mapOf("ident" to PdlPersonKort(emptyList(), emptyList(), emptyList()))
+
+        assertThat(søkService.søkPersonUtenFagsak("ident").navn).isEqualTo(NAVN_MANGLER_FALSK_IDENTITET)
+    }
+
+    @Test
+    internal fun `skal ikke feile når navn og kjønn er annullert, f eks ved falsk identitet`() {
+        every { fagsakService.finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(any(), any()) } returns emptyList()
+        every { fagsakPersonService.finnPerson(any()) } returns null
+        every { personService.hentSøker("ident") } returns pdlSøker(navn = emptyList(), kjønn = null)
+
+        val søkeresultat = søkService.søkPerson(PdlIdenter(listOf(PdlIdent("ident", false))))
+
+        assertThat(søkeresultat.visningsnavn).isEqualTo(NAVN_MANGLER_FALSK_IDENTITET)
+        assertThat(søkeresultat.kjønn).isEqualTo(Kjønn.UKJENT)
+    }
+
+    @Test
+    internal fun `skal returnere falsk identitet i søkeresultatet`() {
+        every { fagsakService.finnFagsakEllerOpprettHvisPersonFinnesIInfotrygd(any(), any()) } returns emptyList()
+        every { fagsakPersonService.finnPerson(any()) } returns null
+        every { personService.hentSøker("ident") } returns pdlSøker(navn = emptyList(), kjønn = null)
+        every { personopplysningerService.hentFalskIdentitet("ident") } returns FalskIdentitetDto(rettIdentitetErUkjent = true)
+
+        val søkeresultat = søkService.søkPerson(PdlIdenter(listOf(PdlIdent("ident", false))))
+
+        assertThat(søkeresultat.falskIdentitet).isEqualTo(FalskIdentitetDto(rettIdentitetErUkjent = true))
     }
 
     @Test

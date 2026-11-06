@@ -75,7 +75,7 @@ class VilkårGrunnlagService(
         return VilkårGrunnlagDto(
             personalia =
                 PersonaliaDto(
-                    navn = NavnDto.fraNavn(grunnlagsdata.søker.navn),
+                    navn = NavnDto.fraNavnEllerMangler(grunnlagsdata.søker.navn),
                     personIdent = personident,
                     bostedsadresse =
                         grunnlagsdata.søker.bostedsadresse

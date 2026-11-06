@@ -18,6 +18,18 @@ fun Personnavn.visningsnavn(): String =
 
 fun List<Navn>.gjeldende(): Navn = this.find { !it.metadata.historisk } ?: this.first()
 
+/**
+ * Navn kan mangle når Folkeregisteret har annullert opplysningene, f.eks. for en ident som er merket som falsk.
+ */
+fun List<Navn>.gjeldendeEllerNull(): Navn? = this.find { !it.metadata.historisk } ?: this.firstOrNull()
+
+fun List<Navn>.visningsnavnEllerMangler(): String = gjeldendeEllerNull()?.visningsnavn() ?: NAVN_MANGLER_FALSK_IDENTITET
+
+/**
+ * Visningsnavn når Folkeregisteret har annullert navnet fordi identen er merket som falsk.
+ */
+const val NAVN_MANGLER_FALSK_IDENTITET = "Navn mangler"
+
 fun List<Bostedsadresse>.gjeldende(): Bostedsadresse? = this.find { !it.metadata.historisk }
 
 fun List<Oppholdsadresse>.gjeldende(): Oppholdsadresse? = this.find { !it.metadata.historisk }
