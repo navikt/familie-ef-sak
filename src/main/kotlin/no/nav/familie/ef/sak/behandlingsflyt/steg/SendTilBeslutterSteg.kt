@@ -231,6 +231,7 @@ class SendTilBeslutterSteg(
                     beskrivelse = beskrivelse,
                     tilordnetNavIdent = utledBeslutterIdent(saksbehandling),
                     erHøyPrioritet = prioritet,
+                    nokkelord = beskrivelseMarkeringer.orEmpty().toSet(),
                 ),
             ),
         )
