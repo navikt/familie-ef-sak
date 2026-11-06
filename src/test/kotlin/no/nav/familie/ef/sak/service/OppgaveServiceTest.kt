@@ -266,7 +266,7 @@ internal class OppgaveServiceTest {
         assertThat(taskSlot.captured.type).isEqualTo(OppdaterOppgaveNokkelordTask.TYPE)
         val data = jsonMapper.readValue<OppdaterOppgaveNokkelordTaskData>(taskSlot.captured.payload)
         assertThat(data.oppgaveId).isEqualTo(GSAK_OPPGAVE_ID)
-        assertThat(data.nokkelord).isEqualTo(nokkelord)
+        assertThat(data.nokkelord).containsExactlyInAnyOrder("EØS", "Selvstendig")
         assertThat(taskSlot.captured.metadata["behandlingId"]).isEqualTo(BEHANDLING_ID.toString())
         verifyOrder {
             oppgaveClient.opprettOppgave(any())
@@ -275,6 +275,31 @@ internal class OppgaveServiceTest {
         }
         verify(exactly = 0) { oppgaveClient.finnOppgaveMedId(any()) }
         verify(exactly = 0) { oppgaveClient.oppdaterOppgaveNokkelord(any(), any()) }
+    }
+
+    @Test
+    fun `skal korte ned lange nokkelord og beholde andre uendret i oppdateringstasken`() {
+        val oppgave = lagTestOppgave()
+        val taskSlot = slot<Task>()
+        every { oppgaveRepository.findByBehandlingIdAndTypeAndErFerdigstiltIsFalse(BEHANDLING_ID, BehandleSak) } returns oppgave
+        every { taskService.save(capture(taskSlot)) } answers { firstArg() }
+
+        oppgaveService.opprettOppgave(
+            BEHANDLING_ID,
+            BehandleSak,
+            nokkelord = setOf("Særlig tilsynskrevende barn", "Selvstendig næringsdrivende", "EØS", "Kontrollsak"),
+        )
+
+        val data = jsonMapper.readValue<OppdaterOppgaveNokkelordTaskData>(taskSlot.captured.payload)
+        assertThat(data.nokkelord).containsExactlyInAnyOrder("Særlig", "Selvstendig", "EØS", "Kontrollsak")
+
+        val request = OppdaterOppgaveNokkelordRequest(data.nokkelord, OppdaterOppgaveNokkelordRequest.Meta(7))
+        every { oppgaveClient.finnOppgaveMedId(oppgave.gsakOppgaveId) } returns lagEksternTestOppgave().copy(versjon = 7)
+        every { oppgaveClient.oppdaterOppgaveNokkelord(oppgave.gsakOppgaveId, request) } just runs
+
+        OppdaterOppgaveNokkelordTask(oppgaveService).doTask(taskSlot.captured)
+
+        verify(exactly = 1) { oppgaveClient.oppdaterOppgaveNokkelord(oppgave.gsakOppgaveId, request) }
     }
 
     @Test

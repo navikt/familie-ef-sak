@@ -95,7 +95,8 @@ class OppgaveService(
                 opprettetOppgaveId
             }
         if (nokkelord.isNotEmpty()) {
-            taskService.save(OppdaterOppgaveNokkelordTask.opprettTask(behandlingId, oppgaveId, nokkelord))
+            val nokkelOrdKortetNed = kortNedNokkelOrd(nokkelord)
+            taskService.save(OppdaterOppgaveNokkelordTask.opprettTask(behandlingId, oppgaveId, nokkelOrdKortetNed))
         }
         return oppgaveId
     }
@@ -542,6 +543,16 @@ class OppgaveService(
 
             else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
         }
+
+    private fun kortNedNokkelOrd(nokkelord: Set<String>): Set<String> =
+        nokkelord
+            .map {
+                when (it) {
+                    "Særlig tilsynskrevende barn" -> "Særlig"
+                    "Selvstendig næringsdrivende" -> "Selvstendig"
+                    else -> it
+                }
+            }.toSet()
 
     private fun List<no.nav.familie.ef.sak.oppgave.Oppgave>?.oppgaveSistEndret(): no.nav.familie.ef.sak.oppgave.Oppgave? = this?.sortedBy { it.sistEndret() }?.lastOrNull()
 
