@@ -11,7 +11,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.1</version>
+        <version>4.1.2</version>
     </parent>
     <repositories>
         <repository>
@@ -35,19 +35,19 @@
         <surefire.forkCount>2</surefire.forkCount>
         <java.version>21</java.version>
         <kotlin.version>2.4.21</kotlin.version>
-        <springdoc.version>3.1.1</springdoc.version>
+        <springdoc.version>3.2.0</springdoc.version>
         <mockk.version>1.14.11</mockk.version>
-        <bytebuddy-agent.version>1.18.15</bytebuddy-agent.version>
-        <felles.version>4.20261014144209_63578dc</felles.version>
-        <prosessering.version>2.20260817115650_f13f507</prosessering.version>
-        <efterlatte-prosessering.version>1.20261013091950_a745cfc</efterlatte-prosessering.version>
-        <token-validation-spring.version>6.0.13</token-validation-spring.version>
+        <bytebuddy-agent.version>1.18.17</bytebuddy-agent.version>
+        <felles.version>4.20261026180911_c3ff6d9</felles.version>
+        <prosessering.version>2.20261102130928_50eba5f</prosessering.version>
+        <efterlatte-prosessering.version>1.20261027142018_2544cfc</efterlatte-prosessering.version>
+        <token-validation-spring.version>7.0.1</token-validation-spring.version>
 
         <start-class>no.nav.familie.ef.sak.ApplicationKt</start-class>
-        <kontrakter.version>4.0_20261014103049_c61507f</kontrakter.version>
+        <kontrakter.version>4.0_20261103100223_424278c</kontrakter.version>
         <mikrofrontend.builder.version>20230704114948-74aa2e9</mikrofrontend.builder.version>
-        <eksterne.kontrakter.bisys.version>2.0_20260918153401_c082792</eksterne.kontrakter.bisys.version>
-        <cucumber.version>7.34.8</cucumber.version>
+        <eksterne.kontrakter.bisys.version>2.0_20261026123216_f55dd20</eksterne.kontrakter.bisys.version>
+        <cucumber.version>8.0.4</cucumber.version>
 
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -298,7 +298,7 @@
         <dependency>
             <groupId>no.nav.security</groupId>
             <artifactId>mock-oauth2-server</artifactId>
-            <version>6.0.2</version>
+            <version>6.1.4</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -395,7 +395,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.6.0</version>
+                <version>3.6.1</version>
                 <configuration>
                     <forkCount>${surefire.forkCount}</forkCount>
                     <reuseForks>true</reuseForks>
