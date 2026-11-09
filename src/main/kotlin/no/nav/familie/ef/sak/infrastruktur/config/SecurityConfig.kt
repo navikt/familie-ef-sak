@@ -33,7 +33,7 @@ class SecurityConfig(
             .securityMatcher("/api/ekstern/soknad/**", "/api/ekstern/minside/**")
             .csrf { it.disable() }
             .authorizeHttpRequests { it.anyRequest().authenticated() }
-            .oauth2ResourceServer { it.jwt { jwt -> jwt.decoder(jwtDecoder(tokenxIssuer, tokenxAudience)) } }
+            .oauth2ResourceServer { it.jwt { jwt -> jwt.decoder(jwtDecoder(issuer = tokenxIssuer, audience = tokenxAudience)) } }
             .build()
 
     @Bean

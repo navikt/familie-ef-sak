@@ -16,11 +16,13 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.http.HttpHeaders
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig
 import org.springframework.test.context.support.TestPropertySourceUtils
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.ResultActions
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -52,22 +54,18 @@ class SecurityConfigTest {
 
     @ParameterizedTest
     @CsvSource(
-        "azuread, /api/test, azure-audience",
-        "tokenx, /api/ekstern/soknad/test, tokenx-audience",
-        "tokenx, /api/ekstern/minside/test, tokenx-audience",
-        "azuread, /api/task/test, azure-audience",
+        "azuread, /api/test",
+        "tokenx, /api/ekstern/soknad/test",
+        "tokenx, /api/ekstern/minside/test",
+        "azuread, /api/task/test",
     )
     fun `skal avvise token med feil audience`(
         issuer: String,
         endpoint: String,
-        audience: String,
     ) {
         val token = token(issuer, mapOf("aud" to "annen-tjeneste"))
-        assertThat(SignedJWT.parse(token).jwtClaimsSet.audience).doesNotContain(audience)
 
-        mockMvc
-            .perform(get(endpoint).header("Authorization", "Bearer $token"))
-            .andExpect(status().isUnauthorized)
+        kall(endpoint, token).andExpect(status().isUnauthorized)
     }
 
     @ParameterizedTest
@@ -84,9 +82,7 @@ class SecurityConfigTest {
         val token = token(issuer)
         assertThat(SignedJWT.parse(token).jwtClaimsSet.claims).doesNotContainKey("aud")
 
-        mockMvc
-            .perform(get(endpoint).header("Authorization", "Bearer $token"))
-            .andExpect(status().isUnauthorized)
+        kall(endpoint, token).andExpect(status().isUnauthorized)
     }
 
     @ParameterizedTest
@@ -103,10 +99,41 @@ class SecurityConfigTest {
     ) {
         val token = token(issuer, mapOf("aud" to audience))
 
-        mockMvc
-            .perform(get(endpoint).header("Authorization", "Bearer $token"))
+        kall(endpoint, token)
             .andExpect(status().isOk)
             .andExpect(content().string("ok"))
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "azuread, /api/test, azure-audience",
+        "tokenx, /api/ekstern/soknad/test, tokenx-audience",
+    )
+    fun `skal godta token der riktig audience er en av flere`(
+        issuer: String,
+        endpoint: String,
+        audience: String,
+    ) {
+        val token = token(issuer, mapOf("aud" to listOf("annen-tjeneste", audience)))
+
+        kall(endpoint, token).andExpect(status().isOk)
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        "tokenx, /api/test, azure-audience",
+        "tokenx, /api/task/test, azure-audience",
+        "azuread, /api/ekstern/soknad/test, tokenx-audience",
+        "azuread, /api/ekstern/minside/test, tokenx-audience",
+    )
+    fun `skal avvise token fra issuer som ikke hører til endepunktet`(
+        issuer: String,
+        endpoint: String,
+        audience: String,
+    ) {
+        val token = token(issuer, mapOf("aud" to audience))
+
+        kall(endpoint, token).andExpect(status().isUnauthorized)
     }
 
     @ParameterizedTest
@@ -122,9 +149,7 @@ class SecurityConfigTest {
     ) {
         val token = token(issuer, mapOf("aud" to audience, "iss" to "https://annen-issuer.example"))
 
-        mockMvc
-            .perform(get(endpoint).header("Authorization", "Bearer $token"))
-            .andExpect(status().isUnauthorized)
+        kall(endpoint, token).andExpect(status().isUnauthorized)
     }
 
     @ParameterizedTest
@@ -145,19 +170,20 @@ class SecurityConfigTest {
         val tidspunkt = Instant.now().plusSeconds(if (tidsclaim == "exp") -120 else 120)
         val token = token(issuer, mapOf("aud" to audience, tidsclaim to Date.from(tidspunkt)))
 
-        mockMvc
-            .perform(get(endpoint).header("Authorization", "Bearer $token"))
-            .andExpect(status().isUnauthorized)
+        kall(endpoint, token).andExpect(status().isUnauthorized)
     }
 
     @Test
     fun `skal fortsatt kreve riktig rolle for Azure-token med riktig audience`() {
         val token = token("azuread", mapOf("aud" to "azure-audience", "groups" to emptyList<String>()))
 
-        mockMvc
-            .perform(get("/api/test").header("Authorization", "Bearer $token"))
-            .andExpect(status().isForbidden)
+        kall("/api/test", token).andExpect(status().isForbidden)
     }
+
+    private fun kall(
+        endpoint: String,
+        token: String,
+    ): ResultActions = mockMvc.perform(get(endpoint).header(HttpHeaders.AUTHORIZATION, "Bearer $token"))
 
     private fun token(
         issuer: String,
