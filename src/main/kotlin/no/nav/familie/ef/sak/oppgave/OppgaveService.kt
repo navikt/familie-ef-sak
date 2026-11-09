@@ -550,7 +550,8 @@ class OppgaveService(
                 when (it) {
                     "Særlig tilsynskrevende barn" -> "Særlig"
                     "Selvstendig næringsdrivende" -> "Selvstendig"
-                    else -> it
+                    "EØS", "Kontrollsak" -> it
+                    else -> throw IllegalArgumentException("Ugyldig nøkkelord: $it")
                 }
             }.toSet()
 
