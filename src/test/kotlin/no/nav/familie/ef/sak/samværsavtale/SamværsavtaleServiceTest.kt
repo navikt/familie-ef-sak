@@ -43,6 +43,7 @@ import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -690,6 +691,11 @@ internal class SamværsavtaleServiceTest {
 
     @Nested
     inner class Journalføring {
+        @AfterEach
+        fun ryddBrukerContext() {
+            BrukerContextUtil.clearBrukerContext()
+        }
+
         @Test
         internal fun `skal journalføre samværsberegning`() {
             val arkivRequestSlot = slot<ArkiverDokumentRequest>()
