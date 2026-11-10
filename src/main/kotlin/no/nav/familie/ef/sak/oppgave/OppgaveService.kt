@@ -3,6 +3,7 @@ package no.nav.familie.ef.sak.oppgave
 import no.nav.familie.ef.sak.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ef.sak.behandling.BehandlingRepository
 import no.nav.familie.ef.sak.behandling.Saksbehandling
+import no.nav.familie.ef.sak.behandlingsflyt.task.OppdaterOppgaveNokkelordTask
 import no.nav.familie.ef.sak.fagsak.FagsakService
 import no.nav.familie.ef.sak.infrastruktur.config.getValue
 import no.nav.familie.ef.sak.infrastruktur.exception.feilHvis
@@ -18,6 +19,7 @@ import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.MappeDto
+import no.nav.familie.kontrakter.felles.oppgave.OppdaterOppgaveNokkelordRequest
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
@@ -30,9 +32,11 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.InnhentDokumentasjon
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.VurderHenvendelse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.saksbehandler.Saksbehandler
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.client.HttpClientErrorException
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -49,9 +53,11 @@ class OppgaveService(
     private val cacheManager: CacheManager,
     private val behandlingRepository: BehandlingRepository,
     private val personService: PersonService,
+    private val taskService: TaskService,
 ) {
     private val logger = LoggerFactory.getLogger(javaClass)
 
+    @Transactional
     fun opprettOppgave(
         behandlingId: UUID,
         oppgavetype: Oppgavetype,
@@ -61,31 +67,38 @@ class OppgaveService(
         mappeId: Long? = null, // Dersom denne er satt vil vi ikke prøve å finne mappe basert på oppgavens innhold
         prioritet: OppgavePrioritet = OppgavePrioritet.NORM,
         fristFerdigstillelse: LocalDate? = null,
+        nokkelord: Set<String> = emptySet(),
     ): Long {
         val oppgaveFinnesFraFør = getOppgaveFinnesFraFør(oppgavetype, vurderHenvendelseOppgaveSubtype, behandlingId)
-        return if (oppgaveFinnesFraFør !== null) {
-            oppgaveFinnesFraFør.gsakOppgaveId
-        } else {
-            val opprettetOppgaveId =
-                opprettOppgaveUtenÅLagreIRepository(
-                    behandlingId = behandlingId,
-                    oppgavetype = oppgavetype,
-                    fristFerdigstillelse = fristFerdigstillelse,
-                    beskrivelse = lagOpprettOppgavebeskrivelse(beskrivelse),
-                    tilordnetNavIdent = tilordnetNavIdent,
-                    mappeId = mappeId,
-                    prioritet = prioritet,
-                )
-            val oppgave =
-                EfOppgave(
-                    gsakOppgaveId = opprettetOppgaveId,
-                    behandlingId = behandlingId,
-                    type = oppgavetype,
-                    oppgaveSubtype = vurderHenvendelseOppgaveSubtype,
-                )
-            oppgaveRepository.insert(oppgave)
-            opprettetOppgaveId
+        val oppgaveId =
+            if (oppgaveFinnesFraFør !== null) {
+                oppgaveFinnesFraFør.gsakOppgaveId
+            } else {
+                val opprettetOppgaveId =
+                    opprettOppgaveUtenÅLagreIRepository(
+                        behandlingId = behandlingId,
+                        oppgavetype = oppgavetype,
+                        fristFerdigstillelse = fristFerdigstillelse,
+                        beskrivelse = lagOpprettOppgavebeskrivelse(beskrivelse),
+                        tilordnetNavIdent = tilordnetNavIdent,
+                        mappeId = mappeId,
+                        prioritet = prioritet,
+                    )
+                val oppgave =
+                    EfOppgave(
+                        gsakOppgaveId = opprettetOppgaveId,
+                        behandlingId = behandlingId,
+                        type = oppgavetype,
+                        oppgaveSubtype = vurderHenvendelseOppgaveSubtype,
+                    )
+                oppgaveRepository.insert(oppgave)
+                opprettetOppgaveId
+            }
+        if (nokkelord.isNotEmpty()) {
+            val nokkelOrdKortetNed = kortNedNokkelOrd(nokkelord)
+            taskService.save(OppdaterOppgaveNokkelordTask.opprettTask(behandlingId, oppgaveId, nokkelOrdKortetNed))
         }
+        return oppgaveId
     }
 
     private fun getOppgaveFinnesFraFør(
@@ -104,6 +117,21 @@ class OppgaveService(
 
     fun oppdaterOppgave(oppgave: Oppgave) {
         oppgaveClient.oppdaterOppgave(oppgave)
+    }
+
+    fun oppdaterOppgaveNokkelord(
+        oppgaveId: Long,
+        nokkelord: Set<String>,
+    ) {
+        val oppgave = oppgaveClient.finnOppgaveMedId(oppgaveId)
+        val versjon = oppgave.versjon ?: error("Oppgave med id=$oppgaveId mangler versjon")
+        oppgaveClient.oppdaterOppgaveNokkelord(
+            oppgaveId,
+            OppdaterOppgaveNokkelordRequest(
+                nokkelord = nokkelord,
+                meta = OppdaterOppgaveNokkelordRequest.Meta(versjon = versjon),
+            ),
+        )
     }
 
     fun hentSaksbehandler(navIdent: String): Saksbehandler = oppgaveClient.hentSaksbehandlerInfo(navIdent)
@@ -515,6 +543,17 @@ class OppgaveService(
 
             else -> error("Håndterer ikke behandlesAvApplikasjon for $oppgavetype")
         }
+
+    private fun kortNedNokkelOrd(nokkelord: Set<String>): Set<String> =
+        nokkelord
+            .map {
+                when (it) {
+                    "Særlig tilsynskrevende barn" -> "Særlig"
+                    "Selvstendig næringsdrivende" -> "Selvstendig"
+                    "EØS", "Kontrollsak" -> it
+                    else -> throw IllegalArgumentException("Ugyldig nøkkelord: $it")
+                }
+            }.toSet()
 
     private fun List<no.nav.familie.ef.sak.oppgave.Oppgave>?.oppgaveSistEndret(): no.nav.familie.ef.sak.oppgave.Oppgave? = this?.sortedBy { it.sistEndret() }?.lastOrNull()
 
