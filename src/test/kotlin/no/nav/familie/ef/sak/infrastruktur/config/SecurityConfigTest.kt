@@ -16,8 +16,10 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Import
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpHeaders
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.web.SpringJUnitWebConfig
 import org.springframework.test.context.support.TestPropertySourceUtils
@@ -37,6 +39,7 @@ import java.util.Date
 
 @SpringJUnitWebConfig(SecurityConfigTest.TestConfig::class)
 @ContextConfiguration(initializers = [SecurityConfigTest.Initializer::class])
+@ActiveProfiles("security-config-test")
 class SecurityConfigTest {
     @Autowired
     private lateinit var context: WebApplicationContext
@@ -215,6 +218,7 @@ class SecurityConfigTest {
     }
 
     @Configuration
+    @Profile("security-config-test")
     @EnableWebMvc
     @Import(SecurityConfig::class, TestController::class)
     @ComponentScan("no.nav.familie.prosessering.sikkerhet")
@@ -235,6 +239,7 @@ class SecurityConfigTest {
     }
 
     @RestController
+    @Profile("security-config-test")
     class TestController {
         @GetMapping("/api/test")
         @PreAuthorize("hasAuthority('ROLE_SAKSBEHANDLER')")
