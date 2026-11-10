@@ -1,5 +1,4 @@
 spring:
-  autoconfigure.exclude: org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration
   datasource:
     url: ${DB_JDBC_URL}
     hikari:
