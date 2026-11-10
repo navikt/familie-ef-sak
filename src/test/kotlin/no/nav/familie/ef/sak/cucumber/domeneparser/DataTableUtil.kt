@@ -7,7 +7,7 @@ import no.nav.familie.ef.sak.cucumber.domeneparser.parseInt
 import java.util.UUID
 
 object DataTableUtil {
-    fun <T> DataTable.forHverBehandling(mapper: (behandlingId: UUID, rader: List<Map<String, String>>) -> T) =
+    fun <T> DataTable.forHverBehandling(mapper: (behandlingId: UUID, rader: List<Map<String?, String?>>) -> T) =
         this
             .asMaps()
             .groupBy {
