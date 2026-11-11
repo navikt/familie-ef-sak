@@ -24,37 +24,37 @@ val isoÅrMånedFormatter = DateTimeFormatter.ofPattern("yyyy-MM")
 
 fun parseDato(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): LocalDate = parseDato(domenebegrep.nøkkel(), rad)
 
 fun parseValgfriDato(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String?>,
+    rad: Map<String?, String?>,
 ): LocalDate? = parseValgfriDato(domenebegrep.nøkkel(), rad)
 
 fun parseÅrMåned(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String?>,
+    rad: Map<String?, String?>,
 ): YearMonth = parseValgfriÅrMåned(domenebegrep.nøkkel(), rad)!!
 
 fun parseValgfriÅrMåned(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String?>,
+    rad: Map<String?, String?>,
 ): YearMonth? = parseValgfriÅrMåned(domenebegrep.nøkkel(), rad)
 
 fun parseString(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): String = verdi(domenebegrep.nøkkel(), rad)
 
 fun parseValgfriString(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): String? = valgfriVerdi(domenebegrep.nøkkel(), rad)
 
 fun parseBooleanMedBooleanVerdi(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): Boolean {
     val verdi = verdi(domenebegrep.nøkkel(), rad)
 
@@ -66,7 +66,7 @@ fun parseBooleanMedBooleanVerdi(
 
 fun parseBooleanJaIsTrue(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): Boolean =
     when (valgfriVerdi(domenebegrep.nøkkel(), rad)) {
         "Ja" -> true
@@ -75,7 +75,7 @@ fun parseBooleanJaIsTrue(
 
 fun parseBoolean(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): Boolean {
     val verdi = verdi(domenebegrep.nøkkel(), rad)
 
@@ -93,7 +93,7 @@ fun parseBoolean(verdi: String): Boolean =
 
 fun parseValgfriBoolean(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String?>,
+    rad: Map<String?, String?>,
 ): Boolean? {
     val verdi = rad[domenebegrep.nøkkel()]
     if (verdi == null || verdi == "") {
@@ -109,7 +109,7 @@ fun parseValgfriBoolean(
 
 fun parseDato(
     domenebegrep: String,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): LocalDate {
     val dato = rad[domenebegrep]!!
 
@@ -125,7 +125,7 @@ fun parseDato(dato: String): LocalDate =
 
 fun parseValgfriDato(
     domenebegrep: String,
-    rad: Map<String, String?>,
+    rad: Map<String?, String?>,
 ): LocalDate? {
     val verdi = rad[domenebegrep]
     if (verdi == null || verdi == "") {
@@ -141,7 +141,7 @@ fun parseValgfriDato(
 
 fun parseValgfriÅrMåned(
     domenebegrep: String,
-    rad: Map<String, String?>,
+    rad: Map<String?, String?>,
 ): YearMonth? {
     val verdi = rad[domenebegrep]
     if (verdi == null || verdi == "") {
@@ -160,7 +160,7 @@ fun parseÅrMåned(verdi: String): YearMonth =
 
 fun parseValgfriÅrMånedEllerDato(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String?>,
+    rad: Map<String?, String?>,
 ): ÅrMånedEllerDato? {
     val verdi = rad[domenebegrep.nøkkel()]
     if (verdi == null || verdi == "") {
@@ -177,7 +177,7 @@ fun parseValgfriÅrMånedEllerDato(
 
 fun verdi(
     nøkkel: String,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): String {
     val verdi = rad[nøkkel]
 
@@ -190,12 +190,12 @@ fun verdi(
 
 fun valgfriVerdi(
     nøkkel: String,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): String? = rad[nøkkel]
 
 fun parseInt(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): Int {
     val verdi = verdi(domenebegrep.nøkkel(), rad).replace("_", "")
 
@@ -204,7 +204,7 @@ fun parseInt(
 
 fun parseBigDecimal(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): BigDecimal {
     val verdi = verdi(domenebegrep.nøkkel(), rad)
     return verdi.toBigDecimal()
@@ -212,7 +212,7 @@ fun parseBigDecimal(
 
 fun parseDouble(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): Double {
     val verdi = verdi(domenebegrep.nøkkel(), rad)
     return verdi.toDouble()
@@ -220,14 +220,14 @@ fun parseDouble(
 
 fun parseValgfriDouble(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): Double? {
     return valgfriVerdi(domenebegrep.nøkkel(), rad)?.toDouble() ?: return null
 }
 
 fun parseValgfriInt(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): Int? {
     valgfriVerdi(domenebegrep.nøkkel(), rad) ?: return null
 
@@ -236,7 +236,7 @@ fun parseValgfriInt(
 
 fun parseValgfriIntRange(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): Pair<Int, Int>? {
     val verdi = valgfriVerdi(domenebegrep.nøkkel(), rad) ?: return null
 
@@ -246,27 +246,27 @@ fun parseValgfriIntRange(
     )
 }
 
-fun parseResultatType(rad: Map<String, String>): ResultatType? = parseValgfriEnum<ResultatType>(VedtakDomenebegrep.RESULTAT_TYPE, rad)
+fun parseResultatType(rad: Map<String?, String?>): ResultatType? = parseValgfriEnum<ResultatType>(VedtakDomenebegrep.RESULTAT_TYPE, rad)
 
-fun parseEndringType(rad: Map<String, String>): EndringType? = parseValgfriEnum<EndringType>(VedtakDomenebegrep.ENDRING_TYPE, rad)
+fun parseEndringType(rad: Map<String?, String?>): EndringType? = parseValgfriEnum<EndringType>(VedtakDomenebegrep.ENDRING_TYPE, rad)
 
-fun parseAktivitetType(rad: Map<String, String>): AktivitetType? = parseValgfriEnum<AktivitetType>(VedtakDomenebegrep.AKTIVITET_TYPE, rad)
+fun parseAktivitetType(rad: Map<String?, String?>): AktivitetType? = parseValgfriEnum<AktivitetType>(VedtakDomenebegrep.AKTIVITET_TYPE, rad)
 
-fun parsePeriodetypeBarnetilsyn(rad: Map<String, String>): PeriodetypeBarnetilsyn? = parseValgfriEnum<PeriodetypeBarnetilsyn>(VedtakDomenebegrep.VEDTAKSPERIODE_TYPE, rad)
+fun parsePeriodetypeBarnetilsyn(rad: Map<String?, String?>): PeriodetypeBarnetilsyn? = parseValgfriEnum<PeriodetypeBarnetilsyn>(VedtakDomenebegrep.VEDTAKSPERIODE_TYPE, rad)
 
-fun parseAktivitetstypeBarnetilsyn(rad: Map<String, String>): AktivitetstypeBarnetilsyn? = parseValgfriEnum<AktivitetstypeBarnetilsyn>(VedtakDomenebegrep.AKTIVITET_TYPE, rad)
+fun parseAktivitetstypeBarnetilsyn(rad: Map<String?, String?>): AktivitetstypeBarnetilsyn? = parseValgfriEnum<AktivitetstypeBarnetilsyn>(VedtakDomenebegrep.AKTIVITET_TYPE, rad)
 
-fun parseArbeidAktivitet(rad: Map<String, String>): SvarId? = parseValgfriEnum<SvarId>(VedtakDomenebegrep.ARBEID_AKTIVITET, rad)
+fun parseArbeidAktivitet(rad: Map<String?, String?>): SvarId? = parseValgfriEnum<SvarId>(VedtakDomenebegrep.ARBEID_AKTIVITET, rad)
 
-fun parseSanksjonsårsak(rad: Map<String, String>): Sanksjonsårsak? = parseValgfriEnum<Sanksjonsårsak>(VedtakDomenebegrep.SANKSJONSÅRSAK, rad)
+fun parseSanksjonsårsak(rad: Map<String?, String?>): Sanksjonsårsak? = parseValgfriEnum<Sanksjonsårsak>(VedtakDomenebegrep.SANKSJONSÅRSAK, rad)
 
-fun parseVedtaksperiodeType(rad: Map<String, String>): VedtaksperiodeType? = parseValgfriEnum<VedtaksperiodeType>(VedtakDomenebegrep.VEDTAKSPERIODE_TYPE, rad)
+fun parseVedtaksperiodeType(rad: Map<String?, String?>): VedtaksperiodeType? = parseValgfriEnum<VedtaksperiodeType>(VedtakDomenebegrep.VEDTAKSPERIODE_TYPE, rad)
 
-fun parseBehandlingstype(rad: Map<String, String>): BehandlingType? = parseValgfriEnum<BehandlingType>(SaksbehandlingDomeneBegrep.BEHANDLINGSTYPE, rad)
+fun parseBehandlingstype(rad: Map<String?, String?>): BehandlingType? = parseValgfriEnum<BehandlingType>(SaksbehandlingDomeneBegrep.BEHANDLINGSTYPE, rad)
 
 inline fun <reified T : Enum<T>> parseValgfriEnum(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): T? {
     val verdi = valgfriVerdi(domenebegrep.nøkkel(), rad) ?: return null
     return enumValueOf<T>(verdi.uppercase())
@@ -274,7 +274,7 @@ inline fun <reified T : Enum<T>> parseValgfriEnum(
 
 inline fun <reified T : Enum<T>> parseEnumUtenUppercase(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): T? {
     val verdi = valgfriVerdi(domenebegrep.nøkkel(), rad) ?: return null
     return enumValueOf<T>(verdi)
@@ -282,7 +282,7 @@ inline fun <reified T : Enum<T>> parseEnumUtenUppercase(
 
 inline fun <reified T : Enum<T>> parseEnum(
     domenebegrep: Domenenøkkel,
-    rad: Map<String, String>,
+    rad: Map<String?, String?>,
 ): T = parseValgfriEnum<T>(domenebegrep, rad)!!
 
 fun <T> mapDataTable(
@@ -291,5 +291,5 @@ fun <T> mapDataTable(
 ): List<T> = dataTable.asMaps().map { radMapper.mapRad(it) }
 
 interface RadMapper<T> {
-    fun mapRad(rad: Map<String, String>): T
+    fun mapRad(rad: Map<String?, String?>): T
 }

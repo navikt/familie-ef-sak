@@ -1,7 +1,9 @@
 package no.nav.familie.ef.sak.infrastruktur.config
 
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.familie.ef.sak.infrastruktur.sikkerhet.SikkerhetContext
 import no.nav.familie.ef.sak.oppgave.OppgaveClient
 import no.nav.familie.kontrakter.felles.Behandlingstema
@@ -133,6 +135,7 @@ class OppgaveClientMock {
             val oppgave =
                 Oppgave(
                     id = nyOppgaveId,
+                    versjon = 1,
                     identer = arg.ident?.let { listOf(it) },
                     saksreferanse = arg.saksId,
                     tema = arg.tema,
@@ -145,11 +148,13 @@ class OppgaveClientMock {
                     tilordnetRessurs = arg.tilordnetRessurs,
                     status = StatusEnum.OPPRETTET,
                     opprettetTidspunkt = LocalDate.now().toString(),
-                    prioritet = OppgavePrioritet.NORM,
+                    prioritet = arg.prioritet,
                 )
             oppgaver[nyOppgaveId] = oppgave
             nyOppgaveId
         }
+
+        every { oppgaveClient.oppdaterOppgaveNokkelord(any(), any()) } just runs
 
         every { oppgaveClient.fordelOppgave(any(), any()) } answers {
             val oppgaveId = firstArg<Long>()

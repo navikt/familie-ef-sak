@@ -752,7 +752,7 @@ class StepDefinitions {
     }
 
     private fun assertBeregnetAndel(
-        it: MutableMap<String, String>,
+        it: Map<String?, String?>,
         index: Int,
         forventetHistorikkEndringer: List<VedtakDomeneParser.ForventetHistorikk>,
         andelHistorikkDto: AndelHistorikkDto,

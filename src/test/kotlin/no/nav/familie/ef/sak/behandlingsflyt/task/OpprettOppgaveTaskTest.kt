@@ -7,9 +7,12 @@ import no.nav.familie.ef.sak.behandling.BehandlingService
 import no.nav.familie.ef.sak.behandling.domain.BehandlingStatus
 import no.nav.familie.ef.sak.oppgave.OppgaveService
 import no.nav.familie.ef.sak.repository.behandling
+import no.nav.familie.kontrakter.felles.oppgave.OppgavePrioritet
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.util.Properties
 import java.util.UUID
 
 internal class OpprettOppgaveTaskTest {
@@ -74,6 +77,55 @@ internal class OpprettOppgaveTaskTest {
 
         opprettOppgaveTask.doTask(task)
         verifyOpprettOppgaveMedLagringKall(1)
+    }
+
+    @Test
+    fun `skal sende nokkelord og høy prioritet videre når oppgaven opprettes`() {
+        val nokkelord = setOf("EØS", "Selvstendig næringsdrivende")
+        val beskrivelse = "EØS, Selvstendig næringsdrivende. Sendt til godkjenning."
+        every { oppgaveService.opprettOppgave(any(), any(), nokkelord = nokkelord, prioritet = OppgavePrioritet.HOY, beskrivelse = beskrivelse) } returns 1L
+        val task =
+            OpprettOppgaveTask.opprettTask(
+                OpprettOppgaveTask.OpprettOppgaveTaskData(
+                    behandlingId = behandlingId,
+                    oppgavetype = Oppgavetype.GodkjenneVedtak,
+                    beskrivelse = beskrivelse,
+                    erHøyPrioritet = true,
+                    nokkelord = nokkelord,
+                ),
+            )
+
+        opprettOppgaveTask.doTask(task)
+
+        verify(exactly = 1) {
+            oppgaveService.opprettOppgave(
+                behandlingId = behandlingId,
+                oppgavetype = Oppgavetype.GodkjenneVedtak,
+                beskrivelse = beskrivelse,
+                prioritet = OppgavePrioritet.HOY,
+                nokkelord = nokkelord,
+            )
+        }
+    }
+
+    @Test
+    fun `skal kunne kjøre eldre tasker uten nokkelord`() {
+        val task =
+            Task(
+                type = OpprettOppgaveTask.TYPE,
+                payload = """{"behandlingId":"$behandlingId","oppgavetype":"GodkjenneVedtak"}""",
+                properties = Properties(),
+            )
+
+        opprettOppgaveTask.doTask(task)
+
+        verify(exactly = 1) {
+            oppgaveService.opprettOppgave(
+                behandlingId = behandlingId,
+                oppgavetype = Oppgavetype.GodkjenneVedtak,
+                nokkelord = emptySet(),
+            )
+        }
     }
 
     private fun verifyOpprettOppgaveMedLagringKall(opprettOppgaveKall: Int) {

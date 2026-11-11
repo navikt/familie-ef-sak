@@ -11,6 +11,7 @@ import no.nav.familie.kontrakter.felles.getDataOrThrow
 import no.nav.familie.kontrakter.felles.oppgave.FinnMappeResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
+import no.nav.familie.kontrakter.felles.oppgave.OppdaterOppgaveNokkelordRequest
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
@@ -46,6 +47,22 @@ class OppgaveClient(
                 .retrieve()
                 .body<Ressurs<OppgaveResponse>>()!!
         return pakkUtRespons(respons, uri, "opprettOppgave").oppgaveId
+    }
+
+    fun oppdaterOppgaveNokkelord(
+        oppgaveId: Long,
+        request: OppdaterOppgaveNokkelordRequest,
+    ) {
+        val uri = URI.create("$oppgaveUri/$oppgaveId/nokkelord")
+        val respons =
+            restClient
+                .patch()
+                .uri(uri)
+                .headers { it.addAll(HttpHeaders().medContentTypeJsonUTF8()) }
+                .body(request)
+                .retrieve()
+                .body<Ressurs<OppgaveResponse>>()!!
+        pakkUtRespons(respons, uri, "oppdaterOppgaveNokkelord")
     }
 
     fun finnOppgaveMedId(oppgaveId: Long): Oppgave {
