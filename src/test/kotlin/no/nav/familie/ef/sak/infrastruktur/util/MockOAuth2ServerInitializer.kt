@@ -15,6 +15,7 @@ class MockOAuth2ServerInitializer : ApplicationContextInitializer<ConfigurableAp
             "AZURE_OPENID_CONFIG_ISSUER=$azureIssuerUrl",
             "AZURE_APP_CLIENT_ID=aud-localhost",
             "TOKEN_X_ISSUER=$tokenxIssuerUrl",
+            "TOKEN_X_CLIENT_ID=aud-localhost",
         )
     }
 
