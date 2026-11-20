@@ -70,8 +70,6 @@ spec:
           cluster: dev-gcp
         - application: tilleggsstonader-integrasjoner
           namespace: tilleggsstonader
-        - application: etterlatte-prosessering
-          namespace: etterlatte
         - application: arena
           namespace: teamarenanais
           cluster: dev-fss
