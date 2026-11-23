@@ -38,6 +38,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
     private val taskService: TaskService,
 ) : AsyncTaskStep {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
+    private  val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
     override fun doTask(task: Task) {
         val data = jsonMapper.readValue<OpprettOppgaveForMigrertFødtBarnTaskData>(task.payload)
@@ -99,7 +100,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
             .mapNotNull {
                 val fødselsdato = it.fødselsdato
                 if (fødselsdato == null) {
-                    logger.warn("Kan ikke opprette oppgave for barn uten fødselsdato personident=${it.personIdent}")
+                    secureLogger.warn("Kan ikke opprette oppgave for barn uten fødselsdato personident=${it.personIdent}")
                     return@mapNotNull null
                 }
                 if (kjenteFødselsdatoer.contains(fødselsdato)) {
