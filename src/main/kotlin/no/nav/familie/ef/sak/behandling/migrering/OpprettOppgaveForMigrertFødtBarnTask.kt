@@ -100,6 +100,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
             .mapNotNull {
                 val fødselsdato = it.fødselsdato
                 if (fødselsdato == null) {
+                    logger.warn("Kan ikke opprette oppgave for barn uten fødselsdato personident=(se sikker-log)")
                     secureLogger.warn("Kan ikke opprette oppgave for barn uten fødselsdato personident=${it.personIdent}")
                     return@mapNotNull null
                 }
