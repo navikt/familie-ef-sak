@@ -38,7 +38,7 @@ class OpprettOppgaveForMigrertFødtBarnTask(
     private val taskService: TaskService,
 ) : AsyncTaskStep {
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
-    private  val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
+    private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 
     override fun doTask(task: Task) {
         val data = jsonMapper.readValue<OpprettOppgaveForMigrertFødtBarnTaskData>(task.payload)
