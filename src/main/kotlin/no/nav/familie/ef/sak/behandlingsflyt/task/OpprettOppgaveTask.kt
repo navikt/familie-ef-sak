@@ -44,7 +44,7 @@ class OpprettOppgaveTask(
     override fun doTask(task: Task) {
         val data = jsonMapper.readValue<OpprettOppgaveTaskData>(task.payload)
         val oppgavetype = data.oppgavetype
-        val prioritet = if ((data.beskrivelse?.contains("Kontrollsak") == true) || data.erHøyPrioritet == true) OppgavePrioritet.HOY else OppgavePrioritet.NORM
+        val prioritet = if (data.nokkelord.contains("Kontrollsak") || data.erHøyPrioritet == true) OppgavePrioritet.HOY else OppgavePrioritet.NORM
 
         if (oppgavetype == Oppgavetype.BehandleSak) {
             val behandling = behandlingService.hentBehandling(data.behandlingId)

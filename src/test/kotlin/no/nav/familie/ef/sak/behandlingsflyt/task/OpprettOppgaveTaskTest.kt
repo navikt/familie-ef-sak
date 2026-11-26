@@ -82,7 +82,7 @@ internal class OpprettOppgaveTaskTest {
     @Test
     fun `skal sende nokkelord og høy prioritet videre når oppgaven opprettes`() {
         val nokkelord = setOf("EØS", "Selvstendig næringsdrivende")
-        val beskrivelse = "EØS, Selvstendig næringsdrivende. Sendt til godkjenning."
+        val beskrivelse = "Sendt til godkjenning av saksbehandlernavn."
         every { oppgaveService.opprettOppgave(any(), any(), nokkelord = nokkelord, prioritet = OppgavePrioritet.HOY, beskrivelse = beskrivelse) } returns 1L
         val task =
             OpprettOppgaveTask.opprettTask(
@@ -104,6 +104,88 @@ internal class OpprettOppgaveTaskTest {
                 beskrivelse = beskrivelse,
                 prioritet = OppgavePrioritet.HOY,
                 nokkelord = nokkelord,
+            )
+        }
+    }
+
+    @Test
+    fun `skal gi høy prioritet når Kontrollsak er et nokkelord uten å stå i beskrivelsen`() {
+        val nokkelord = setOf("Kontrollsak")
+        val beskrivelse = "Sendt til godkjenning av saksbehandlernavn."
+        every { oppgaveService.opprettOppgave(any(), any(), nokkelord = nokkelord, prioritet = OppgavePrioritet.HOY, beskrivelse = beskrivelse) } returns 1L
+        val task =
+            OpprettOppgaveTask.opprettTask(
+                OpprettOppgaveTask.OpprettOppgaveTaskData(
+                    behandlingId = behandlingId,
+                    oppgavetype = Oppgavetype.GodkjenneVedtak,
+                    beskrivelse = beskrivelse,
+                    erHøyPrioritet = false,
+                    nokkelord = nokkelord,
+                ),
+            )
+
+        opprettOppgaveTask.doTask(task)
+
+        verify(exactly = 1) {
+            oppgaveService.opprettOppgave(
+                behandlingId = behandlingId,
+                oppgavetype = Oppgavetype.GodkjenneVedtak,
+                beskrivelse = beskrivelse,
+                prioritet = OppgavePrioritet.HOY,
+                nokkelord = nokkelord,
+            )
+        }
+    }
+
+    @Test
+    fun `skal beholde normal prioritet for andre nokkelord uten høy prioritet`() {
+        val nokkelord = setOf("EØS", "Selvstendig næringsdrivende")
+        val beskrivelse = "Sendt til godkjenning av saksbehandlernavn."
+        every { oppgaveService.opprettOppgave(any(), any(), nokkelord = nokkelord, prioritet = OppgavePrioritet.NORM, beskrivelse = beskrivelse) } returns 1L
+        val task =
+            OpprettOppgaveTask.opprettTask(
+                OpprettOppgaveTask.OpprettOppgaveTaskData(
+                    behandlingId = behandlingId,
+                    oppgavetype = Oppgavetype.GodkjenneVedtak,
+                    beskrivelse = beskrivelse,
+                    erHøyPrioritet = false,
+                    nokkelord = nokkelord,
+                ),
+            )
+
+        opprettOppgaveTask.doTask(task)
+
+        verify(exactly = 1) {
+            oppgaveService.opprettOppgave(
+                behandlingId = behandlingId,
+                oppgavetype = Oppgavetype.GodkjenneVedtak,
+                beskrivelse = beskrivelse,
+                prioritet = OppgavePrioritet.NORM,
+                nokkelord = nokkelord,
+            )
+        }
+    }
+
+    @Test
+    fun `skal ikke gi høy prioritet basert på beskrivelsen alene`() {
+        val beskrivelse = "Kontrollsak. Sendt til godkjenning av saksbehandlernavn."
+        every { oppgaveService.opprettOppgave(any(), any(), beskrivelse = beskrivelse, prioritet = OppgavePrioritet.NORM) } returns 1L
+        val task =
+            Task(
+                type = OpprettOppgaveTask.TYPE,
+                payload = """{"behandlingId":"$behandlingId","oppgavetype":"GodkjenneVedtak","beskrivelse":"$beskrivelse"}""",
+                properties = Properties(),
+            )
+
+        opprettOppgaveTask.doTask(task)
+
+        verify(exactly = 1) {
+            oppgaveService.opprettOppgave(
+                behandlingId = behandlingId,
+                oppgavetype = Oppgavetype.GodkjenneVedtak,
+                beskrivelse = beskrivelse,
+                prioritet = OppgavePrioritet.NORM,
+                nokkelord = emptySet(),
             )
         }
     }

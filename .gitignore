@@ -29,3 +29,5 @@ hs_err_pid*
 .DS_Store
 
 .run
+
+/src/main/resources/application-local.yml
