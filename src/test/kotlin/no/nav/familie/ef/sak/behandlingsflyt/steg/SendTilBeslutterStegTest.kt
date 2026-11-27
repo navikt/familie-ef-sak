@@ -425,21 +425,7 @@ internal class SendTilBeslutterStegTest {
     }
 
     @Test
-    internal fun `lagBeskrivelseMedMerker skal legge til merker før gammel beskrivelse`() {
-        val beskrivelseMarkeringer = listOf("EØS", "Selvstendig næringsdrivende")
-        val result = beslutteVedtakSteg.lagBeskrivelseMedMerker(beskrivelseMarkeringer)
-        assertThat(result).isEqualTo("EØS, Selvstendig næringsdrivende. Sendt til godkjenning av saksbehandlernavn.")
-    }
-
-    @Test
-    internal fun `lagBeskrivelseMedMerker skal kun lage teskt med sendt til godkjenning`() {
-        val beskrivelseMarkeringer = emptyList<String>()
-        val result = beslutteVedtakSteg.lagBeskrivelseMedMerker(beskrivelseMarkeringer)
-        assertThat(result).isEqualTo("Sendt til godkjenning av saksbehandlernavn.")
-    }
-
-    @Test
-    internal fun `skal lagre valgte markeringer som nokkelord og beholde beskrivelsen`() {
+    internal fun `skal lagre markeringer som nokkelord uten å ta dem med i beskrivelsen`() {
         every { vedtakService.oppdaterSaksbehandler(any(), any()) } just Runs
         val markeringer = listOf("EØS", "Selvstendig næringsdrivende", "EØS")
 
@@ -454,7 +440,7 @@ internal class SendTilBeslutterStegTest {
 
         val data = jsonMapper.readValue<OpprettOppgaveTaskData>(taskSlot.first().payload)
         assertThat(data.nokkelord).containsExactlyInAnyOrder("EØS", "Selvstendig næringsdrivende")
-        assertThat(data.beskrivelse).isEqualTo("EØS, Selvstendig næringsdrivende, EØS. Sendt til godkjenning av saksbehandlernavn.")
+        assertThat(data.beskrivelse).isEqualTo("Sendt til godkjenning av saksbehandlernavn.")
         assertThat(data.erHøyPrioritet).isTrue()
     }
 

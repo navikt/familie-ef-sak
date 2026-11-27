@@ -222,30 +222,18 @@ class SendTilBeslutterSteg(
         beskrivelseMarkeringer: List<String>? = null,
         prioritet: Boolean? = false,
     ) {
-        val beskrivelse = lagBeskrivelseMedMerker(beskrivelseMarkeringer)
         taskService.save(
             OpprettOppgaveTask.opprettTask(
                 OpprettOppgaveTaskData(
                     behandlingId = saksbehandling.id,
                     oppgavetype = Oppgavetype.GodkjenneVedtak,
-                    beskrivelse = beskrivelse,
+                    beskrivelse = "Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}.",
                     tilordnetNavIdent = utledBeslutterIdent(saksbehandling),
                     erHøyPrioritet = prioritet,
                     nokkelord = beskrivelseMarkeringer.orEmpty().toSet(),
                 ),
             ),
         )
-    }
-
-    fun lagBeskrivelseMedMerker(beskrivelseMarkeringer: List<String>?): String {
-        val beskrivelse = "Sendt til godkjenning av ${SikkerhetContext.hentSaksbehandlerNavn(true)}."
-        if (beskrivelseMarkeringer.isNullOrEmpty()) {
-            return beskrivelse
-        }
-
-        val merker = beskrivelseMarkeringer.joinToString(", ").plus(". ")
-
-        return "${merker}$beskrivelse"
     }
 
     private fun utledBeslutterIdent(saksbehandling: Saksbehandling): String? =
